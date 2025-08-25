@@ -1,0 +1,5 @@
+/* Deprecated: Tailwind-based globals removed.
+   Use src/styles/ThemeFile.css for theme variables and base styles. */
+
+/* Intentionally left minimal to avoid conflicts. */
+body {}
