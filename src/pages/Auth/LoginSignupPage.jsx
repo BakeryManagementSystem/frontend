@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import axios from "axios";
 import "./LoginSignupPage.css";
 import { FaGooglePlusG, FaFacebookF } from "react-icons/fa";
-import backgroundImage from '../../assets/BK2.jpg';
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 // Helper: email check
 const isEmail = (v) => /\S+@\S+\.\S+/.test(v);
@@ -28,8 +29,10 @@ const validateSignUp = ({ name, email, password, userType }) => {
     return errors;
 };
 
-export default function LoginSignupPage({ onAuth }) {
+export default function LoginSignupPage() {
     const [active, setActive] = useState(false); // false = Sign In, true = Sign Up
+    const navigate = useNavigate();
+    const { login } = useAuth();
 
     // Sign In state
     const [si, setSi] = useState({ email: "", password: "" });
@@ -41,7 +44,7 @@ export default function LoginSignupPage({ onAuth }) {
         name: "",
         email: "",
         password: "",
-        userType: "" // 'owner' or 'buyer'
+        userType: "",
     });
     const [suErr, setSuErr] = useState({});
     const [suLoading, setSuLoading] = useState(false);
@@ -50,7 +53,7 @@ export default function LoginSignupPage({ onAuth }) {
     const [alertMsg, setAlertMsg] = useState("");
 
     const API = axios.create({
-        baseURL: import.meta.env.VITE_API_BASE_URL || "",
+        baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:8000",
         withCredentials: true,
     });
 
@@ -64,13 +67,16 @@ export default function LoginSignupPage({ onAuth }) {
         setSiLoading(true);
         try {
             const { data } = await API.post("/auth/login", si);
-            const token = data?.token || data?.accessToken;
-            if (token) localStorage.setItem("access_token", token);
-            if (data?.userType) localStorage.setItem("user_type", data.userType);
-            if (onAuth) onAuth(data);
-            setAlertMsg(`✅ Welcome back, ${data.userType === 'owner' ? 'Bakery Owner' : 'Valued Customer'}!`);
+            const token = data?.token;
+            if (token) {
+                localStorage.setItem("access_token", token);
+                if (data?.userType) localStorage.setItem("user_type", data.userType);
+                login(); // Update auth context
+                setAlertMsg(`✅ Welcome back, ${data.userType === 'owner' ? 'Bakery Owner' : 'Valued Customer'}!`);
+                navigate("/profile"); // Navigate to profile after successful login
+            }
         } catch (err) {
-            const msg = err?.response?.data?.message || err?.response?.data?.error || "Login failed. Please check your credentials.";
+            const msg = err?.response?.data?.error || "Login failed. Please check your credentials.";
             setAlertMsg(msg);
         } finally {
             setSiLoading(false);
@@ -87,14 +93,16 @@ export default function LoginSignupPage({ onAuth }) {
         setSuLoading(true);
         try {
             const { data } = await API.post("/auth/register", su);
-            const token = data?.token || data?.accessToken;
-            if (token) localStorage.setItem("access_token", token);
-            if (su.userType) localStorage.setItem("user_type", su.userType);
-            if (onAuth) onAuth(data);
-            setAlertMsg(`🎉 Welcome to Smart Bakery! Your ${su.userType === 'owner' ? 'Bakery Owner' : 'Customer'} account was created successfully.`);
-            setActive(false);
+            const token = data?.token;
+            if (token) {
+                localStorage.setItem("access_token", token);
+                if (su.userType) localStorage.setItem("user_type", su.userType);
+                login(); // Update auth context
+                setAlertMsg(`🎉 Welcome to Smart Bakery! Your ${su.userType === 'owner' ? 'Bakery Owner' : 'Customer'} account was created successfully.`);
+                navigate("/profile"); // Navigate to profile after successful registration
+            }
         } catch (err) {
-            const msg = err?.response?.data?.message || err?.response?.data?.error || "Sign up failed. Please try again.";
+            const msg = err?.response?.data?.error || "Sign up failed. Please try again.";
             setAlertMsg(msg);
         } finally {
             setSuLoading(false);
@@ -103,10 +111,7 @@ export default function LoginSignupPage({ onAuth }) {
 
     return (
         <>
-            {/* Background Image */}
             <div className="auth-page-background"></div>
-
-            {/* Main Content */}
             <div className="page-root">
                 <h1 className="main-heading">Smart Bakery Management System</h1>
                 {alertMsg && (
@@ -114,9 +119,7 @@ export default function LoginSignupPage({ onAuth }) {
                         {alertMsg}
                     </div>
                 )}
-
                 <div className={`container${active ? " active" : ""}`} id="container">
-                    {/* Sign Up panel */}
                     <div className="form-container sign-up">
                         <form onSubmit={handleSignUp} noValidate>
                             <h1>Create Account</h1>
@@ -128,10 +131,6 @@ export default function LoginSignupPage({ onAuth }) {
                                     <FaFacebookF />
                                 </a>
                             </div>
-
-                            {/* Removed helper text under title per design */}
-
-                            {/* User Type Selection */}
                             <div className="user-type-selector">
                                 <span className="type-label">I am a:</span>
                                 <div className="type-options">
@@ -141,7 +140,7 @@ export default function LoginSignupPage({ onAuth }) {
                                             name="userType"
                                             value="buyer"
                                             checked={su.userType === 'buyer'}
-                                            onChange={(e) => setSu(p => ({ ...p, userType: e.target.value }))}
+                                            onChange={(e) => setSu((p) => ({ ...p, userType: e.target.value }))}
                                         />
                                         <span className="option-text">🛒 Online Buyer</span>
                                     </label>
@@ -151,7 +150,7 @@ export default function LoginSignupPage({ onAuth }) {
                                             name="userType"
                                             value="owner"
                                             checked={su.userType === 'owner'}
-                                            onChange={(e) => setSu(p => ({ ...p, userType: e.target.value }))}
+                                            onChange={(e) => setSu((p) => ({ ...p, userType: e.target.value }))}
                                         />
                                         <span className="option-text">👨‍🍳 Bakery Owner</span>
                                     </label>
@@ -162,7 +161,6 @@ export default function LoginSignupPage({ onAuth }) {
                                     </div>
                                 )}
                             </div>
-
                             <input
                                 type="text"
                                 placeholder="Name"
@@ -178,7 +176,6 @@ export default function LoginSignupPage({ onAuth }) {
                                     {suErr.name}
                                 </div>
                             )}
-
                             <input
                                 type="email"
                                 placeholder="Email"
@@ -194,7 +191,6 @@ export default function LoginSignupPage({ onAuth }) {
                                     {suErr.email}
                                 </div>
                             )}
-
                             <input
                                 type="password"
                                 placeholder="Password"
@@ -210,14 +206,11 @@ export default function LoginSignupPage({ onAuth }) {
                                     {suErr.password}
                                 </div>
                             )}
-
                             <button type="submit" disabled={suLoading}>
                                 {suLoading ? "Creating..." : `Sign Up as ${su.userType === 'owner' ? 'Bakery Owner' : su.userType === 'buyer' ? 'Online Buyer' : 'User'}`}
                             </button>
                         </form>
                     </div>
-
-                    {/* Sign In panel */}
                     <div className="form-container sign-in">
                         <form onSubmit={handleSignIn} noValidate>
                             <h1>Sign In</h1>
@@ -229,9 +222,6 @@ export default function LoginSignupPage({ onAuth }) {
                                     <FaFacebookF />
                                 </a>
                             </div>
-
-                            {/* Removed helper text under title per design */}
-
                             <input
                                 type="email"
                                 placeholder="Email"
@@ -247,7 +237,6 @@ export default function LoginSignupPage({ onAuth }) {
                                     {siErr.email}
                                 </div>
                             )}
-
                             <input
                                 type="password"
                                 placeholder="Password"
@@ -263,16 +252,12 @@ export default function LoginSignupPage({ onAuth }) {
                                     {siErr.password}
                                 </div>
                             )}
-
                             <a href="#">Forget Your Password?</a>
-
                             <button type="submit" disabled={siLoading}>
                                 {siLoading ? "Signing in..." : "Sign In"}
                             </button>
                         </form>
                     </div>
-
-                    {/* Right side toggle background */}
                     <div className="toggle-container">
                         <div className="toggle">
                             <div className="toggle-panel toggle-left">

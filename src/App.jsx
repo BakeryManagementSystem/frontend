@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
 import MainLayout from "./components/layouts/MainLayout.jsx";
 
 // Auth
@@ -21,30 +22,27 @@ import "./App.css";
 
 function App() {
     return (
-        <BrowserRouter>
-            {/* App routes with layout (Navbar + Home-only Sidebar) */}
-            <Routes>
-                <Route element={<MainLayout />}>
-                    <Route path="/" element={<BuyerPage />} />
-                    <Route path="/shop" element={<BuyerPage />} />
-                    <Route path="/cart" element={<CartPage />} />
-                    <Route path="/messages" element={<MessagesPage />} />
-                    <Route path="/notifications" element={<NotificationsPage />} />
-                    <Route path="/status" element={<StatusPage />} />
-                    <Route path="/orders" element={<OrdersPage />} />
-                    <Route path="/settings" element={<SettingsPage />} />
-                    <Route path="/reviews" element={<ReviewsPage />} />
-                    <Route path="/help" element={<HelpPage />} />
-                    <Route path="/profile" element={<ProfilePage />} />
-                </Route>
+        <AuthProvider>
+            <BrowserRouter>
+                <Routes>
+                    {/* Protected routes inside MainLayout */}
+                    <Route path="/" element={<MainLayout />}>
+                        <Route index element={<Homepage />} />
+                        <Route path="/orders" element={<OrdersPage />} />
+                        <Route path="/settings" element={<SettingsPage />} />
+                        <Route path="/reviews" element={<ReviewsPage />} />
+                        <Route path="/help" element={<HelpPage />} />
+                        <Route path="/profile" element={<ProfilePage />} />
+                    </Route>
 
-                {/* Auth outside the layout */}
-                <Route path="/auth" element={<LoginSignupPage />} />
+                    {/* Auth outside the layout */}
+                    <Route path="/auth" element={<LoginSignupPage />} />
 
-                {/* Fallback */}
-                <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-        </BrowserRouter>
+                    {/* Fallback */}
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+            </BrowserRouter>
+        </AuthProvider>
     );
 }
 

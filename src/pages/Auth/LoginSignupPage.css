@@ -1,36 +1,32 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
 
 /* ==== Bakery Theme (Vanilla CSS) ==== */
-:root{
-    /* Your palette */
-    --color-bg: #EAEBD0;        /* warm base */
-    --color-primary: #DA6C6C;   /* brand main */
-    --color-secondary: #CD5656; /* brand secondary */
-    --color-accent: #AF3E3E;    /* deep accent */
-
-    /* neutrals & helpers */
+:root {
+    --color-bg: #EAEBD0;
+    --color-primary: #DA6C6C;
+    --color-secondary: #CD5656;
+    --color-accent: #AF3E3E;
     --text-main: #2B2B2B;
     --text-subtle: #666666;
     --surface: #FFFFFF;
     --surface-muted: #F6F6F6;
     --border-soft: rgba(0,0,0,0.08);
     --ring: var(--color-primary);
-
     --error-bg: #FFF0F0;
     --error-border: #FFD6D6;
     --error-text: #B91C1C;
 }
 
-/* font + reset (kept from your original) */
-*{
+/* font + reset */
+* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
     font-family: 'Montserrat', sans-serif;
 }
 
-/* ===== Page background (themed) ===== */
-body{
+/* Page background */
+body {
     background:
             radial-gradient(800px 500px at 20% 10%, #FFFFFF 0%, transparent 60%),
             radial-gradient(700px 500px at 80% 20%, #FFFFFF 0%, transparent 55%),
@@ -54,15 +50,15 @@ body{
     width: 100%;
     height: 100vh;
     background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-                url('../../assets/BK2.jpg');
+    url('../../assets/BK2.jpg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     z-index: -1;
 }
 
-/* ===== Auth container (Bigger size) ===== */
-.container{
+/* Auth container */
+.container {
     background-color: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
     border-radius: 30px;
@@ -76,7 +72,7 @@ body{
     margin: 40px auto;
 }
 
-.container p{
+.container p {
     font-size: 16px;
     line-height: 24px;
     letter-spacing: 0.3px;
@@ -84,28 +80,28 @@ body{
     color: var(--text-subtle);
 }
 
-.container span{
+.container span {
     font-size: 14px;
     color: var(--text-subtle);
 }
 
-.container a{
+.container a {
     color: var(--color-secondary);
     font-size: 13px;
     text-decoration: none;
     margin: 15px 0 10px;
     transition: color .15s ease, text-shadow .15s ease;
 }
-.container a:hover{
+.container a:hover {
     color: var(--color-accent);
     text-shadow: 0 0 8px color-mix(in srgb, var(--color-secondary) 35%, transparent);
 }
 
-.container button{
+.container button {
     background-color: var(--color-primary);
     color: #fff;
-    font-size: 16px;
-    padding: 14px 50px;
+    font-size: 0.95rem;
+    padding: 12px 30px;
     border: 1px solid transparent;
     border-radius: 8px;
     font-weight: 700;
@@ -116,97 +112,154 @@ body{
     transition: transform .12s ease, box-shadow .18s ease, background .18s ease;
     box-shadow: 0 2px 12px rgba(218,108,108,0.2);
 }
-.container button:hover{
+.container button:hover {
     background-color: var(--color-accent);
     transform: translateY(-1px);
     box-shadow: 0 6px 18px rgba(175,62,62,0.25);
 }
-.container button:active{ transform: translateY(0); }
-.container button.hidden{
+.container button:active {
+    transform: translateY(0);
+}
+.container button.hidden {
     background-color: transparent;
     border-color: #fff;
     color: #fff;
 }
 
-.container form{
+.container form {
     background-color: var(--surface);
     display: flex;
     align-items: center;
     justify-content: center;
     flex-direction: column;
-    padding: 0 60px;
+    padding: 0 50px;
     height: 100%;
 }
 
-.container input{
+.container form h1 {
+    font-size: 2rem;
+    margin-bottom: 15px;
+    background: linear-gradient(45deg, var(--color-primary), var(--color-accent));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.2));
+}
+
+.container input {
     background-color: var(--surface-muted);
     border: 2px solid #EEE;
     margin: 12px 0;
-    padding: 15px 20px;
-    font-size: 16px;
+    padding: 12px 15px;
+    font-size: 0.95rem;
     border-radius: 10px;
     width: 100%;
     outline: none;
     transition: border-color .16s ease, box-shadow .16s ease, background .16s ease;
 }
-.container input:hover{ border-color: #E6E6E6; }
-.container input:focus{
+.container input:hover {
+    border-color: #E6E6E6;
+}
+.container input:focus {
     background: #FFF;
     border-color: var(--ring);
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 22%, transparent);
 }
+.container input.input-error {
+    border-color: var(--error-border);
+    background: var(--error-bg);
+}
 
-/* social icons */
-.social-icons{ margin: 25px 0; }
-.social-icons a{
+/* Error messages */
+.field-error {
+    color: var(--error-text);
+    font-size: 0.85rem;
+    margin-top: 5px;
+    text-align: left;
+    width: 100%;
+}
+
+/* Social icons */
+.social-icons {
+    margin: 20px 0;
+    display: flex;
+    gap: 20px;
+}
+.social-icons a {
     border: 1px solid var(--border-soft);
     border-radius: 20%;
     display: inline-flex;
     justify-content: center;
     align-items: center;
     margin: 0 10px;
-    width: 50px;
-    height: 50px;
+    width: 45px;
+    height: 45px;
     color: var(--text-main);
     background: #fff;
     transition: background .15s ease, border-color .15s ease, transform .12s ease;
 }
-.social-icons a:hover{
+.social-icons a:hover {
     background: var(--color-bg);
     border-color: color-mix(in srgb, var(--color-primary) 25%, var(--border-soft));
     transform: translateY(-1px);
 }
+.social-icons a.icon[aria-label="Google"] {
+    background: white;
+    color: #DB4437;
+    box-shadow: 0 2px 8px rgba(219, 68, 55, 0.2);
+}
+.social-icons a.icon[aria-label="Google"]:hover {
+    background: #DB4437;
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(219, 68, 55, 0.3);
+}
+.social-icons a.icon[aria-label="Facebook"] {
+    background: white;
+    color: #4267B2;
+    box-shadow: 0 2px 8px rgba(66, 103, 178, 0.2);
+}
+.social-icons a.icon[aria-label="Facebook"]:hover {
+    background: #4267B2;
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(66, 103, 178, 0.3);
+}
 
-/* ===== Panels / Toggle (same behavior as script.js) ===== */
-.form-container{
+/* Panels / Toggle */
+.form-container {
     position: absolute;
     top: 0;
     height: 100%;
     transition: all 0.6s ease-in-out;
     padding: 20px 0;
 }
-.sign-in{ left: 0; width: 50%; z-index: 2; }
-.container.active .sign-in{ transform: translateX(100%); }
-
-.sign-up{
+.sign-in {
+    left: 0;
+    width: 50%;
+    z-index: 2;
+}
+.container.active .sign-in {
+    transform: translateX(100%);
+}
+.sign-up {
     left: 0;
     width: 50%;
     opacity: 0;
     z-index: 1;
 }
-.container.active .sign-up{
+.container.active .sign-up {
     transform: translateX(100%);
     opacity: 1;
     z-index: 5;
     animation: move 0.6s;
 }
-@keyframes move{
-    0%, 49.99%{ opacity: 0; z-index: 1; }
-    50%, 100%{ opacity: 1; z-index: 5; }
+@keyframes move {
+    0%, 49.99% { opacity: 0; z-index: 1; }
+    50%, 100% { opacity: 1; z-index: 5; }
 }
 
-/* Right-side toggle background */
-.toggle-container{
+.toggle-container {
     position: absolute;
     top: 0;
     left: 50%;
@@ -217,13 +270,12 @@ body{
     border-radius: 150px 0 0 100px;
     z-index: 1000;
 }
-.container.active .toggle-container{
+.container.active .toggle-container {
     transform: translateX(-100%);
     border-radius: 0 150px 100px 0;
 }
 
-/* BRAND GRADIENT (palette applied) */
-.toggle{
+.toggle {
     color: #fff;
     position: relative;
     left: -100%;
@@ -231,12 +283,13 @@ body{
     width: 200%;
     transform: translateX(0);
     transition: all 0.6s ease-in-out;
-    /* original was blue/teal; now using your reds */
     background: linear-gradient(90deg, var(--color-secondary) 0%, var(--color-accent) 100%);
 }
-.container.active .toggle{ transform: translateX(50%); }
+.container.active .toggle {
+    transform: translateX(50%);
+}
 
-.toggle-panel{
+.toggle-panel {
     position: absolute;
     width: 50%;
     height: 100%;
@@ -250,40 +303,56 @@ body{
     transform: translateX(0);
     transition: all 0.6s ease-in-out;
 }
-.toggle-panel h1{ color: #fff; font-size: 2.5rem; margin-bottom: 20px; }
-.toggle-panel p{ color: #fff; opacity: .95; font-size: 16px; line-height: 1.6; }
-
-.toggle-left{ transform: translateX(-200%); }
-.container.active .toggle-left{ transform: translateX(0); }
-
-.toggle-right{ right: 0; transform: translateX(0); }
-.container.active .toggle-right{ transform: translateX(200%); }
-
-/* ===== Small screens ===== */
-@media (max-width: 480px){
-    .container{ border-radius: 20px; }
-    .container form{ padding: 0 24px; }
+.toggle-panel h1 {
+    color: #fff;
+    font-size: 2rem;
+    margin-bottom: 20px;
 }
-.page-root{
+.toggle-panel p {
+    color: #fff;
+    opacity: .95;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+.toggle-left {
+    transform: translateX(-200%);
+}
+.container.active .toggle-left {
+    transform: translateX(0);
+}
+.toggle-right {
+    right: 0;
+    transform: translateX(0);
+}
+.container.active .toggle-right {
+    transform: translateX(200%);
+}
+
+/* Small screens */
+@media (max-width: 480px) {
+    .container { border-radius: 20px; }
+    .container form { padding: 0 24px; }
+}
+
+.page-root {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 1rem;
 }
 
-.page-title{
+.page-title {
     font-size: 1.8rem;
     font-weight: 700;
-    color: var(--color-accent); /* uses your palette */
+    color: var(--color-accent);
     margin-bottom: 1rem;
     text-align: center;
 }
 
-/* User Type Selector Styles */
 .user-type-selector {
     width: 100%;
-    margin: 20px 0;
-    padding: 15px;
+    margin: 15px 0;
+    padding: 12px;
     background: var(--surface-muted);
     border-radius: 12px;
     border: 2px solid var(--border-soft);
@@ -307,7 +376,7 @@ body{
     flex: 1;
     position: relative;
     cursor: pointer;
-    padding: 15px;
+    padding: 12px;
     background: white;
     border: 2px solid var(--border-soft);
     border-radius: 10px;
@@ -323,13 +392,12 @@ body{
 
 .type-option .option-text {
     display: block;
-    font-size: 16px;
+    font-size: 0.9rem;
     font-weight: 600;
     color: var(--text-subtle);
     transition: color 0.3s ease;
 }
 
-/* Selected state */
 .type-option.selected {
     border-color: var(--color-primary);
     background: linear-gradient(45deg, var(--color-primary), var(--color-secondary));
@@ -341,7 +409,6 @@ body{
     color: white;
 }
 
-/* Hover state */
 .type-option:hover:not(.selected) {
     border-color: var(--color-primary);
     background: var(--surface);
@@ -353,13 +420,11 @@ body{
     color: var(--color-primary);
 }
 
-/* Error state */
 .user-type-error {
     margin-top: 8px;
     text-align: center;
 }
 
-/* Animation for selected state */
 .type-option {
     transform-origin: center;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -375,7 +440,6 @@ body{
     100% { transform: scale(1) translateY(-2px); }
 }
 
-/* Main heading adjustments */
 .main-heading {
     text-align: center;
     font-size: 3.5rem;
@@ -383,8 +447,8 @@ body{
     color: var(--color-primary);
     margin: 40px 0;
     text-shadow:
-        2px 2px 4px rgba(0, 0, 0, 0.3),
-        0 0 20px rgba(255, 255, 255, 0.5);
+            2px 2px 4px rgba(0, 0, 0, 0.3),
+            0 0 20px rgba(255, 255, 255, 0.5);
     background: linear-gradient(45deg, var(--color-primary), var(--color-accent));
     -webkit-background-clip: text;
     background-clip: text;
@@ -392,99 +456,6 @@ body{
     filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3));
 }
 
-/* Container form adjustments */
-.container form {
-    padding: 0 50px;
-}
-
-.container form h1 {
-    font-size: 2rem;
-    margin-bottom: 15px;
-    background: linear-gradient(45deg, var(--color-primary), var(--color-accent));
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.2));
-}
-
-/* Adjust button text size */
-.container button {
-    font-size: 0.95rem;
-    padding: 12px 30px;
-}
-
-/* Social Icons with brand colors */
-.social-icons {
-    margin: 20px 0;
-    display: flex;
-    gap: 20px;
-}
-
-.social-icons a.icon {
-    width: 45px;
-    height: 45px;
-    font-size: 1.5rem;
-    border: none;
-    transition: all 0.3s ease;
-}
-
-/* Google Icon */
-.social-icons a.icon[aria-label="Google"] {
-    background: white;
-    color: #DB4437;
-    box-shadow: 0 2px 8px rgba(219, 68, 55, 0.2);
-}
-.social-icons a.icon[aria-label="Google"]:hover {
-    background: #DB4437;
-    color: white;
-    transform: translateY(-3px);
-    box-shadow: 0 4px 12px rgba(219, 68, 55, 0.3);
-}
-
-/* Facebook Icon */
-.social-icons a.icon[aria-label="Facebook"] {
-    background: white;
-    color: #4267B2;
-    box-shadow: 0 2px 8px rgba(66, 103, 178, 0.2);
-}
-.social-icons a.icon[aria-label="Facebook"]:hover {
-    background: #4267B2;
-    color: white;
-    transform: translateY(-3px);
-    box-shadow: 0 4px 12px rgba(66, 103, 178, 0.3);
-}
-
-/* User type selector adjustments */
-.user-type-selector {
-    margin: 15px 0;
-    padding: 12px;
-}
-
-.type-option {
-    padding: 12px;
-}
-
-.type-option .option-text {
-    font-size: 0.9rem;
-}
-
-/* Adjust form input sizes */
-.container input {
-    font-size: 0.95rem;
-    padding: 12px 15px;
-}
-
-/* Make the toggle panel text smaller */
-.toggle-panel h1 {
-    font-size: 2rem;
-}
-
-.toggle-panel p {
-    font-size: 0.95rem;
-    line-height: 1.5;
-}
-
-/* Toast notification */
 .toast {
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(8px);
