@@ -1,293 +1,239 @@
-import React, { useState } from "react";
-import axios from "axios";
-import "./LoginSignupPage.css";
-import { FaGooglePlusG, FaFacebookF } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
+// pages/Auth/LoginSignupPage.jsx
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext'; // Assuming AuthContext provides setUser or similar
+import '../Auth/LoginSignupPage.css'; // Adjust path if needed
 
-// Helper: email check
-const isEmail = (v) => /\S+@\S+\.\S+/.test(v);
-
-// Minimal validators
-const validateSignIn = ({ email, password }) => {
-    const errors = {};
-    if (!email?.trim()) errors.email = "Email is required";
-    else if (!isEmail(email)) errors.email = "Enter a valid email";
-    if (!password) errors.password = "Password is required";
-    else if (password.length < 6) errors.password = "Min 6 characters";
-    return errors;
-};
-
-const validateSignUp = ({ name, email, password, userType }) => {
-    const errors = {};
-    if (!name?.trim()) errors.name = "Full name is required";
-    if (!email?.trim()) errors.email = "Email is required";
-    else if (!isEmail(email)) errors.email = "Enter a valid email";
-    if (!password) errors.password = "Password is required";
-    else if (password.length < 6) errors.password = "Min 6 characters";
-    if (!userType) errors.userType = "Please select your account type";
-    return errors;
-};
-
-export default function LoginSignupPage() {
-    const [active, setActive] = useState(false); // false = Sign In, true = Sign Up
+const LoginSignupPage = () => {
+    const [isActive, setIsActive] = useState(false); // For toggling between sign-in and sign-up
+    const [signupData, setSignupData] = useState({
+        name: '',
+        email: '',
+        password: '',
+        user_type: '',
+    });
+    const [loginData, setLoginData] = useState({
+        email: '',
+        password: '',
+    });
+    const [errors, setErrors] = useState({}); // For validation errors
     const navigate = useNavigate();
-    const { login } = useAuth();
+    const { setUser } = useAuth(); // Assuming AuthContext has setUser to store authenticated user
 
-    // Sign In state
-    const [si, setSi] = useState({ email: "", password: "" });
-    const [siErr, setSiErr] = useState({});
-    const [siLoading, setSiLoading] = useState(false);
+    const togglePanel = () => {
+        setIsActive(!isActive);
+        setErrors({}); // Clear errors on toggle
+    };
 
-    // Sign Up state
-    const [su, setSu] = useState({
-        name: "",
-        email: "",
-        password: "",
-        userType: "",
-    });
-    const [suErr, setSuErr] = useState({});
-    const [suLoading, setSuLoading] = useState(false);
+    const handleSignupChange = (e) => {
+        const { name, value } = e.target;
+        setSignupData({ ...signupData, [name]: value });
+    };
 
-    // Global alert
-    const [alertMsg, setAlertMsg] = useState("");
+    const handleLoginChange = (e) => {
+        const { name, value } = e.target;
+        setLoginData({ ...loginData, [name]: value });
+    };
 
-    const API = axios.create({
-        baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:8000",
-        withCredentials: true,
-    });
+    const handleUserTypeSelect = (type) => {
+        setSignupData({ ...signupData, user_type: type });
+    };
 
-    const handleSignIn = async (e) => {
+    const validateSignup = () => {
+        const newErrors = {};
+        if (!signupData.name) newErrors.name = 'Name is required';
+        if (!signupData.email) newErrors.email = 'Email is required';
+        if (!signupData.password || signupData.password.length < 8) newErrors.password = 'Password must be at least 8 characters';
+        if (!signupData.user_type) newErrors.user_type = 'User type is required';
+        return newErrors;
+    };
+
+    const validateLogin = () => {
+        const newErrors = {};
+        if (!loginData.email) newErrors.email = 'Email is required';
+        if (!loginData.password) newErrors.password = 'Password is required';
+        return newErrors;
+    };
+
+    const handleSignup = async (e) => {
         e.preventDefault();
-        setAlertMsg("");
-        const errors = validateSignIn(si);
-        setSiErr(errors);
-        if (Object.keys(errors).length) return;
+        const validationErrors = validateSignup();
+        if (Object.keys(validationErrors).length > 0) {
+            setErrors(validationErrors);
+            return;
+        }
 
-        setSiLoading(true);
         try {
-            const { data } = await API.post("/auth/login", si);
-            const token = data?.token;
-            if (token) {
-                localStorage.setItem("access_token", token);
-                if (data?.userType) localStorage.setItem("user_type", data.userType);
-                login(); // Update auth context
-                setAlertMsg(`✅ Welcome back, ${data.userType === 'owner' ? 'Bakery Owner' : 'Valued Customer'}!`);
-                navigate("/profile"); // Navigate to profile after successful login
+            const response = await fetch('/api/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(signupData),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                setErrors({ general: errorData.message || 'Registration failed' });
+                return;
             }
-        } catch (err) {
-            const msg = err?.response?.data?.error || "Login failed. Please check your credentials.";
-            setAlertMsg(msg);
-        } finally {
-            setSiLoading(false);
+
+            alert('User Registered Successfully'); // Pop-up message
+            togglePanel(); // Switch to login panel
+        } catch (error) {
+            setErrors({ general: 'An error occurred during registration' });
         }
     };
 
-    const handleSignUp = async (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
-        setAlertMsg("");
-        const errors = validateSignUp(su);
-        setSuErr(errors);
-        if (Object.keys(errors).length) return;
+        const validationErrors = validateLogin();
+        if (Object.keys(validationErrors).length > 0) {
+            setErrors(validationErrors);
+            return;
+        }
 
-        setSuLoading(true);
         try {
-            const { data } = await API.post("/auth/register", su);
-            const token = data?.token;
-            if (token) {
-                localStorage.setItem("access_token", token);
-                if (su.userType) localStorage.setItem("user_type", su.userType);
-                login(); // Update auth context
-                setAlertMsg(`🎉 Welcome to Smart Bakery! Your ${su.userType === 'owner' ? 'Bakery Owner' : 'Customer'} account was created successfully.`);
-                navigate("/profile"); // Navigate to profile after successful registration
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(loginData),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                setErrors({ general: errorData.message || 'Invalid credentials' });
+                return;
             }
-        } catch (err) {
-            const msg = err?.response?.data?.error || "Sign up failed. Please try again.";
-            setAlertMsg(msg);
-        } finally {
-            setSuLoading(false);
+
+            const { user } = await response.json();
+            setUser(user); // Store user in context
+            // Optionally store in localStorage for persistence
+            localStorage.setItem('user', JSON.stringify(user));
+
+            // Route based on user_type
+            if (user.user_type === 'customer') {
+                navigate('/BuyerPage');
+            } else {
+                navigate('/OwnerPage');
+            }
+        } catch (error) {
+            setErrors({ general: 'An error occurred during login' });
         }
     };
 
     return (
-        <>
-            <div className="auth-page-background"></div>
-            <div className="page-root">
-                <h1 className="main-heading">Smart Bakery Management System</h1>
-                {alertMsg && (
-                    <div className="toast" role="status" aria-live="polite">
-                        {alertMsg}
-                    </div>
-                )}
-                <div className={`container${active ? " active" : ""}`} id="container">
-                    <div className="form-container sign-up">
-                        <form onSubmit={handleSignUp} noValidate>
-                            <h1>Create Account</h1>
-                            <div className="social-icons">
-                                <a href="#" className="icon" aria-label="Google">
-                                    <FaGooglePlusG />
-                                </a>
-                                <a href="#" className="icon" aria-label="Facebook">
-                                    <FaFacebookF />
-                                </a>
+        <div className="auth-page-background">
+            <h1 className="main-heading">Bakery App</h1>
+            <div className={`container ${isActive ? 'active' : ''}`}>
+                {/* Sign Up Form */}
+                <div className="form-container sign-up">
+                    <form onSubmit={handleSignup}>
+                        <h1>Create Account</h1>
+                        <div className="social-icons">
+                            {/* Add social links if needed */}
+                        </div>
+                        <span>or use your email for registration</span>
+                        <input
+                            type="text"
+                            name="name"
+                            placeholder="Name"
+                            value={signupData.name}
+                            onChange={handleSignupChange}
+                            className={errors.name ? 'input-error' : ''}
+                        />
+                        {errors.name && <p className="field-error">{errors.name}</p>}
+                        <input
+                            type="email"
+                            name="email"
+                            placeholder="Email"
+                            value={signupData.email}
+                            onChange={handleSignupChange}
+                            className={errors.email ? 'input-error' : ''}
+                        />
+                        {errors.email && <p className="field-error">{errors.email}</p>}
+                        <input
+                            type="password"
+                            name="password"
+                            placeholder="Password"
+                            value={signupData.password}
+                            onChange={handleSignupChange}
+                            className={errors.password ? 'input-error' : ''}
+                        />
+                        {errors.password && <p className="field-error">{errors.password}</p>}
+
+                        <div className="user-type-selector">
+                            <span className="type-label">Select User Type</span>
+                            <div className="type-options">
+                                <label className={`type-option ${signupData.user_type === 'customer' ? 'selected' : ''}`}>
+                                    <input type="radio" name="user_type" onChange={() => handleUserTypeSelect('customer')} />
+                                    <span className="option-text">Customer</span>
+                                </label>
+                                <label className={`type-option ${signupData.user_type === 'admin' ? 'selected' : ''}`}>
+                                    <input type="radio" name="user_type" onChange={() => handleUserTypeSelect('admin')} />
+                                    <span className="option-text">Admin</span>
+                                </label>
+                                <label className={`type-option ${signupData.user_type === 'staff' ? 'selected' : ''}`}>
+                                    <input type="radio" name="user_type" onChange={() => handleUserTypeSelect('staff')} />
+                                    <span className="option-text">Staff</span>
+                                </label>
                             </div>
-                            <div className="user-type-selector">
-                                <span className="type-label">I am a:</span>
-                                <div className="type-options">
-                                    <label className={`type-option${su.userType === 'buyer' ? ' selected' : ''}`}>
-                                        <input
-                                            type="radio"
-                                            name="userType"
-                                            value="buyer"
-                                            checked={su.userType === 'buyer'}
-                                            onChange={(e) => setSu((p) => ({ ...p, userType: e.target.value }))}
-                                        />
-                                        <span className="option-text">🛒 Online Buyer</span>
-                                    </label>
-                                    <label className={`type-option${su.userType === 'owner' ? ' selected' : ''}`}>
-                                        <input
-                                            type="radio"
-                                            name="userType"
-                                            value="owner"
-                                            checked={su.userType === 'owner'}
-                                            onChange={(e) => setSu((p) => ({ ...p, userType: e.target.value }))}
-                                        />
-                                        <span className="option-text">👨‍🍳 Bakery Owner</span>
-                                    </label>
-                                </div>
-                                {suErr.userType && (
-                                    <div className="field-error user-type-error">
-                                        {suErr.userType}
-                                    </div>
-                                )}
-                            </div>
-                            <input
-                                type="text"
-                                placeholder="Name"
-                                autoComplete="name"
-                                value={su.name}
-                                onChange={(e) => setSu((p) => ({ ...p, name: e.target.value }))}
-                                className={suErr.name ? "input-error" : ""}
-                                aria-invalid={!!suErr.name}
-                                aria-describedby={suErr.name ? "su-name-err" : undefined}
-                            />
-                            {suErr.name && (
-                                <div id="su-name-err" className="field-error">
-                                    {suErr.name}
-                                </div>
-                            )}
-                            <input
-                                type="email"
-                                placeholder="Email"
-                                autoComplete="email"
-                                value={su.email}
-                                onChange={(e) => setSu((p) => ({ ...p, email: e.target.value }))}
-                                className={suErr.email ? "input-error" : ""}
-                                aria-invalid={!!suErr.email}
-                                aria-describedby={suErr.email ? "su-email-err" : undefined}
-                            />
-                            {suErr.email && (
-                                <div id="su-email-err" className="field-error">
-                                    {suErr.email}
-                                </div>
-                            )}
-                            <input
-                                type="password"
-                                placeholder="Password"
-                                autoComplete="new-password"
-                                value={su.password}
-                                onChange={(e) => setSu((p) => ({ ...p, password: e.target.value }))}
-                                className={suErr.password ? "input-error" : ""}
-                                aria-invalid={!!suErr.password}
-                                aria-describedby={suErr.password ? "su-pass-err" : undefined}
-                            />
-                            {suErr.password && (
-                                <div id="su-pass-err" className="field-error">
-                                    {suErr.password}
-                                </div>
-                            )}
-                            <button type="submit" disabled={suLoading}>
-                                {suLoading ? "Creating..." : `Sign Up as ${su.userType === 'owner' ? 'Bakery Owner' : su.userType === 'buyer' ? 'Online Buyer' : 'User'}`}
-                            </button>
-                        </form>
-                    </div>
-                    <div className="form-container sign-in">
-                        <form onSubmit={handleSignIn} noValidate>
-                            <h1>Sign In</h1>
-                            <div className="social-icons">
-                                <a href="#" className="icon" aria-label="Google">
-                                    <FaGooglePlusG />
-                                </a>
-                                <a href="#" className="icon" aria-label="Facebook">
-                                    <FaFacebookF />
-                                </a>
-                            </div>
-                            <input
-                                type="email"
-                                placeholder="Email"
-                                autoComplete="email"
-                                value={si.email}
-                                onChange={(e) => setSi((p) => ({ ...p, email: e.target.value }))}
-                                className={siErr.email ? "input-error" : ""}
-                                aria-invalid={!!siErr.email}
-                                aria-describedby={siErr.email ? "si-email-err" : undefined}
-                            />
-                            {siErr.email && (
-                                <div id="si-email-err" className="field-error">
-                                    {siErr.email}
-                                </div>
-                            )}
-                            <input
-                                type="password"
-                                placeholder="Password"
-                                autoComplete="current-password"
-                                value={si.password}
-                                onChange={(e) => setSi((p) => ({ ...p, password: e.target.value }))}
-                                className={siErr.password ? "input-error" : ""}
-                                aria-invalid={!!siErr.password}
-                                aria-describedby={siErr.password ? "si-pass-err" : undefined}
-                            />
-                            {siErr.password && (
-                                <div id="si-pass-err" className="field-error">
-                                    {siErr.password}
-                                </div>
-                            )}
-                            <a href="#">Forget Your Password?</a>
-                            <button type="submit" disabled={siLoading}>
-                                {siLoading ? "Signing in..." : "Sign In"}
-                            </button>
-                        </form>
-                    </div>
-                    <div className="toggle-container">
-                        <div className="toggle">
-                            <div className="toggle-panel toggle-left">
-                                <h1>Welcome Back!</h1>
-                                <p>Enter your personal details to use all of site features</p>
-                                <button
-                                    type="button"
-                                    className="hidden"
-                                    id="login"
-                                    onClick={() => setActive(false)}
-                                >
-                                    Sign In
-                                </button>
-                            </div>
-                            <div className="toggle-panel toggle-right">
-                                <h1>Hello, Friend!</h1>
-                                <p>Register with your personal details to use all of site features</p>
-                                <button
-                                    type="button"
-                                    className="hidden"
-                                    id="register"
-                                    onClick={() => setActive(true)}
-                                >
-                                    Sign Up
-                                </button>
-                            </div>
+                            {errors.user_type && <p className="user-type-error field-error">{errors.user_type}</p>}
+                        </div>
+
+                        <button type="submit">Sign Up</button>
+                        {errors.general && <p className="field-error">{errors.general}</p>}
+                    </form>
+                </div>
+
+                {/* Sign In Form */}
+                <div className="form-container sign-in">
+                    <form onSubmit={handleLogin}>
+                        <h1>Sign In</h1>
+                        <div className="social-icons">
+                            {/* Add social links if needed */}
+                        </div>
+                        <span>or use your email password</span>
+                        <input
+                            type="email"
+                            name="email"
+                            placeholder="Email"
+                            value={loginData.email}
+                            onChange={handleLoginChange}
+                            className={errors.email ? 'input-error' : ''}
+                        />
+                        {errors.email && <p className="field-error">{errors.email}</p>}
+                        <input
+                            type="password"
+                            name="password"
+                            placeholder="Password"
+                            value={loginData.password}
+                            onChange={handleLoginChange}
+                            className={errors.password ? 'input-error' : ''}
+                        />
+                        {errors.password && <p className="field-error">{errors.password}</p>}
+                        <a href="#">Forget Your Password?</a>
+                        <button type="submit">Sign In</button>
+                        {errors.general && <p className="field-error">{errors.general}</p>}
+                    </form>
+                </div>
+
+                {/* Toggle Panels */}
+                <div className="toggle-container">
+                    <div className="toggle">
+                        <div className="toggle-panel toggle-left">
+                            <h1>Welcome Back!</h1>
+                            <p>Enter your personal details to use all of site features</p>
+                            <button className="hidden" onClick={togglePanel}>Sign In</button>
+                        </div>
+                        <div className="toggle-panel toggle-right">
+                            <h1>Hello, Friend!</h1>
+                            <p>Register with your personal details to use all of site features</p>
+                            <button className="hidden" onClick={togglePanel}>Sign Up</button>
                         </div>
                     </div>
                 </div>
             </div>
-        </>
+        </div>
     );
-}
+};
+
+export default LoginSignupPage;

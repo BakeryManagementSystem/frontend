@@ -18,6 +18,9 @@ import ReviewsPage from "./pages/BuyerSection/ReviewsPage.jsx";
 import HelpPage from "./pages/BuyerSection/HelpPage.jsx";
 import ProfilePage from "./pages/BuyerSection/ProfilePage.jsx";
 
+// ⬇️ NEW: import your Owner page component (create it if not present)
+import OwnerPage from "./pages/OwnerSection/OwnerPge.jsx";
+
 import "./App.css";
 
 function App() {
@@ -28,11 +31,20 @@ function App() {
                     {/* Protected routes inside MainLayout */}
                     <Route path="/" element={<MainLayout />}>
                         <Route index element={<Homepage />} />
+                        <Route path="/shop" element={<BuyerPage />} />
+                        <Route path="/cart" element={<CartPage />} />
+                        <Route path="/messages" element={<MessagesPage />} />
+                        <Route path="/notifications" element={<NotificationsPage />} />
+                        <Route path="/status" element={<StatusPage />} />
+                        <Route path="/BuyerPage" element={<BuyerPage />} />
                         <Route path="/orders" element={<OrdersPage />} />
                         <Route path="/settings" element={<SettingsPage />} />
                         <Route path="/reviews" element={<ReviewsPage />} />
                         <Route path="/help" element={<HelpPage />} />
                         <Route path="/profile" element={<ProfilePage />} />
+
+                        {/* ⬇️ NEW: owner landing */}
+                        <Route path="/OwnerPage" element={<OwnerPage />} />
                     </Route>
 
                     {/* Auth outside the layout */}

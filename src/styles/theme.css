@@ -1,0 +1,32 @@
+:root {
+  /* Core palette (updated to Purple theme) */
+  --color-bg: #e6e6e6;        /* Neutral / Light Gray */
+  --color-primary: #6639a6;   /* Deep Purple */
+  --color-secondary: #7f4fc3; /* Medium Purple */
+  --color-accent: #9b75d0;    /* Light Purple (accent) */
+  --color-dark: #4f2c80;      /* Dark Purple */
+  --color-light: #ffffff;     /* White */
+
+  /* Additional variables for common use */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+
+  /* Spacing variables */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+
+  /* Border radius */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 1rem;
+}
+
+/* Apply theme to body */
+body {
+  background-color: var(--color-bg);
+  color: var(--color-dark);
+}
