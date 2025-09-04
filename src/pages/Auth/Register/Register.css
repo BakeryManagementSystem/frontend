@@ -1,1 +1,101 @@
+/* Register page extends the base auth styles with additional components */
 
+.user-type-selection {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
+}
+
+.user-type-option {
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: var(--bg-card);
+}
+
+.user-type-option:hover {
+  border-color: var(--border-medium);
+  background-color: var(--bg-secondary);
+}
+
+.user-type-option.selected {
+  border-color: var(--primary-color);
+  background-color: rgb(37 99 235 / 0.05);
+}
+
+.user-type-option input[type="radio"] {
+  display: none;
+}
+
+.user-type-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+  text-align: center;
+}
+
+.user-type-content svg {
+  color: var(--text-secondary);
+  transition: color 0.2s ease;
+}
+
+.user-type-option.selected .user-type-content svg {
+  color: var(--primary-color);
+}
+
+.user-type-content span {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: color 0.2s ease;
+}
+
+.user-type-option.selected .user-type-content span {
+  color: var(--primary-color);
+}
+
+.error-message {
+  color: var(--error-color);
+  font-size: var(--font-size-xs);
+  margin-top: var(--spacing-xs);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.form-input.error {
+  border-color: var(--error-color);
+}
+
+.form-input.error:focus {
+  border-color: var(--error-color);
+  box-shadow: 0 0 0 3px rgb(239 68 68 / 0.1);
+}
+
+.checkbox-wrapper.error {
+  color: var(--error-color);
+}
+
+.terms-link {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+.terms-link:hover {
+  text-decoration: underline;
+}
+
+/* Responsive adjustments for register page */
+@media (max-width: 480px) {
+  .user-type-selection {
+    grid-template-columns: 1fr;
+  }
+
+  .user-type-option {
+    padding: var(--spacing-md);
+  }
+}

@@ -1,136 +1,141 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
-import { CartProvider } from './contexts/CartContext';
-import { ThemeProvider } from './contexts/ThemeContext';
-import theme from './styles/theme.js';
+import { AuthProvider } from './context/AuthContext';
+import { CartProvider } from './context/CartContext';
 
 // Layout Components
-import PublicLayout from './components/Layout/PublicLayout';
-import BuyerLayout from './components/Layout/BuyerLayout';
-import SellerLayout from './components/Layout/SellerLayout';
+import Header from './components/layout/Header/Header';
+import Footer from './components/layout/Footer/Footer';
 
 // Public Pages
-import Home from './pages/Public/Home/Home.jsx';
-import Marketplace from './pages/Public/Marketplace/Marketplace.jsx';
-import ProductDetail from './pages/Public/ProductDetail/ProductDetail.jsx';
-import About from './pages/Public/About/About.jsx';
-import Contact from './pages/Public/Contact/Contact.jsx';
+import Home from './pages/Home/Home';
+import Products from './pages/Products/Products';
+import ProductDetail from './pages/ProductDetail/ProductDetail';
+import Categories from './pages/Categories/Categories';
+import About from './pages/About/About';
+import Contact from './pages/Contact/Contact';
 
 // Auth Pages
-import Login from './pages/Auth/Login/Login.jsx';
-import Register from './pages/Auth/Register/Register.jsx';
-import ForgotPassword from './pages/Auth/ForgotPassword/ForgotPassword.jsx';
+import Login from './pages/Auth/Login/Login';
+import Register from './pages/Auth/Register/Register';
 
-// Buyer Pages
-import BuyerDashboard from './pages/Buyer/Dashboard/Dashboard.jsx';
-import OrderHistory from './pages/Buyer/OrderHistory/OrderHistory.jsx';
-import Wishlist from './pages/Buyer/Wishlist/Wishlist.jsx';
-import BuyerProfile from './pages/Buyer/Profile/Profile.jsx';
-import Checkout from './pages/Buyer/Checkout/Checkout.jsx';
+// Buyer Pages (Customer Pages for Bakery)
+import BuyerDashboard from './pages/Buyer/Dashboard/BuyerDashboard';
+import OrderHistory from './pages/Buyer/OrderHistory/OrderHistory';
+import Wishlist from './pages/Buyer/Wishlist/Wishlist';
+import Profile from './pages/Buyer/Profile/Profile';
+import Checkout from './pages/Buyer/Checkout/Checkout';
 
-// Seller Pages
-import SellerDashboard from './pages/Seller/Dashboard/Dashboard.jsx';
-import ShopManagement from './pages/Seller/ShopManagement/ShopManagement.jsx';
-import ProductManagement from './pages/Seller/ProductManagement/ProductManagement.jsx';
-import InventoryManagement from './pages/Seller/InventoryManagement/InventoryManagement.jsx';
-import OrderManagement from './pages/Seller/OrderManagement/OrderManagement.jsx';
-import ShopAnalytics from './pages/Seller/Analytics/Analytics.jsx';
-import SellerProfile from './pages/Seller/Profile/Profile.jsx';
+// Seller Pages (Baker/Shop Manager Pages)
+import SellerDashboard from './pages/Seller/Dashboard/SellerDashboard';
+import SellerProducts from './pages/Seller/Products/SellerProducts';
+import SellerOrders from './pages/Seller/Orders/SellerOrders';
+import SellerProfile from './pages/Seller/Profile/SellerProfile';
+import SellerShop from './pages/Seller/Shop/SellerShop';
+import SellerAnalytics from './pages/Seller/Analytics/SellerAnalytics';
 
-// Components
-import ProtectedRoute from './components/Auth/ProtectedRoute';
-import RoleBasedRoute from './components/Auth/RoleBasedRoute';
-import Cart from './components/Cart/Cart';
-import NotFound from './pages/NotFound/NotFound.jsx';
+// Protected Route Component
+import ProtectedRoute from './components/common/ProtectedRoute/ProtectedRoute';
 
-import './App.css';
+// Shop Pages (Bakery Shop Pages)
+import ShopDetail from './pages/Shop/ShopDetail/ShopDetail';
 
 function App() {
-  // Initialize theme CSS custom properties
-  useEffect(() => {
-    const style = document.createElement('style');
-    style.textContent = theme.generateCSSCustomProperties();
-    document.head.appendChild(style);
-
-    return () => {
-      // Cleanup on unmount
-      if (document.head.contains(style)) {
-        document.head.removeChild(style);
-      }
-    };
-  }, []);
-
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <CartProvider>
-          <Router>
-            <div className="App">
+    <AuthProvider>
+      <CartProvider>
+        <Router>
+          <div className="App">
+            <Header />
+            <main className="main-content">
               <Routes>
                 {/* Public Routes */}
-                <Route path="/" element={<PublicLayout />}>
-                  <Route index element={<Home />} />
-                  <Route path="marketplace" element={<Marketplace />} />
-                  <Route path="product/:id" element={<ProductDetail />} />
-                  <Route path="about" element={<About />} />
-                  <Route path="contact" element={<Contact />} />
-                </Route>
+                <Route path="/" element={<Home />} />
+                <Route path="/products" element={<Products />} />
+                <Route path="/products/:id" element={<ProductDetail />} />
+                <Route path="/categories" element={<Categories />} />
+                <Route path="/categories/:category" element={<Products />} />
+                <Route path="/bakery/:shopId" element={<ShopDetail />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/contact" element={<Contact />} />
 
-                {/* Auth Routes */}
-                <Route path="/auth/login" element={<Login />} />
-                <Route path="/auth/register" element={<Register />} />
-                <Route path="/auth/forgot-password" element={<ForgotPassword />} />
+                {/* Authentication Routes */}
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
 
-                {/* Buyer Routes */}
-                <Route path="/buyer" element={
-                  <ProtectedRoute>
-                    <RoleBasedRoute allowedRoles={['buyer', 'admin']}>
-                      <BuyerLayout />
-                    </RoleBasedRoute>
+                {/* Customer Protected Routes */}
+                <Route path="/customer" element={
+                  <ProtectedRoute userType="buyer">
+                    <BuyerDashboard />
                   </ProtectedRoute>
-                }>
-                  <Route index element={<BuyerDashboard />} />
-                  <Route path="dashboard" element={<BuyerDashboard />} />
-                  <Route path="orders" element={<OrderHistory />} />
-                  <Route path="wishlist" element={<Wishlist />} />
-                  <Route path="profile" element={<BuyerProfile />} />
-                  <Route path="checkout" element={<Checkout />} />
-                </Route>
-
-                {/* Seller Routes */}
-                <Route path="/seller" element={
-                  <ProtectedRoute>
-                    <RoleBasedRoute allowedRoles={['seller', 'admin']}>
-                      <SellerLayout />
-                    </RoleBasedRoute>
+                } />
+                <Route path="/customer/orders" element={
+                  <ProtectedRoute userType="buyer">
+                    <OrderHistory />
                   </ProtectedRoute>
-                }>
-                  <Route index element={<SellerDashboard />} />
-                  <Route path="dashboard" element={<SellerDashboard />} />
-                  <Route path="shop" element={<ShopManagement />} />
-                  <Route path="products" element={<ProductManagement />} />
-                  <Route path="inventory" element={<InventoryManagement />} />
-                  <Route path="orders" element={<OrderManagement />} />
-                  <Route path="analytics" element={<ShopAnalytics />} />
-                  <Route path="profile" element={<SellerProfile />} />
-                </Route>
+                } />
+                <Route path="/customer/favorites" element={
+                  <ProtectedRoute userType="buyer">
+                    <Wishlist />
+                  </ProtectedRoute>
+                } />
+                <Route path="/customer/profile" element={
+                  <ProtectedRoute userType="buyer">
+                    <Profile />
+                  </ProtectedRoute>
+                } />
+                <Route path="/checkout" element={
+                  <ProtectedRoute userType="buyer">
+                    <Checkout />
+                  </ProtectedRoute>
+                } />
 
-                {/* Cart - Available to authenticated users */}
-                <Route path="/cart" element={
-                  <ProtectedRoute>
-                    <Cart />
+                {/* Baker/Manager Protected Routes */}
+                <Route path="/baker" element={
+                  <ProtectedRoute userType="seller">
+                    <SellerDashboard />
+                  </ProtectedRoute>
+                } />
+                <Route path="/baker/products" element={
+                  <ProtectedRoute userType="seller">
+                    <SellerProducts />
+                  </ProtectedRoute>
+                } />
+                <Route path="/baker/orders" element={
+                  <ProtectedRoute userType="seller">
+                    <SellerOrders />
+                  </ProtectedRoute>
+                } />
+                <Route path="/baker/profile" element={
+                  <ProtectedRoute userType="seller">
+                    <SellerProfile />
+                  </ProtectedRoute>
+                } />
+                <Route path="/baker/bakery" element={
+                  <ProtectedRoute userType="seller">
+                    <SellerShop />
+                  </ProtectedRoute>
+                } />
+                <Route path="/baker/analytics" element={
+                  <ProtectedRoute userType="seller">
+                    <SellerAnalytics />
                   </ProtectedRoute>
                 } />
 
                 {/* 404 Page */}
-                <Route path="*" element={<NotFound />} />
+                <Route path="*" element={
+                  <div className="container text-center" style={{ padding: '4rem 0' }}>
+                    <h1>404 - Page Not Found</h1>
+                    <p>The page you are looking for does not exist.</p>
+                  </div>
+                } />
               </Routes>
-            </div>
-          </Router>
-        </CartProvider>
-      </AuthProvider>
-    </ThemeProvider>
+            </main>
+            <Footer />
+          </div>
+        </Router>
+      </CartProvider>
+    </AuthProvider>
   );
 }
 

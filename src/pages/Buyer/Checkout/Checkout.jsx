@@ -1,476 +1,572 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useCart } from '../../../contexts/CartContext.jsx';
-import { useAuth } from '../../../contexts/AuthContext.jsx';
+import { useAuth } from '../../../context/AuthContext';
+import { useCart } from '../../../context/CartContext';
 import {
   CreditCard,
-  MapPin,
   Truck,
-  Shield,
-  Plus,
-  Edit,
-  Check,
+  MapPin,
+  User,
+  Lock,
+  ShoppingBag,
   ArrowLeft,
-  Clock
+  CheckCircle
 } from 'lucide-react';
+import './Checkout.css';
 
 const Checkout = () => {
-  const navigate = useNavigate();
-  const { items, totalPrice, clearCart } = useCart();
   const { user } = useAuth();
+  const { items, getTotalPrice, clearCart } = useCart();
+  const navigate = useNavigate();
 
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(1); // 1: Shipping, 2: Payment, 3: Review, 4: Complete
   const [loading, setLoading] = useState(false);
-  const [addresses, setAddresses] = useState([]);
-  const [selectedAddress, setSelectedAddress] = useState(null);
-  const [paymentMethod, setPaymentMethod] = useState('card');
-  const [orderNotes, setOrderNotes] = useState('');
-  const [deliveryOption, setDeliveryOption] = useState('standard');
 
-  // Mock addresses - replace with API call
+  const [shippingData, setShippingData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    address: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    country: 'United States'
+  });
+
+  const [paymentData, setPaymentData] = useState({
+    cardNumber: '',
+    expiryDate: '',
+    cvv: '',
+    cardholderName: '',
+    billingAddress: {
+      sameAsShipping: true,
+      address: '',
+      city: '',
+      state: '',
+      zipCode: ''
+    }
+  });
+
+  const [shippingMethod, setShippingMethod] = useState('standard');
+  const [errors, setErrors] = useState({});
+
   useEffect(() => {
-    setAddresses([
-      {
-        id: 1,
-        type: 'home',
-        street: '123 Main Street, Apt 4B',
-        city: 'Dhaka',
-        state: 'Dhaka Division',
-        zipCode: '1208',
-        isDefault: true
-      },
-      {
-        id: 2,
-        type: 'work',
-        street: '456 Business Ave, Suite 200',
-        city: 'Dhaka',
-        state: 'Dhaka Division',
-        zipCode: '1215',
-        isDefault: false
+    // If cart is empty, redirect to products
+    if (items.length === 0) {
+      navigate('/products');
+    }
+
+    // Pre-fill with user data if available
+    if (user) {
+      setShippingData(prev => ({
+        ...prev,
+        firstName: user.name?.split(' ')[0] || '',
+        lastName: user.name?.split(' ')[1] || '',
+        email: user.email || ''
+      }));
+    }
+  }, [items, navigate, user]);
+
+  const shippingOptions = [
+    { id: 'standard', name: 'Standard Shipping', price: 5.99, days: '5-7 business days' },
+    { id: 'express', name: 'Express Shipping', price: 12.99, days: '2-3 business days' },
+    { id: 'overnight', name: 'Overnight Shipping', price: 24.99, days: '1 business day' }
+  ];
+
+  const handleInputChange = (section, field, value) => {
+    if (section === 'shipping') {
+      setShippingData(prev => ({ ...prev, [field]: value }));
+    } else if (section === 'payment') {
+      if (field.startsWith('billing.')) {
+        const billingField = field.split('.')[1];
+        setPaymentData(prev => ({
+          ...prev,
+          billingAddress: {
+            ...prev.billingAddress,
+            [billingField]: value
+          }
+        }));
+      } else {
+        setPaymentData(prev => ({ ...prev, [field]: value }));
       }
-    ]);
+    }
 
-    // Set default address
-    const defaultAddr = addresses.find(addr => addr.isDefault);
-    if (defaultAddr) setSelectedAddress(defaultAddr.id);
-  }, []);
+    // Clear errors
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }));
+    }
+  };
 
-  const deliveryOptions = [
-    { id: 'standard', label: 'Standard Delivery', time: '2-3 days', price: 2.99 },
-    { id: 'express', label: 'Express Delivery', time: 'Same day', price: 5.99 },
-    { id: 'pickup', label: 'Store Pickup', time: '2 hours', price: 0 }
-  ];
+  const validateShipping = () => {
+    const newErrors = {};
+    const required = ['firstName', 'lastName', 'email', 'phone', 'address', 'city', 'state', 'zipCode'];
 
-  const paymentMethods = [
-    { id: 'card', label: 'Credit/Debit Card', icon: CreditCard },
-    { id: 'mobile', label: 'Mobile Banking', icon: Shield },
-    { id: 'cod', label: 'Cash on Delivery', icon: Truck }
-  ];
+    required.forEach(field => {
+      if (!shippingData[field]?.trim()) {
+        newErrors[field] = `${field.charAt(0).toUpperCase() + field.slice(1)} is required`;
+      }
+    });
 
-  const calculateTotal = () => {
-    const selectedDelivery = deliveryOptions.find(opt => opt.id === deliveryOption);
-    const subtotal = totalPrice;
-    const deliveryFee = selectedDelivery?.price || 0;
-    const tax = subtotal * 0.08;
-    return {
-      subtotal,
-      deliveryFee,
-      tax,
-      total: subtotal + deliveryFee + tax
-    };
+    if (shippingData.email && !/\S+@\S+\.\S+/.test(shippingData.email)) {
+      newErrors.email = 'Email is invalid';
+    }
+
+    return newErrors;
+  };
+
+  const validatePayment = () => {
+    const newErrors = {};
+
+    if (!paymentData.cardNumber?.replace(/\s/g, '')) {
+      newErrors.cardNumber = 'Card number is required';
+    } else if (paymentData.cardNumber.replace(/\s/g, '').length < 16) {
+      newErrors.cardNumber = 'Card number must be 16 digits';
+    }
+
+    if (!paymentData.expiryDate) {
+      newErrors.expiryDate = 'Expiry date is required';
+    }
+
+    if (!paymentData.cvv) {
+      newErrors.cvv = 'CVV is required';
+    } else if (paymentData.cvv.length < 3) {
+      newErrors.cvv = 'CVV must be 3-4 digits';
+    }
+
+    if (!paymentData.cardholderName?.trim()) {
+      newErrors.cardholderName = 'Cardholder name is required';
+    }
+
+    return newErrors;
+  };
+
+  const handleNext = () => {
+    let formErrors = {};
+
+    if (step === 1) {
+      formErrors = validateShipping();
+    } else if (step === 2) {
+      formErrors = validatePayment();
+    }
+
+    if (Object.keys(formErrors).length > 0) {
+      setErrors(formErrors);
+      return;
+    }
+
+    setErrors({});
+    setStep(step + 1);
+  };
+
+  const handleBack = () => {
+    setStep(step - 1);
   };
 
   const handlePlaceOrder = async () => {
     setLoading(true);
 
-    // Simulate order placement
-    setTimeout(() => {
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 3000));
+
+      // Clear cart and go to success
       clearCart();
+      setStep(4);
+    } catch (error) {
+      setErrors({ order: 'Failed to place order. Please try again.' });
+    } finally {
       setLoading(false);
-      navigate('/buyer/orders', {
-        state: { message: 'Order placed successfully!' }
-      });
-    }, 2000);
+    }
   };
 
-  const totals = calculateTotal();
+  const formatCardNumber = (value) => {
+    const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+    const matches = v.match(/\d{4,16}/g);
+    const match = matches && matches[0] || '';
+    const parts = [];
+    for (let i = 0, len = match.length; i < len; i += 4) {
+      parts.push(match.substring(i, i + 4));
+    }
+    if (parts.length) {
+      return parts.join(' ');
+    } else {
+      return v;
+    }
+  };
 
-  if (items.length === 0) {
+  const selectedShipping = shippingOptions.find(option => option.id === shippingMethod);
+  const subtotal = getTotalPrice();
+  const tax = subtotal * 0.08; // 8% tax
+  const shipping = selectedShipping?.price || 0;
+  const total = subtotal + tax + shipping;
+
+  if (step === 4) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-md mx-auto text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Your cart is empty</h2>
-          <p className="text-gray-600 mb-8">Add some delicious items to proceed with checkout.</p>
-          <button
-            onClick={() => navigate('/marketplace')}
-            className="btn btn-primary"
-          >
-            Continue Shopping
-          </button>
+      <div className="checkout-page">
+        <div className="container">
+          <div className="order-success">
+            <div className="success-icon">
+              <CheckCircle size={64} />
+            </div>
+            <h1>Order Placed Successfully!</h1>
+            <p>Thank you for your purchase. You will receive an email confirmation shortly.</p>
+            <div className="order-summary">
+              <div className="order-number">Order #BMS{Date.now()}</div>
+              <div className="order-total">Total: ${total.toFixed(2)}</div>
+            </div>
+            <div className="success-actions">
+              <button
+                className="btn btn-primary"
+                onClick={() => navigate('/buyer/orders')}
+              >
+                View Orders
+              </button>
+              <button
+                className="btn btn-outline"
+                onClick={() => navigate('/products')}
+              >
+                Continue Shopping
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="flex items-center mb-8">
-        <button
-          onClick={() => navigate('/cart')}
-          className="mr-4 p-2 hover:bg-gray-100 rounded-lg transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <h1 className="text-2xl font-bold text-gray-900">Checkout</h1>
-      </div>
-
-      {/* Progress Steps */}
-      <div className="mb-8">
-        <div className="flex items-center">
-          {[1, 2, 3].map((stepNum) => (
-            <React.Fragment key={stepNum}>
-              <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
-                step >= stepNum ? 'bg-primary-color text-white' : 'bg-gray-200 text-gray-600'
-              }`}>
-                {step > stepNum ? <Check className="w-4 h-4" /> : stepNum}
-              </div>
-              {stepNum < 3 && (
-                <div className={`flex-1 h-1 mx-4 ${
-                  step > stepNum ? 'bg-primary-color' : 'bg-gray-200'
-                }`} />
-              )}
-            </React.Fragment>
-          ))}
+    <div className="checkout-page">
+      <div className="container">
+        {/* Header */}
+        <div className="checkout-header">
+          <button className="back-btn" onClick={() => navigate('/cart')}>
+            <ArrowLeft size={20} />
+            Back to Cart
+          </button>
+          <h1>Checkout</h1>
         </div>
-        <div className="flex justify-between mt-2 text-sm">
-          <span className={step >= 1 ? 'text-primary-color' : 'text-gray-500'}>
-            Delivery
-          </span>
-          <span className={step >= 2 ? 'text-primary-color' : 'text-gray-500'}>
-            Payment
-          </span>
-          <span className={step >= 3 ? 'text-primary-color' : 'text-gray-500'}>
-            Review
-          </span>
-        </div>
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Main Content */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Step 1: Delivery Information */}
-          {step === 1 && (
-            <div className="space-y-6">
-              {/* Delivery Address */}
-              <div className="card">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold text-gray-900">Delivery Address</h2>
-                  <button className="btn btn-secondary btn-sm">
-                    <Plus className="w-4 h-4" />
-                    Add New
-                  </button>
-                </div>
-
-                <div className="space-y-3">
-                  {addresses.map((address) => (
-                    <label
-                      key={address.id}
-                      className={`block p-4 border-2 rounded-lg cursor-pointer transition-colors ${
-                        selectedAddress === address.id
-                          ? 'border-primary-color bg-purple-50'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="address"
-                        value={address.id}
-                        checked={selectedAddress === address.id}
-                        onChange={() => setSelectedAddress(address.id)}
-                        className="sr-only"
-                      />
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-start space-x-3">
-                          <MapPin className="w-5 h-5 text-gray-400 mt-1" />
-                          <div>
-                            <div className="flex items-center space-x-2 mb-1">
-                              <span className="font-medium text-gray-900 capitalize">
-                                {address.type}
-                              </span>
-                              {address.isDefault && (
-                                <span className="px-2 py-1 bg-primary-color text-white text-xs rounded-full">
-                                  Default
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-gray-600">{address.street}</p>
-                            <p className="text-gray-600">
-                              {address.city}, {address.state} {address.zipCode}
-                            </p>
-                          </div>
-                        </div>
-                        <button className="text-gray-400 hover:text-gray-600">
-                          <Edit className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Delivery Options */}
-              <div className="card">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Delivery Options</h2>
-                <div className="space-y-3">
-                  {deliveryOptions.map((option) => (
-                    <label
-                      key={option.id}
-                      className={`block p-4 border-2 rounded-lg cursor-pointer transition-colors ${
-                        deliveryOption === option.id
-                          ? 'border-primary-color bg-purple-50'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="delivery"
-                        value={option.id}
-                        checked={deliveryOption === option.id}
-                        onChange={() => setDeliveryOption(option.id)}
-                        className="sr-only"
-                      />
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          <Truck className="w-5 h-5 text-gray-400" />
-                          <div>
-                            <p className="font-medium text-gray-900">{option.label}</p>
-                            <p className="text-sm text-gray-500">{option.time}</p>
-                          </div>
-                        </div>
-                        <span className="font-medium text-gray-900">
-                          {option.price === 0 ? 'Free' : `$${option.price}`}
-                        </span>
-                      </div>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Order Notes */}
-              <div className="card">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Order Notes (Optional)</h2>
-                <textarea
-                  value={orderNotes}
-                  onChange={(e) => setOrderNotes(e.target.value)}
-                  placeholder="Any special instructions for your order..."
-                  className="form-textarea"
-                  rows="3"
-                />
-              </div>
+        {/* Progress Steps */}
+        <div className="checkout-progress">
+          <div className={`step ${step >= 1 ? 'active' : ''} ${step > 1 ? 'completed' : ''}`}>
+            <div className="step-icon">
+              <Truck size={16} />
             </div>
-          )}
-
-          {/* Step 2: Payment Method */}
-          {step === 2 && (
-            <div className="card">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Payment Method</h2>
-              <div className="space-y-3">
-                {paymentMethods.map((method) => (
-                  <label
-                    key={method.id}
-                    className={`block p-4 border-2 rounded-lg cursor-pointer transition-colors ${
-                      paymentMethod === method.id
-                        ? 'border-primary-color bg-purple-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="payment"
-                      value={method.id}
-                      checked={paymentMethod === method.id}
-                      onChange={() => setPaymentMethod(method.id)}
-                      className="sr-only"
-                    />
-                    <div className="flex items-center space-x-3">
-                      <method.icon className="w-5 h-5 text-gray-400" />
-                      <span className="font-medium text-gray-900">{method.label}</span>
-                    </div>
-                  </label>
-                ))}
-              </div>
-
-              {paymentMethod === 'card' && (
-                <div className="mt-6 p-4 border border-gray-200 rounded-lg">
-                  <h3 className="font-medium text-gray-900 mb-4">Card Details</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="form-label">Card Number</label>
-                      <input type="text" placeholder="1234 5678 9012 3456" className="form-input" />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="form-label">Expiry Date</label>
-                        <input type="text" placeholder="MM/YY" className="form-input" />
-                      </div>
-                      <div>
-                        <label className="form-label">CVV</label>
-                        <input type="text" placeholder="123" className="form-input" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
+            <span>Shipping</span>
+          </div>
+          <div className={`step ${step >= 2 ? 'active' : ''} ${step > 2 ? 'completed' : ''}`}>
+            <div className="step-icon">
+              <CreditCard size={16} />
             </div>
-          )}
-
-          {/* Step 3: Order Review */}
-          {step === 3 && (
-            <div className="space-y-6">
-              {/* Order Items */}
-              <div className="card">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Order Items</h2>
-                <div className="space-y-4">
-                  {items.map((item) => (
-                    <div key={item.id} className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg">
-                      <img
-                        src={item.image || '/api/placeholder/80/80'}
-                        alt={item.name}
-                        className="w-16 h-16 rounded-lg object-cover"
-                      />
-                      <div className="flex-1">
-                        <h3 className="font-medium text-gray-900">{item.name}</h3>
-                        <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
-                      </div>
-                      <span className="font-medium text-gray-900">
-                        ${(item.price * item.quantity).toFixed(2)}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Order Summary */}
-              <div className="card">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Order Summary</h2>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span>Subtotal:</span>
-                    <span>${totals.subtotal.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Delivery:</span>
-                    <span>${totals.deliveryFee.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Tax:</span>
-                    <span>${totals.tax.toFixed(2)}</span>
-                  </div>
-                  <div className="border-t pt-2 flex justify-between font-bold text-lg">
-                    <span>Total:</span>
-                    <span>${totals.total.toFixed(2)}</span>
-                  </div>
-                </div>
-              </div>
+            <span>Payment</span>
+          </div>
+          <div className={`step ${step >= 3 ? 'active' : ''} ${step > 3 ? 'completed' : ''}`}>
+            <div className="step-icon">
+              <CheckCircle size={16} />
             </div>
-          )}
-
-          {/* Navigation Buttons */}
-          <div className="flex justify-between">
-            {step > 1 && (
-              <button
-                onClick={() => setStep(step - 1)}
-                className="btn btn-secondary"
-              >
-                Back
-              </button>
-            )}
-
-            {step < 3 ? (
-              <button
-                onClick={() => setStep(step + 1)}
-                className="btn btn-primary ml-auto"
-                disabled={step === 1 && !selectedAddress}
-              >
-                Continue
-              </button>
-            ) : (
-              <button
-                onClick={handlePlaceOrder}
-                disabled={loading}
-                className="btn btn-primary ml-auto"
-              >
-                {loading ? (
-                  <>
-                    <div className="spinner mr-2"></div>
-                    Placing Order...
-                  </>
-                ) : (
-                  'Place Order'
-                )}
-              </button>
-            )}
+            <span>Review</span>
           </div>
         </div>
 
-        {/* Order Summary Sidebar */}
-        <div className="lg:col-span-1">
-          <div className="card sticky top-4">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Order Summary</h2>
+        <div className="checkout-content">
+          {/* Main Content */}
+          <div className="checkout-main">
+            {/* Step 1: Shipping Information */}
+            {step === 1 && (
+              <div className="checkout-step">
+                <h2>Shipping Information</h2>
 
-            <div className="space-y-3 mb-6">
-              {items.slice(0, 3).map((item) => (
-                <div key={item.id} className="flex items-center space-x-3">
-                  <img
-                    src={item.image || '/api/placeholder/50/50'}
-                    alt={item.name}
-                    className="w-12 h-12 rounded object-cover"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">
-                      {item.name}
-                    </p>
-                    <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
+                <div className="form-grid">
+                  <div className="form-group">
+                    <label className="form-label">First Name</label>
+                    <input
+                      type="text"
+                      value={shippingData.firstName}
+                      onChange={(e) => handleInputChange('shipping', 'firstName', e.target.value)}
+                      className={`form-input ${errors.firstName ? 'error' : ''}`}
+                    />
+                    {errors.firstName && <div className="error-message">{errors.firstName}</div>}
                   </div>
-                  <span className="text-sm font-medium">
-                    ${(item.price * item.quantity).toFixed(2)}
-                  </span>
+
+                  <div className="form-group">
+                    <label className="form-label">Last Name</label>
+                    <input
+                      type="text"
+                      value={shippingData.lastName}
+                      onChange={(e) => handleInputChange('shipping', 'lastName', e.target.value)}
+                      className={`form-input ${errors.lastName ? 'error' : ''}`}
+                    />
+                    {errors.lastName && <div className="error-message">{errors.lastName}</div>}
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Email</label>
+                    <input
+                      type="email"
+                      value={shippingData.email}
+                      onChange={(e) => handleInputChange('shipping', 'email', e.target.value)}
+                      className={`form-input ${errors.email ? 'error' : ''}`}
+                    />
+                    {errors.email && <div className="error-message">{errors.email}</div>}
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Phone</label>
+                    <input
+                      type="tel"
+                      value={shippingData.phone}
+                      onChange={(e) => handleInputChange('shipping', 'phone', e.target.value)}
+                      className={`form-input ${errors.phone ? 'error' : ''}`}
+                    />
+                    {errors.phone && <div className="error-message">{errors.phone}</div>}
+                  </div>
                 </div>
-              ))}
-              {items.length > 3 && (
-                <p className="text-sm text-gray-500 text-center">
-                  +{items.length - 3} more items
-                </p>
+
+                <div className="form-group">
+                  <label className="form-label">Address</label>
+                  <input
+                    type="text"
+                    value={shippingData.address}
+                    onChange={(e) => handleInputChange('shipping', 'address', e.target.value)}
+                    className={`form-input ${errors.address ? 'error' : ''}`}
+                  />
+                  {errors.address && <div className="error-message">{errors.address}</div>}
+                </div>
+
+                <div className="form-grid">
+                  <div className="form-group">
+                    <label className="form-label">City</label>
+                    <input
+                      type="text"
+                      value={shippingData.city}
+                      onChange={(e) => handleInputChange('shipping', 'city', e.target.value)}
+                      className={`form-input ${errors.city ? 'error' : ''}`}
+                    />
+                    {errors.city && <div className="error-message">{errors.city}</div>}
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">State</label>
+                    <input
+                      type="text"
+                      value={shippingData.state}
+                      onChange={(e) => handleInputChange('shipping', 'state', e.target.value)}
+                      className={`form-input ${errors.state ? 'error' : ''}`}
+                    />
+                    {errors.state && <div className="error-message">{errors.state}</div>}
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">ZIP Code</label>
+                    <input
+                      type="text"
+                      value={shippingData.zipCode}
+                      onChange={(e) => handleInputChange('shipping', 'zipCode', e.target.value)}
+                      className={`form-input ${errors.zipCode ? 'error' : ''}`}
+                    />
+                    {errors.zipCode && <div className="error-message">{errors.zipCode}</div>}
+                  </div>
+                </div>
+
+                <div className="shipping-methods">
+                  <h3>Shipping Method</h3>
+                  {shippingOptions.map(option => (
+                    <label key={option.id} className="shipping-option">
+                      <input
+                        type="radio"
+                        name="shipping"
+                        value={option.id}
+                        checked={shippingMethod === option.id}
+                        onChange={(e) => setShippingMethod(e.target.value)}
+                      />
+                      <div className="option-content">
+                        <div className="option-name">{option.name}</div>
+                        <div className="option-details">{option.days}</div>
+                      </div>
+                      <div className="option-price">${option.price}</div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Step 2: Payment Information */}
+            {step === 2 && (
+              <div className="checkout-step">
+                <h2>Payment Information</h2>
+
+                <div className="payment-form">
+                  <div className="form-group">
+                    <label className="form-label">Card Number</label>
+                    <input
+                      type="text"
+                      value={paymentData.cardNumber}
+                      onChange={(e) => handleInputChange('payment', 'cardNumber', formatCardNumber(e.target.value))}
+                      className={`form-input ${errors.cardNumber ? 'error' : ''}`}
+                      placeholder="1234 5678 9012 3456"
+                      maxLength="19"
+                    />
+                    {errors.cardNumber && <div className="error-message">{errors.cardNumber}</div>}
+                  </div>
+
+                  <div className="form-grid">
+                    <div className="form-group">
+                      <label className="form-label">Expiry Date</label>
+                      <input
+                        type="text"
+                        value={paymentData.expiryDate}
+                        onChange={(e) => handleInputChange('payment', 'expiryDate', e.target.value)}
+                        className={`form-input ${errors.expiryDate ? 'error' : ''}`}
+                        placeholder="MM/YY"
+                        maxLength="5"
+                      />
+                      {errors.expiryDate && <div className="error-message">{errors.expiryDate}</div>}
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">CVV</label>
+                      <input
+                        type="text"
+                        value={paymentData.cvv}
+                        onChange={(e) => handleInputChange('payment', 'cvv', e.target.value.replace(/\D/g, ''))}
+                        className={`form-input ${errors.cvv ? 'error' : ''}`}
+                        placeholder="123"
+                        maxLength="4"
+                      />
+                      {errors.cvv && <div className="error-message">{errors.cvv}</div>}
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Cardholder Name</label>
+                    <input
+                      type="text"
+                      value={paymentData.cardholderName}
+                      onChange={(e) => handleInputChange('payment', 'cardholderName', e.target.value)}
+                      className={`form-input ${errors.cardholderName ? 'error' : ''}`}
+                    />
+                    {errors.cardholderName && <div className="error-message">{errors.cardholderName}</div>}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Step 3: Order Review */}
+            {step === 3 && (
+              <div className="checkout-step">
+                <h2>Review Your Order</h2>
+
+                <div className="order-review">
+                  <div className="review-section">
+                    <h3>Shipping Address</h3>
+                    <div className="review-content">
+                      <p>{shippingData.firstName} {shippingData.lastName}</p>
+                      <p>{shippingData.address}</p>
+                      <p>{shippingData.city}, {shippingData.state} {shippingData.zipCode}</p>
+                      <p>{shippingData.email} • {shippingData.phone}</p>
+                    </div>
+                    <button className="edit-btn" onClick={() => setStep(1)}>Edit</button>
+                  </div>
+
+                  <div className="review-section">
+                    <h3>Payment Method</h3>
+                    <div className="review-content">
+                      <p>**** **** **** {paymentData.cardNumber.slice(-4)}</p>
+                      <p>{paymentData.cardholderName}</p>
+                    </div>
+                    <button className="edit-btn" onClick={() => setStep(2)}>Edit</button>
+                  </div>
+
+                  <div className="review-section">
+                    <h3>Shipping Method</h3>
+                    <div className="review-content">
+                      <p>{selectedShipping?.name}</p>
+                      <p>{selectedShipping?.days}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {errors.order && (
+                  <div className="alert alert-error">
+                    {errors.order}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Navigation Buttons */}
+            <div className="checkout-actions">
+              {step > 1 && step < 4 && (
+                <button className="btn btn-secondary" onClick={handleBack}>
+                  Back
+                </button>
+              )}
+
+              {step < 3 && (
+                <button className="btn btn-primary" onClick={handleNext}>
+                  Continue
+                </button>
+              )}
+
+              {step === 3 && (
+                <button
+                  className="btn btn-primary"
+                  onClick={handlePlaceOrder}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <>
+                      <div className="loading"></div>
+                      Processing...
+                    </>
+                  ) : (
+                    'Place Order'
+                  )}
+                </button>
               )}
             </div>
+          </div>
 
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
+          {/* Order Summary Sidebar */}
+          <div className="order-summary">
+            <h3>Order Summary</h3>
+
+            <div className="cart-items">
+              {items.map(item => (
+                <div key={item.id} className="cart-item">
+                  <img src={item.image} alt={item.name} className="item-image" />
+                  <div className="item-details">
+                    <div className="item-name">{item.name}</div>
+                    <div className="item-quantity">Qty: {item.quantity}</div>
+                  </div>
+                  <div className="item-price">${(item.price * item.quantity).toFixed(2)}</div>
+                </div>
+              ))}
+            </div>
+
+            <div className="summary-breakdown">
+              <div className="summary-line">
                 <span>Subtotal:</span>
-                <span>${totals.subtotal.toFixed(2)}</span>
+                <span>${subtotal.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between">
-                <span>Delivery:</span>
-                <span>${totals.deliveryFee.toFixed(2)}</span>
+              <div className="summary-line">
+                <span>Shipping:</span>
+                <span>${shipping.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between">
+              <div className="summary-line">
                 <span>Tax:</span>
-                <span>${totals.tax.toFixed(2)}</span>
+                <span>${tax.toFixed(2)}</span>
               </div>
-              <div className="border-t pt-2 flex justify-between font-bold">
+              <div className="summary-line total">
                 <span>Total:</span>
-                <span>${totals.total.toFixed(2)}</span>
+                <span>${total.toFixed(2)}</span>
               </div>
             </div>
 
-            <div className="mt-6 p-3 bg-green-50 rounded-lg">
-              <div className="flex items-center space-x-2 text-green-800">
-                <Clock className="w-4 h-4" />
-                <span className="text-sm font-medium">
-                  Estimated delivery: 2-3 days
-                </span>
-              </div>
+            <div className="security-notice">
+              <Lock size={16} />
+              <span>Your payment information is secure and encrypted</span>
             </div>
           </div>
         </div>
