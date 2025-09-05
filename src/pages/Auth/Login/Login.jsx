@@ -151,12 +151,12 @@ const Login = () => {
 
             <div className="social-auth">
               <button className="social-btn google-btn">
-                <img src="/google-icon.svg" alt="Google" />
-                Google
+                <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google" />
+                Continue with Google
               </button>
-              <button className="social-btn facebook-btn">
-                <img src="/facebook-icon.svg" alt="Facebook" />
-                Facebook
+              <button type="button" className="social-btn facebook-btn">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_%282019%29.svg" alt="Facebook" />
+                Continue with Facebook
               </button>
             </div>
           </div>

@@ -193,53 +193,58 @@ const ShopDetail = () => {
     <div className="shop-detail">
       {/* Shop Banner */}
       <div className="shop-banner">
-        <img src={shopData.banner} alt={shopData.name} className="banner-image" />
+        <img src={shopData.banner || 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1200&h=400&fit=crop&crop=center'} alt={shopData.name} className="banner-image" />
         <div className="banner-overlay">
           <div className="container">
             <div className="shop-header">
               <div className="shop-info">
-                <div className="shop-logo">
-                  <img src={shopData.logo} alt={shopData.name} />
-                  {shopData.verified && (
-                    <div className="verified-badge" title="Verified Seller">
-                      ✓
-                    </div>
-                  )}
-                </div>
-                <div className="shop-details">
-                  <h1>{shopData.name}</h1>
-                  <div className="shop-meta">
-                    <div className="shop-rating">
-                      <div className="stars">
-                        {renderStars(shopData.rating)}
-                      </div>
-                      <span>{shopData.rating} ({shopData.reviewCount} reviews)</span>
-                    </div>
-                    <div className="shop-location">
-                      <MapPin size={14} />
-                      {shopData.location}
+                <div className="shop-main-info">
+                  <div className="shop-avatar">
+                    <div className="shop-logo">
+                      <img src={shopData.logo || 'https://images.unsplash.com/photo-1555507036-ab794f4eed25?w=120&h=120&fit=crop&crop=center'} alt={shopData.name} />
+                      {shopData.verified && (
+                        <div className="verified-badge" title="Verified Seller">
+                          ✓
+                        </div>
+                      )}
                     </div>
                   </div>
-                  <p className="shop-description">{shopData.description}</p>
-                </div>
-              </div>
 
-              <div className="shop-actions">
-                <button
-                  className={`btn ${isFollowing ? 'btn-secondary' : 'btn-primary'}`}
-                  onClick={handleFollow}
-                >
-                  <Heart size={16} fill={isFollowing ? 'currentColor' : 'none'} />
-                  {isFollowing ? 'Following' : 'Follow'}
-                </button>
-                <button className="btn btn-outline">
-                  <MessageCircle size={16} />
-                  Contact
-                </button>
-                <button className="btn btn-outline">
-                  <Share size={16} />
-                  Share
-                </button>
+                  <div className="shop-details">
+                    <h1>{shopData.name}</h1>
+                    <div className="shop-meta">
+                      <div className="shop-rating">
+                        <div className="stars">
+                          {renderStars(shopData.rating)}
+                        </div>
+                        <span>{shopData.rating} ({shopData.reviewCount} reviews)</span>
+                      </div>
+                      <div className="shop-location">
+                        <MapPin size={14} />
+                        {shopData.location}
+                      </div>
+                    </div>
+                    <p className="shop-description">{shopData.description}</p>
+                  </div>
+                </div>
+
+                <div className="shop-actions">
+                  <button
+                    className={`btn ${isFollowing ? 'btn-secondary' : 'btn-primary'}`}
+                    onClick={handleFollow}
+                  >
+                    <Heart size={16} fill={isFollowing ? 'currentColor' : 'none'} />
+                    {isFollowing ? 'Following' : 'Follow'}
+                  </button>
+                  <button className="btn btn-outline">
+                    <MessageCircle size={16} />
+                    Contact
+                  </button>
+                  <button className="btn btn-outline">
+                    <Share size={16} />
+                    Share
+                  </button>
+                </div>
               </div>
             </div>
           </div>

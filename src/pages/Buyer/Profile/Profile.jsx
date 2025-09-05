@@ -249,7 +249,7 @@ const Profile = () => {
           <div className="avatar-section">
             <div className="avatar-container">
               <img
-                src={profileData.avatar || '/placeholder-avatar.jpg'}
+                src={profileData.avatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face'}
                 alt="Profile Avatar"
                 className="avatar-image"
               />

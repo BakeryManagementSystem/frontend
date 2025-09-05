@@ -339,7 +339,7 @@ const SellerProfile = () => {
               <div className="avatar-section">
                 <div className="avatar-container">
                   <img
-                    src={profileData.personal.avatar || '/placeholder-avatar.jpg'}
+                    src={profileData.personal.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'}
                     alt="Profile Avatar"
                     className="avatar-image"
                   />

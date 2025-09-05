@@ -389,7 +389,7 @@ const SellerShop = () => {
                   <div className="upload-group">
                     <h3>Shop Logo</h3>
                     <div className="image-upload">
-                      <img src={shopData.logo} alt="Shop Logo" className="upload-preview logo" />
+                      <img src={shopData.logo || 'https://images.unsplash.com/photo-1555507036-ab794f4eed25?w=120&h=120&fit=crop&crop=center'} alt="Shop Logo" className="upload-preview logo" />
                       {isEditing && (
                         <button className="upload-btn">
                           <Camera size={16} />
@@ -403,7 +403,7 @@ const SellerShop = () => {
                   <div className="upload-group">
                     <h3>Shop Banner</h3>
                     <div className="image-upload">
-                      <img src={shopData.banner} alt="Shop Banner" className="upload-preview banner" />
+                      <img src={shopData.banner || 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1200&h=400&fit=crop&crop=center'} alt="Shop Banner" className="upload-preview banner" />
                       {isEditing && (
                         <button className="upload-btn">
                           <Image size={16} />

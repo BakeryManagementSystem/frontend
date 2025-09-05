@@ -35,7 +35,7 @@ const Home = () => {
           name: "Artisan Chocolate Croissants",
           price: 4.99,
           originalPrice: 6.99,
-          image: "/placeholder-product.jpg",
+          image: "https://images.unsplash.com/photo-1555507036-ab794f4eed25?w=400&h=300&fit=crop&crop=center",
           category: "Pastries",
           rating: 4.8,
           reviewCount: 128,
@@ -46,7 +46,7 @@ const Home = () => {
           id: 2,
           name: "Fresh Sourdough Bread",
           price: 5.99,
-          image: "/placeholder-product.jpg",
+          image: "https://images.unsplash.com/photo-1549931319-a545dcf3bc73?w=400&h=300&fit=crop&crop=center",
           category: "Breads",
           rating: 4.9,
           reviewCount: 89,
@@ -57,7 +57,7 @@ const Home = () => {
           name: "Classic Vanilla Cupcakes (6-pack)",
           price: 12.99,
           originalPrice: 15.99,
-          image: "/placeholder-product.jpg",
+          image: "https://images.unsplash.com/photo-1587668178277-295251f900ce?w=400&h=300&fit=crop&crop=center",
           category: "Cupcakes",
           rating: 4.7,
           reviewCount: 203,
@@ -68,7 +68,7 @@ const Home = () => {
           id: 4,
           name: "Seasonal Fruit Tart",
           price: 18.99,
-          image: "/placeholder-product.jpg",
+          image: "https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=400&h=300&fit=crop&crop=center",
           category: "Cakes",
           rating: 4.6,
           reviewCount: 156,
@@ -81,7 +81,7 @@ const Home = () => {
           id: 5,
           name: "Cinnamon Rolls (4-pack)",
           price: 8.99,
-          image: "/placeholder-product.jpg",
+          image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=300&fit=crop&crop=center",
           category: "Pastries",
           rating: 4.8,
           reviewCount: 67,
@@ -91,7 +91,7 @@ const Home = () => {
           id: 6,
           name: "Gluten-Free Brownies",
           price: 9.99,
-          image: "/placeholder-product.jpg",
+          image: "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=400&h=300&fit=crop&crop=center",
           category: "Specialty",
           rating: 4.5,
           reviewCount: 142,
@@ -145,7 +145,7 @@ const Home = () => {
               </div>
             </div>
             <div className="hero-image">
-              <img src="/placeholder-hero.jpg" alt="Fresh Bakery Items" />
+              <img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?w=800&h=600&fit=crop&crop=center" alt="Fresh Bakery Items" />
             </div>
           </div>
         </div>
