@@ -1,9 +1,10 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "./context/AuthContext";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 import MainLayout from "./components/layouts/MainLayout.jsx";
 
 // Auth
-import LoginSignupPage from "./pages/Auth/LoginSignupPage.jsx";
+import LoginPage from "./pages/Auth/Login.jsx";
+import SignupPage from "./pages/Auth/SignIn.jsx";
 
 // Buyer Section pages
 import Homepage from "./pages/BuyerSection/Homepage.jsx";
@@ -18,17 +19,23 @@ import ReviewsPage from "./pages/BuyerSection/ReviewsPage.jsx";
 import HelpPage from "./pages/BuyerSection/HelpPage.jsx";
 import ProfilePage from "./pages/BuyerSection/ProfilePage.jsx";
 
-// ⬇️ NEW: import your Owner page component (create it if not present)
+// Owner Section
 import OwnerPage from "./pages/OwnerSection/OwnerPge.jsx";
 
 import "./App.css";
+
+// Protected Route Component
+const ProtectedRoute = ({ children }) => {
+    const { isAuthenticated } = useAuth();
+    return isAuthenticated ? children : <Navigate to="/auth" replace />;
+};
 
 function App() {
     return (
         <AuthProvider>
             <BrowserRouter>
                 <Routes>
-                    {/* Protected routes inside MainLayout */}
+                    {/* Public routes */}
                     <Route path="/" element={<MainLayout />}>
                         <Route index element={<Homepage />} />
                         <Route path="/shop" element={<BuyerPage />} />
@@ -36,21 +43,16 @@ function App() {
                         <Route path="/messages" element={<MessagesPage />} />
                         <Route path="/notifications" element={<NotificationsPage />} />
                         <Route path="/status" element={<StatusPage />} />
-                        <Route path="/BuyerPage" element={<BuyerPage />} />
+                        <Route path="/buyer" element={<BuyerPage />} />
                         <Route path="/orders" element={<OrdersPage />} />
                         <Route path="/settings" element={<SettingsPage />} />
                         <Route path="/reviews" element={<ReviewsPage />} />
                         <Route path="/help" element={<HelpPage />} />
-                        <Route path="/profile" element={<ProfilePage />} />
-
-                        {/* ⬇️ NEW: owner landing */}
-                        <Route path="/OwnerPage" element={<OwnerPage />} />
+                        <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+                        <Route path="/owner" element={<ProtectedRoute><OwnerPage /></ProtectedRoute>} />
                     </Route>
-
-                    {/* Auth outside the layout */}
-                    <Route path="/auth" element={<LoginSignupPage />} />
-
-                    {/* Fallback */}
+                    <Route path="/auth" element={<LoginPage />} />
+                    <Route path="/signin" element={<SignupPage />} />
                     <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
             </BrowserRouter>
