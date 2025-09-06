@@ -2,16 +2,30 @@ import "./BuyerPage.css";
 import { useState } from "react";
 import { useLocation } from "react-router-dom";
 
-export default function BuyerPage() {
+export default async function BuyerPage() {
     const [cartCount, setCartCount] = useState(3);
-    const [toast, setToast] = useState({ show: false, text: "" });
+    const [toast, setToast] = useState({show: false, text: ""});
     const location = useLocation();
 
     const showToast = (text) => {
-        setToast({ show: true, text });
+        setToast({show: true, text});
         clearTimeout(showToast._t);
-        showToast._t = setTimeout(() => setToast({ show: false, text: "" }), 3000);
+        showToast._t = setTimeout(() => setToast({show: false, text: ""}), 3000);
     };
+
+
+    const token = localStorage.getItem("token");
+
+    await fetch(`${API_BASE}/api/cart`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`, // 🔑
+        },
+        body: JSON.stringify({product_id: product.id, quantity: 1}),
+    });
+
 
     const addToCart = (item) => {
         setCartCount((c) => c + 1);
@@ -34,19 +48,20 @@ export default function BuyerPage() {
 
             <section className="grid">
                 {[
-                    { name: "Fresh Croissant", price: "$3.50", emoji: "✔️", icon: true },
-                    { name: "Chocolate Cake", price: "$25.99", emoji: "🎂" },
-                    { name: "Artisan Bread", price: "$4.75", emoji: "🍞" },
-                    { name: "Blueberry Muffin", price: "$2.25", emoji: "🧁" },
-                    { name: "Danish Pastry", price: "$3.99", emoji: "🥐" },
-                    { name: "Sourdough Loaf", price: "$6.50", emoji: "🍞" },
+                    {name: "Fresh Croissant", price: "$3.50", emoji: "✔️", icon: true},
+                    {name: "Chocolate Cake", price: "$25.99", emoji: "🎂"},
+                    {name: "Artisan Bread", price: "$4.75", emoji: "🍞"},
+                    {name: "Blueberry Muffin", price: "$2.25", emoji: "🧁"},
+                    {name: "Danish Pastry", price: "$3.99", emoji: "🥐"},
+                    {name: "Sourdough Loaf", price: "$6.50", emoji: "🍞"},
                 ].map((it) => (
                     <article key={it.name} className="item-card">
                         <div className="item-top">
                             <div className="item-circle">
                                 {it.icon ? (
                                     <svg className="item-circle-icon" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                        <path
+                                            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                                     </svg>
                                 ) : (
                                     <span className="item-emoji">{it.emoji}</span>
