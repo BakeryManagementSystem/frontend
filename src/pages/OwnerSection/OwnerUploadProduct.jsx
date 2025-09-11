@@ -1,21 +1,22 @@
-import React from "react";
+import React, { useState } from "react";
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
 export default function OwnerUploadProduct() {
-    const [name, setName] = React.useState("");
-    const [description, setDescription] = React.useState("");
-    const [price, setPrice] = React.useState("");
-    const [category, setCategory] = React.useState("");
-    const [image, setImage] = React.useState(null);
-    const [ownerId, setOwnerId] = React.useState(""); // optional: set after login
-    const [msg, setMsg] = React.useState("");
-    const [loading, setLoading] = React.useState(false);
+    const [name, setName] = useState("");
+    const [description, setDescription] = useState("");
+    const [price, setPrice] = useState("");
+    const [category, setCategory] = useState("");
+    const [image, setImage] = useState(null);
+    const [msg, setMsg] = useState("");
+    const [loading, setLoading] = useState(false);
 
     async function onSubmit(e) {
         e.preventDefault();
         setMsg("");
         setLoading(true);
+
+        const token = localStorage.getItem("token"); // token from login
 
         const formData = new FormData();
         formData.append("name", name);
@@ -23,31 +24,33 @@ export default function OwnerUploadProduct() {
         if (description) formData.append("description", description);
         if (category) formData.append("category", category);
         if (image) formData.append("image", image);
-        if (ownerId) formData.append("owner_id", ownerId);
 
         try {
             const res = await fetch(`${API_BASE}/api/products`, {
                 method: "POST",
-                body: formData, // multipart/form-data
+                headers: {
+                    Authorization: `Bearer ${token}`, // ✅ send token
+                    Accept: "application/json",
+                },
+                body: formData, // DO NOT set Content-Type manually
             });
 
             const data = await res.json().catch(() => ({}));
 
             if (!res.ok) {
-                const firstError =
-                    data?.errors && Object.values(data.errors)?.[0]?.[0];
+                const firstError = data?.errors && Object.values(data.errors)?.[0]?.[0];
                 setMsg(firstError || data.message || "Upload failed");
                 return;
             }
 
-            setMsg("Product uploaded successfully!");
+            setMsg("✅ Product uploaded successfully!");
             setName("");
             setDescription("");
             setPrice("");
             setCategory("");
             setImage(null);
         } catch (err) {
-            setMsg("Network error. Is the Laravel server running?");
+            setMsg("⚠️ Network error. Is the Laravel server running?");
         } finally {
             setLoading(false);
         }
@@ -92,14 +95,6 @@ export default function OwnerUploadProduct() {
                     accept="image/*"
                     onChange={(e) => setImage(e.target.files?.[0] || null)}
                 />
-
-                {/* If you keep owner_id on client side after login */}
-                {/* <input
-          type="number"
-          placeholder="Owner ID"
-          value={ownerId}
-          onChange={(e) => setOwnerId(e.target.value)}
-        /> */}
 
                 <button type="submit" disabled={loading}>
                     {loading ? "Uploading..." : "Upload"}

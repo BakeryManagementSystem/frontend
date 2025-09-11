@@ -1,18 +1,21 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext.jsx";
+
 import "./Login.css";
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-const Login = () => {
+export default function Login() {
     const navigate = useNavigate();
+    const { login: setAuthSession } = useAuth(); // <-- call this on success
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [msg, setMsg] = useState(""); // success/error message
+    const [msg, setMsg] = useState("");
     const [loading, setLoading] = useState(false);
 
-    const onSubmit = async (e) => {
+    async function onSubmit(e) {
         e.preventDefault();
         setMsg("");
         setLoading(true);
@@ -27,39 +30,59 @@ const Login = () => {
                 body: JSON.stringify({ email, password }),
             });
 
+            // Try to parse JSON either way
             const data = await res.json().catch(() => ({}));
 
             if (!res.ok) {
                 setMsg(data.message || "Invalid credentials");
-                setLoading(false);
                 return;
             }
 
-            // Expecting: { message: "...", user: { id, name, email, user_type, ... } }
-            const userType = data?.user?.user_type?.toLowerCase();
+            // Defensive checks
+            const token = data?.token;
+            const user = data?.user || {};
+            const role = String(user.user_type || "").trim().toLowerCase();
+
+            if (!token) {
+                setMsg("Login succeeded but token is missing from server response.");
+                return;
+            }
+
+            // 1) Save to AuthContext (so ProtectedRoute & Navbar know you're logged in)
+            setAuthSession({
+                token,
+                user: {
+                    name: user.name,
+                    email: user.email,
+                    user_type: user.user_type,
+                },
+            });
+
+            // 2) Also keep old localStorage keys for other parts of your app that read them
+            localStorage.setItem("token", token);
+            localStorage.setItem("access_token", token);
+            localStorage.setItem("user", JSON.stringify(user));
+            localStorage.setItem("user_type", user.user_type || "buyer");
+            localStorage.setItem("name", user.name || "");
+            localStorage.setItem("email", user.email || "");
 
             setMsg("User login successfully");
 
-            // after successful login
-            localStorage.setItem("token", data.token);   // <— save token
-            localStorage.setItem("user", JSON.stringify(data.user));
-
-
-            // Route based on user_type
-            if (userType === "buyer") {
-                navigate("/buyer");
-            } else if (userType === "owner") {
-                navigate("/owner");
+            // Normalize role: treat "owner" or "seller" as owner area
+            if (role === "owner" || role === "seller") {
+                navigate("/owner", { replace: true });
+            } else if (role === "buyer") {
+                navigate("/buyer", { replace: true }); // or /shop if you prefer
             } else {
-                // Fallback if user_type is missing or unexpected
-                setMsg("Logged in, but user type is not recognized.");
+                // Unknown role → send to home (or buyer)
+                navigate("/", { replace: true });
             }
         } catch (err) {
             setMsg("Network error. Is the API running?");
         } finally {
             setLoading(false);
         }
-    };
+    }
 
     return (
         <div className="login-container">
@@ -98,6 +121,4 @@ const Login = () => {
             </div>
         </div>
     );
-};
-
-export default Login;
+}

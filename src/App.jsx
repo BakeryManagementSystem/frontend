@@ -18,11 +18,18 @@ import SettingsPage from "./pages/BuyerSection/SettingsPage.jsx";
 import ReviewsPage from "./pages/BuyerSection/ReviewsPage.jsx";
 import HelpPage from "./pages/BuyerSection/HelpPage.jsx";
 import ProfilePage from "./pages/BuyerSection/ProfilePage.jsx";
+import BuyerProfileView from "./pages/BuyerSection/BuyerProfileView.jsx";
+import BuyerProfileEdit from "./pages/BuyerSection/BuyerProfileEdit.jsx";
+import OwnerDashboard from "./pages/OwnerSection/OwnerDashboard.jsx";
+import IngredientUploadPage from "./pages/OwnerSection/IngredientUploadPage.jsx";
 
 // Owner Section
-import OwnerPage from "./pages/OwnerSection/OwnerPge.jsx";
+import OwnerPage from "./pages/OwnerSection/OwnerPage.jsx";
+import ShopProfilePage from "./pages/OwnerSection/ShopProfilePage.jsx";
+import OwnerShopProfileEdit from "./pages/OwnerSection/OwnerShopProfileEdit.jsx";
 
 import "./App.css";
+
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -48,9 +55,35 @@ function App() {
                         <Route path="/settings" element={<SettingsPage />} />
                         <Route path="/reviews" element={<ReviewsPage />} />
                         <Route path="/help" element={<HelpPage />} />
-                        <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+                        <Route
+                            path="/profile"
+                            element={<ProtectedRoute><ProfilePage /></ProtectedRoute>}
+                        />
+                        <Route
+                            path="/profile/edit"
+                            element={<ProtectedRoute><BuyerProfileEdit /></ProtectedRoute>}
+                        />
+
+                        /* Owner shop profile */
+                        <Route
+                            path="/owner/shop"
+                            element={<ProtectedRoute><ShopProfilePage /></ProtectedRoute>}
+                        />
+                        <Route
+                            path="/owner/shop/edit"
+                            element={<ProtectedRoute><OwnerShopProfileEdit /></ProtectedRoute>}
+                        />
+
                         <Route path="/owner" element={<ProtectedRoute><OwnerPage /></ProtectedRoute>} />
                     </Route>
+                    <Route
+                        path="/owner/dashboard"
+                        element={<ProtectedRoute><OwnerDashboard /></ProtectedRoute>}
+                    />
+                    <Route
+                        path="/owner/ingredients/upload"
+                        element={<ProtectedRoute><IngredientUploadPage /></ProtectedRoute>}
+                    />
                     <Route path="/auth" element={<LoginPage />} />
                     <Route path="/signin" element={<SignupPage />} />
                     <Route path="*" element={<Navigate to="/" replace />} />
