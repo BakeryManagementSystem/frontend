@@ -1,0 +1,17 @@
+.ib-wrap { padding:24px; }
+.ib-head { margin-bottom:12px; }
+.ib-form { background:#fff; border:1px solid #eee; border-radius:14px; padding:16px; }
+.ib-grid { display:grid; gap:12px; grid-template-columns: 1fr 1fr; }
+.ib-field { display:grid; gap:6px; }
+.ib-field--full { grid-column: 1 / -1; }
+.ib-table { margin-top:12px; border:1px solid #eee; border-radius:12px; overflow:hidden; }
+.ib-row { display:grid; grid-template-columns: 2fr 1fr 1fr 48px; gap:8px; padding:10px; border-top:1px solid #f1f1f1; align-items:center; }
+.ib-row--head { background:#fafafa; font-weight:700; border-top:0; }
+.ib-row select, .ib-row input, .ib-field input, .ib-field select { padding:10px; border:1px solid #ddd; border-radius:10px; }
+.ib-del { border:0; background:#ffe8e8; color:#c02626; padding:8px 10px; border-radius:8px; cursor:pointer; }
+.ib-actions { display:flex; gap:10px; margin-top:12px; }
+.ib-btn { border:1px solid #6639a6; color:#6639a6; padding:10px 14px; border-radius:10px; background:#fff; cursor:pointer; }
+.ib-btn--primary { background:#6639a6; color:#fff; }
+.ib-msg { margin-top:10px; padding:10px; border-radius:10px; }
+.ib-msg.ok { background:#ecfeff; color:#155e75; border:1px solid #a5f3fc; }
+.ib-msg.err { background:#fff0ff; color:#a21caf; border:1px solid #f0abfc; }
