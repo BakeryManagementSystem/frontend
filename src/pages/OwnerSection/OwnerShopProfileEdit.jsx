@@ -19,6 +19,7 @@ export default function OwnerShopProfileEdit() {
         shop_name: "",
         address: "",
         facebook_url: "",
+        phone: "",
         logo_url: "",
     });
 
@@ -38,6 +39,7 @@ export default function OwnerShopProfileEdit() {
                     shop_name: data.shop_name ?? "",
                     address: data.address ?? "",
                     facebook_url: data.facebook_url ?? "",
+                    phone: data.phone ?? "",
                     logo_url: data.logo_url ?? "",
                 });
             } catch (e) {
@@ -64,6 +66,7 @@ export default function OwnerShopProfileEdit() {
             if (form.shop_name) fd.append("shop_name", form.shop_name);
             if (form.address) fd.append("address", form.address);
             if (form.facebook_url) fd.append("facebook_url", form.facebook_url);
+            if (form.phone) fd.append("phone", form.phone);
             if (file) fd.append("logo", file);
 
             const res = await fetch(apiUrl("/api/owner/shop"), {
@@ -114,6 +117,13 @@ export default function OwnerShopProfileEdit() {
                             value={form.facebook_url}
                             onChange={(e) => setForm((p) => ({ ...p, facebook_url: e.target.value }))}
                             placeholder="https://facebook.com/your.shop"
+                        />
+                    </Field>
+                    <Field label="Phone Number">
+                        <input
+                            value={form.phone}
+                            onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))}
+                            placeholder="+1234567890"
                         />
                     </Field>
 

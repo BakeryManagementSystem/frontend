@@ -75,15 +75,16 @@ function App() {
                         />
 
                         <Route path="/owner" element={<ProtectedRoute><OwnerPage /></ProtectedRoute>} />
+                        <Route
+                            path="/owner/dashboard"
+                            element={<ProtectedRoute><OwnerDashboard /></ProtectedRoute>}
+                        />
+                        <Route
+                            path="/owner/ingredients/upload"
+                            element={<ProtectedRoute><IngredientUploadPage /></ProtectedRoute>}
+                        />
                     </Route>
-                    <Route
-                        path="/owner/dashboard"
-                        element={<ProtectedRoute><OwnerDashboard /></ProtectedRoute>}
-                    />
-                    <Route
-                        path="/owner/ingredients/upload"
-                        element={<ProtectedRoute><IngredientUploadPage /></ProtectedRoute>}
-                    />
+
                     <Route path="/auth" element={<LoginPage />} />
                     <Route path="/signin" element={<SignupPage />} />
                     <Route path="*" element={<Navigate to="/" replace />} />

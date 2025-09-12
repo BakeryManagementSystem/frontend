@@ -4,6 +4,26 @@ import { useAuth } from "../../context/AuthContext.jsx";
 import "./ShopProfilePage.css";
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const api = (p) => `${API_BASE}${p}`;
+
+// Safely extract shop fields from different payload shapes
+function normalizeShopPayload(raw) {
+    const s = raw?.shop ?? raw ?? {};
+    // determine best image url
+    const logoUrl =
+        s.logo_url ||
+        s.photo_url ||
+        (s.logo_path ? `${API_BASE}/storage/${s.logo_path}` : "");
+
+    return {
+        shop_name: s.shop_name || "Your Shop",
+        address: s.address || "",
+        phone: s.phone || "",
+        facebook_url: s.facebook_url || "",
+        image_url: logoUrl || "",
+        stats: s.stats || null,
+    };
+}
 
 export default function ShopProfilePage() {
     const { isAuthenticated, user, logout } = useAuth();
@@ -14,42 +34,45 @@ export default function ShopProfilePage() {
         [user?.id]
     );
 
-    // Shop profile state
     const [shop, setShop] = useState(null);
     const [loading, setLoading] = useState(true);
     const [err, setErr] = useState("");
 
-    // Ensure authenticated owner
+    // auth gate
     useEffect(() => {
-        const token = localStorage.getItem("token") || localStorage.getItem("access_token");
-        const userType = (user?.user_type || localStorage.getItem("user_type") || "buyer").toLowerCase();
+        const token =
+            localStorage.getItem("token") || localStorage.getItem("access_token");
+        const userType = (
+            user?.user_type || localStorage.getItem("user_type") || "buyer"
+        ).toLowerCase();
+
         if (!isAuthenticated && !token) {
             navigate("/auth");
             return;
         }
-        // If non-owner hits this page, bounce
         if (userType !== "owner" && userType !== "seller") {
-            navigate("/profile"); // send buyers to their profile instead
+            navigate("/profile");
         }
     }, [isAuthenticated, navigate, user?.user_type]);
 
-    // Fetch shop profile (adjust endpoint to your backend)
+    // load shop profile
     useEffect(() => {
         let alive = true;
+
         (async () => {
             try {
                 setLoading(true);
                 setErr("");
-                // Example endpoints you might have:
-                //  - GET /api/me/shop-profile             (owner’s own shop)
-                //  - GET /api/shops/{ownerId}             (public shop data by owner id)
-                //  - GET /api/owner/{ownerId}/shop-profile
-                // Use whatever you implemented; the first one below is common:
-                const token = localStorage.getItem("token") || localStorage.getItem("access_token");
-                const res = await fetch(`${API_BASE}/api/me/shop-profile`, {
+                const token =
+                    localStorage.getItem("token") ||
+                    localStorage.getItem("access_token") ||
+                    "";
+
+                // Your protected endpoint
+                const res = await fetch(api("/api/me/shop-profile"), {
                     headers: {
                         Accept: "application/json",
-                        Authorization: token ? `Bearer ${token}` : undefined,
+                        ...(token ? { Authorization: `Bearer ${token}` } : {}),
                     },
                 });
 
@@ -58,26 +81,24 @@ export default function ShopProfilePage() {
                 if (!res.ok) {
                     setErr("Failed to load shop profile");
                     setShop(null);
-                } else {
-                    const data = await res.json().catch(() => ({}));
-                    // normalize
-                    setShop({
-                        shop_name: data?.shop_name || "Your Shop",
-                        address: data?.address || "",
-                        facebook_url: data?.facebook_url || "",
-                        photo_url: data?.photo_url || "",
-                        // You can also include aggregates if your API provides:
-                        stats: data?.stats || null,
-                    });
+                    return;
                 }
-            } catch (e) {
-                if (alive) setErr("Failed to load shop profile");
+
+                const data = await res.json().catch(() => ({}));
+                setShop(normalizeShopPayload(data));
+            } catch {
+                if (alive) {
+                    setErr("Failed to load shop profile");
+                    setShop(null);
+                }
             } finally {
                 if (alive) setLoading(false);
             }
         })();
 
-        return () => { alive = false; };
+        return () => {
+            alive = false;
+        };
     }, [ownerId]);
 
     const ownerName = useMemo(
@@ -90,7 +111,8 @@ export default function ShopProfilePage() {
     );
 
     const initials = useMemo(() => {
-        const parts = String(shop?.shop_name || ownerName).trim().split(/\s+/).filter(Boolean);
+        const base = shop?.shop_name || ownerName || "";
+        const parts = String(base).trim().split(/\s+/).filter(Boolean);
         const first = parts[0]?.[0] ?? "";
         const last = parts.length > 1 ? parts[parts.length - 1][0] : "";
         return (first + last).toUpperCase() || "S";
@@ -106,7 +128,6 @@ export default function ShopProfilePage() {
     return (
         <main className="sp-main">
             <section className="sp-shell">
-                {/* Top bar */}
                 <div className="sp-topbar">
                     <div className="sp-title">
                         <h1>Shop Profile</h1>
@@ -122,12 +143,11 @@ export default function ShopProfilePage() {
                     </div>
                 </div>
 
-                {/* Cover + Avatar */}
                 <div className="sp-cover">
                     <div className="sp-cover-overlay" />
                     <div className="sp-avatar">
-                        {shop?.photo_url ? (
-                            <img src={shop.photo_url} alt="Shop" className="sp-avatar-img" />
+                        {shop?.image_url ? (
+                            <img src={shop.image_url} alt="Shop" className="sp-avatar-img" />
                         ) : (
                             <div className="sp-avatar-circle" aria-label="Shop avatar">
                                 {initials}
@@ -136,12 +156,13 @@ export default function ShopProfilePage() {
                     </div>
                 </div>
 
-                {/* Shop Card */}
                 <div className="sp-card">
                     <div className="sp-card-header">
                         <h2>Shop Information</h2>
                         {!loading && !err && (
-                            <Link className="sp-inline-link" to="/owner/shop/edit">Update details</Link>
+                            <Link className="sp-inline-link" to="/owner/shop/edit">
+                                Update details
+                            </Link>
                         )}
                     </div>
 
@@ -162,17 +183,27 @@ export default function ShopProfilePage() {
                                 <label>Facebook</label>
                                 <div className="sp-value">
                                     {shop?.facebook_url ? (
-                                        <a href={shop.facebook_url} target="_blank" rel="noreferrer" className="sp-link">
+                                        <a
+                                            href={shop.facebook_url}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="sp-link"
+                                        >
                                             {shop.facebook_url}
                                         </a>
-                                    ) : "—"}
+                                    ) : (
+                                        "—"
+                                    )}
                                 </div>
+                            </div>
+                            <div className="sp-field">
+                                <label>Phone</label>
+                                <div className="sp-value">{shop?.phone || "—"}</div>
                             </div>
                         </div>
                     )}
                 </div>
 
-                {/* Owner Card */}
                 <div className="sp-card">
                     <div className="sp-card-header">
                         <h2>Owner</h2>
@@ -186,7 +217,6 @@ export default function ShopProfilePage() {
                     </div>
                 </div>
 
-                {/* Quick Links */}
                 <div className="sp-card">
                     <div className="sp-card-header">
                         <h2>Quick Links</h2>
@@ -207,7 +237,6 @@ export default function ShopProfilePage() {
                     </div>
                 </div>
 
-                {/* Stats (optional mock; wire to your report endpoints later) */}
                 <div className="sp-stats">
                     <div className="sp-stat">
                         <div className="sp-stat-num">{shop?.stats?.products ?? 24}</div>
@@ -219,7 +248,9 @@ export default function ShopProfilePage() {
                     </div>
                     <div className="sp-stat">
                         <div className="sp-stat-num">
-                            {shop?.stats?.revenue ? `৳${Number(shop.stats.revenue).toLocaleString()}` : "৳75,400"}
+                            {shop?.stats?.revenue
+                                ? `৳${Number(shop.stats.revenue).toLocaleString()}`
+                                : "৳75,400"}
                         </div>
                         <div className="sp-stat-label">Revenue (mo)</div>
                     </div>
