@@ -17,7 +17,117 @@ export default function BuyerPage() {
     const [seller, setSeller] = useState(null);     // { shop, owner }
     const [sellerLoading, setSellerLoading] = useState(false);
     const [sellerErr, setSellerErr] = useState("");
+
+    // Buy Now Modal State
+    const [showBuyNowModal, setShowBuyNowModal] = useState(false);
+    const [buyNowProduct, setBuyNowProduct] = useState(null);
+    const [buyNowData, setBuyNowData] = useState({
+        buyer_name: '',
+        buyer_email: '',
+        buyer_phone: '',
+        buyer_address: '',
+        quantity: 1
+    });
+    const [buyNowLoading, setBuyNowLoading] = useState(false);
+    const [userProfile, setUserProfile] = useState(null);
+
     const token = localStorage.getItem("token");
+
+
+    // Fetch user profile when component mounts
+    useEffect(() => {
+        if (token) {
+            fetchUserProfile();
+        }
+    }, [token]);
+
+    const fetchUserProfile = async () => {
+        try {
+            const res = await fetch(`${API_BASE}/api/user-profile`, {
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            if (res.ok) {
+                const profile = await res.json();
+                setUserProfile(profile);
+            }
+        } catch (error) {
+            console.error('Failed to fetch user profile:', error);
+        }
+    };
+
+    // Open Buy Now Modal
+    const openBuyNowModal = (product) => {
+        setBuyNowProduct(product);
+        setBuyNowData({
+            buyer_name: userProfile?.name || '',
+            buyer_email: userProfile?.email || '',
+            quantity: 1
+        });
+        setShowBuyNowModal(true);
+        document.body.style.overflow = "hidden";
+    };
+
+    // Close Buy Now Modal
+    const closeBuyNowModal = () => {
+        setShowBuyNowModal(false);
+        setBuyNowProduct(null);
+        setBuyNowData({
+            buyer_phone: '',
+            buyer_address: '',
+            quantity: 1
+        });
+        document.body.style.overflow = "";
+    };
+
+    // Handle Buy Now form submission
+    const handleBuyNow = async (e) => {
+        e.preventDefault();
+
+        if (!token) {
+            alert("Please log in to place an order.");
+            return;
+        }
+
+        setBuyNowLoading(true);
+
+        try {
+            const res = await fetch(`${API_BASE}/api/buy-now`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    product_id: buyNowProduct.id,
+                    ...buyNowData
+                })
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                alert('Order placed successfully!');
+                closeBuyNowModal();
+            } else {
+                throw new Error(data.message || 'Failed to place order');
+            }
+        } catch (error) {
+            console.error('Buy now error:', error);
+            alert(error.message);
+        } finally {
+            setBuyNowLoading(false);
+        }
+    };
+
+    // Calculate total price
+    const totalPrice = buyNowProduct ? (buyNowProduct.price * buyNowData.quantity).toFixed(2) : '0.00';
+
+
+
     // Fetch products
     useEffect(() => {
         let alive = true;
@@ -194,7 +304,7 @@ export default function BuyerPage() {
 
                                 <button
                                     className="btn btn-dark"
-                                    onClick={(e) => { e.stopPropagation(); /* wire order-now */ }}
+                                    onClick={(e) => { e.stopPropagation(); openBuyNowModal(p); }}
                                 >
                                     Order Now
                                 </button>
@@ -203,6 +313,137 @@ export default function BuyerPage() {
                     ))}
                 </section>
             )}
+
+            {/* Buy Now Modal */}
+            {/* Buy Now Modal */}
+            {showBuyNowModal && buyNowProduct && (
+                <div className="modal-backdrop" onClick={closeBuyNowModal}>
+                    <div
+                        className="modal-card modal-animate-in buy-now-modal"
+                        onClick={(e) => e.stopPropagation()}
+                        role="dialog"
+                        aria-modal="true"
+                    >
+                        <button className="modal-close" onClick={closeBuyNowModal} aria-label="Close">✕</button>
+
+                        <div className="modal-content buy-now-layout">
+                            {/* Left side - product preview */}
+                            <div className="buy-now-left">
+                                <div className="product-image-box">
+                                    {buyNowProduct.image_url ? (
+                                        <img src={buyNowProduct.image_url} alt={buyNowProduct.name} />
+                                    ) : (
+                                        <div className="product-placeholder">No Image</div>
+                                    )}
+                                </div>
+                                <div className="product-info-box">
+                                    <h2 className="product-title">{buyNowProduct.name}</h2>
+                                    <p className="product-price">${buyNowProduct.price}</p>
+                                    {buyNowProduct.category && (
+                                        <span className="product-category">{buyNowProduct.category}</span>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Right side - form */}
+                            <div className="buy-now-right">
+                                <h3 className="form-heading">Complete Your Order</h3>
+
+                                <form onSubmit={handleBuyNow} className="buy-now-form">
+                                    <div className="form-group">
+                                        <label htmlFor="buyer_name">Name *</label>
+                                        <input
+                                            type="text"
+                                            id="buyer_name"
+                                            value={buyNowData.buyer_name}
+                                            onChange={(e) => setBuyNowData({ ...buyNowData, buyer_name: e.target.value })}
+                                            required
+                                            className="form-input"
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label htmlFor="buyer_email">Email *</label>
+                                        <input
+                                            type="email"
+                                            id="buyer_email"
+                                            value={buyNowData.buyer_email}
+                                            onChange={(e) => setBuyNowData({ ...buyNowData, buyer_email: e.target.value })}
+                                            required
+                                            className="form-input"
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label htmlFor="buyer_phone">Phone *</label>
+                                        <input
+                                            type="tel"
+                                            id="buyer_phone"
+                                            value={buyNowData.buyer_phone}
+                                            onChange={(e) => setBuyNowData({ ...buyNowData, buyer_phone: e.target.value })}
+                                            required
+                                            className="form-input"
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label htmlFor="buyer_address">Address *</label>
+                                        <textarea
+                                            id="buyer_address"
+                                            value={buyNowData.buyer_address}
+                                            onChange={(e) => setBuyNowData({ ...buyNowData, buyer_address: e.target.value })}
+                                            required
+                                            className="form-textarea"
+                                            rows="3"
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label htmlFor="quantity">Quantity *</label>
+                                        <input
+                                            type="number"
+                                            id="quantity"
+                                            min="1"
+                                            value={buyNowData.quantity}
+                                            onChange={(e) =>
+                                                setBuyNowData({ ...buyNowData, quantity: parseInt(e.target.value) || 1 })
+                                            }
+                                            required
+                                            className="form-input"
+                                        />
+                                    </div>
+
+                                    <div className="total-section">
+                                        <div className="total-row">
+                                            <span>Total Amount:</span>
+                                            <span className="total-price">${totalPrice}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="form-actions">
+                                        <button
+                                            type="button"
+                                            onClick={closeBuyNowModal}
+                                            className="btn btn-secondary"
+                                            disabled={buyNowLoading}
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            className="btn btn-primary"
+                                            disabled={buyNowLoading}
+                                        >
+                                            {buyNowLoading ? "Placing Order..." : "Place Order"}
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
 
             {/* Modal Preview */}
             {selected && (
@@ -241,7 +482,10 @@ export default function BuyerPage() {
                                         Add to Cart
                                     </button>
 
-                                    <button className="btn btn-dark">Order Now</button>
+                                    <button className="btn btn-dark"
+                                            onClick={() => openBuyNowModal(selected)}
+
+                                    >Order Now</button>
                                 </div>
 
                                 <div className="modal-divider" />

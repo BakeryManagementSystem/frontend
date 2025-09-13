@@ -4,7 +4,7 @@ import "./Sidebar.css";
 
 const links = [
     { to: "/orders", label: "Orders", icon: "orders" },
-    { to: "/status", label: "Order Status", icon: "status" },
+    { to: "/owner/orders", label: "Order Status", icon: "status" },
     { to: "/reviews", label: "Reviews", icon: "review" },
     { to: "/settings", label: "Settings", icon: "settings" },
     { to: "/help", label: "Help", icon: "help" },

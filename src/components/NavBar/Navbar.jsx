@@ -141,7 +141,7 @@ export default function Navbar({ onLeftIconClick }) {
                                 </NabIconLink>
 
                                 {/* Owner: Inbox (placeholder -> reuse /messages) */}
-                                <NabIconLink to="/messages" label="Inbox">
+                                <NabIconLink to="/owner/inbox" label="Inbox">
                                     <svg className="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 7h18M3 7l3 10a2 2 0 002 2h8a2 2 0 002-2l3-10M3 7h18M7 7v-.5a2.5 2.5 0 115 0V7" />
                                     </svg>

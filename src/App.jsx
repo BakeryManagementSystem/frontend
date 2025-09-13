@@ -1,3 +1,4 @@
+// File: 'frontend/src/App.jsx'
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import MainLayout from "./components/layouts/MainLayout.jsx";
@@ -27,9 +28,10 @@ import IngredientUploadPage from "./pages/OwnerSection/IngredientUploadPage.jsx"
 import OwnerPage from "./pages/OwnerSection/OwnerPage.jsx";
 import ShopProfilePage from "./pages/OwnerSection/ShopProfilePage.jsx";
 import OwnerShopProfileEdit from "./pages/OwnerSection/OwnerShopProfileEdit.jsx";
+import Inbox from "./pages/OwnerSection/Inbox.jsx";
+import OrderStatus from "./pages/OwnerSection/OrderStatus.jsx";
 
 import "./App.css";
-
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -57,31 +59,78 @@ function App() {
                         <Route path="/help" element={<HelpPage />} />
                         <Route
                             path="/profile"
-                            element={<ProtectedRoute><ProfilePage /></ProtectedRoute>}
+                            element={
+                                <ProtectedRoute>
+                                    <ProfilePage />
+                                </ProtectedRoute>
+                            }
                         />
                         <Route
                             path="/profile/edit"
-                            element={<ProtectedRoute><BuyerProfileEdit /></ProtectedRoute>}
+                            element={
+                                <ProtectedRoute>
+                                    <BuyerProfileEdit />
+                                </ProtectedRoute>
+                            }
                         />
 
-                        /* Owner shop profile */
+                        {/* Owner shop profile */}
                         <Route
                             path="/owner/shop"
-                            element={<ProtectedRoute><ShopProfilePage /></ProtectedRoute>}
+                            element={
+                                <ProtectedRoute>
+                                    <ShopProfilePage />
+                                </ProtectedRoute>
+                            }
                         />
                         <Route
                             path="/owner/shop/edit"
-                            element={<ProtectedRoute><OwnerShopProfileEdit /></ProtectedRoute>}
+                            element={
+                                <ProtectedRoute>
+                                    <OwnerShopProfileEdit />
+                                </ProtectedRoute>
+                            }
                         />
 
-                        <Route path="/owner" element={<ProtectedRoute><OwnerPage /></ProtectedRoute>} />
+                        <Route
+                            path="/owner"
+                            element={
+                                <ProtectedRoute>
+                                    <OwnerPage />
+                                </ProtectedRoute>
+                            }
+                        />
                         <Route
                             path="/owner/dashboard"
-                            element={<ProtectedRoute><OwnerDashboard /></ProtectedRoute>}
+                            element={
+                                <ProtectedRoute>
+                                    <OwnerDashboard />
+                                </ProtectedRoute>
+                            }
                         />
                         <Route
                             path="/owner/ingredients/upload"
-                            element={<ProtectedRoute><IngredientUploadPage /></ProtectedRoute>}
+                            element={
+                                <ProtectedRoute>
+                                    <IngredientUploadPage />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/owner/inbox"
+                            element={
+                                <ProtectedRoute>
+                                    <Inbox />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/owner/orders"
+                            element={
+                                <ProtectedRoute>
+                                    <OrderStatus />
+                                </ProtectedRoute>
+                            }
                         />
                     </Route>
 
