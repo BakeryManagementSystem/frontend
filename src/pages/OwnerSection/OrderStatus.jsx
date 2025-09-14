@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import './OrderStatus.css';
 
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const API_BASE = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
 const OrderStatus = () => {
     const [orders, setOrders] = useState([]);
@@ -40,6 +40,16 @@ const OrderStatus = () => {
         }
     };
 
+    const handleAcceptOrder = async (orderId) => {
+        await updateOrderStatus(orderId, 'accepted');
+    };
+
+    const handleRejectOrder = async (orderId) => {
+        if (window.confirm('Are you sure you want to reject this order? This action cannot be undone.')) {
+            await updateOrderStatus(orderId, 'rejected');
+        }
+    };
+
     const updateOrderStatus = async (orderId, status) => {
         try {
             setActionLoading(true);
@@ -56,9 +66,17 @@ const OrderStatus = () => {
             const data = await response.json();
 
             if (data.success) {
-                alert(`Order ${status} successfully!`);
+                alert(data.message);
+
+                // Remove from UI
+                setOrders((prevOrders) =>
+                    prevOrders.filter((order) => order.order_id !== orderId)
+                );
+
+                // Optionally log updated order for confirmation
+                console.log("Updated order:", data.order);
+
                 setSelectedOrder(null);
-                fetchOrders(); // Refresh orders list
             } else {
                 alert(data.message || 'Failed to update order status');
             }
@@ -69,6 +87,7 @@ const OrderStatus = () => {
             setActionLoading(false);
         }
     };
+
 
     const openOrderModal = (order) => {
         setSelectedOrder(order);
@@ -134,7 +153,7 @@ const OrderStatus = () => {
                 ) : (
                     orders.map((order) => (
                         <div
-                            key={order.order_item_id}
+                            key={order.order_id}
                             className="order-card"
                             onClick={() => openOrderModal(order)}
                         >
@@ -168,7 +187,6 @@ const OrderStatus = () => {
                 )}
             </div>
 
-            {/* Order Detail Modal */}
             {selectedOrder && (
                 <div className="modal-backdrop" onClick={closeOrderModal}>
                     <div
