@@ -41,26 +41,27 @@ const OrderStatus = () => {
     };
 
     const handleAcceptOrder = async (orderId) => {
-        await updateOrderStatus(orderId, 'accepted');
-    };
+            await updateOrderStatus(orderId, 'accepted');
+        };
 
     const handleRejectOrder = async (orderId) => {
-        if (window.confirm('Are you sure you want to reject this order? This action cannot be undone.')) {
-            await updateOrderStatus(orderId, 'rejected');
-        }
-    };
+           if (window.confirm('Are you sure you want to reject this order? This action cannot be undone.')) {
+                 // IMPORTANT: backend status should be "terminated"
+                     await updateOrderStatus(orderId, 'terminated');
+               }
+         };
 
-    const updateOrderStatus = async (orderId, status) => {
+    const updateOrderStatus = async (orderId, status) =>  {
         try {
             setActionLoading(true);
             const response = await fetch(`${API_BASE}/api/owner/orders/${orderId}/status`, {
                 method: 'PUT',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
+                    'Authorization': `Bearer ${token}`,   // <-- REQUIRED
                     'Content-Type': 'application/json',
-                    'Accept': 'application/json'
+                    'Accept': 'application/json',
                 },
-                body: JSON.stringify({ status })
+                body: JSON.stringify({ status }),       // "accepted" | "terminated"
             });
 
             const data = await response.json();
@@ -69,13 +70,12 @@ const OrderStatus = () => {
                 alert(data.message);
 
                 // Remove from UI
-                setOrders((prevOrders) =>
-                    prevOrders.filter((order) => order.order_id !== orderId)
-                );
+                setOrders((prev) => prev.filter((o) => o.order_id !== orderId));
 
-                // Optionally log updated order for confirmation
+                +      // Nudge the OwnerDashboard to refresh stats
+                    +      window.dispatchEvent(new CustomEvent('owner-dashboard-refresh'));
+
                 console.log("Updated order:", data.order);
-
                 setSelectedOrder(null);
             } else {
                 alert(data.message || 'Failed to update order status');
@@ -113,7 +113,7 @@ const OrderStatus = () => {
         const colors = {
             'pending': '#f59e0b',
             'accepted': '#10b981',
-            'rejected': '#ef4444'
+            'terminated': '#ef4444'
         };
         return colors[status] || '#6b7280';
     };
@@ -254,7 +254,7 @@ const OrderStatus = () => {
                             <div className="modal-actions">
                                 <button
                                     className="btn btn-reject"
-                                    onClick={() => updateOrderStatus(selectedOrder.order_id, 'rejected')}
+                                    onClick={() => updateOrderStatus(selectedOrder.order_id, 'terminated')}
                                     disabled={actionLoading}
                                 >
                                     {actionLoading ? 'Processing...' : 'Reject Order'}

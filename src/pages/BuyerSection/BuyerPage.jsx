@@ -128,24 +128,25 @@ export default function BuyerPage() {
 
 
 
-    // Fetch products
-    useEffect(() => {
-        let alive = true;
-        setLoading(true);
-        setErr("");
-        fetch(`${API_BASE}/api/products?per_page=24`, {
-            headers: { Accept: "application/json" },
-        })
-            .then((r) => r.json())
-            .then((data) => {
-                if (!alive) return;
-                const rows = Array.isArray(data?.data) ? data.data : data;
-                setItems(rows || []);
-            })
-            .catch(() => alive && setErr("Failed to load products"))
-            .finally(() => alive && setLoading(false));
-        return () => { alive = false; };
-    }, []);
+    // Fetch products whenever q changes (server-side search)
+     useEffect(() => {
+           let alive = true;
+           setLoading(true);
+           setErr("");
+           const url = new URL(`${API_BASE}/api/products`);
+           url.searchParams.set("per_page", "24");
+           if (q) url.searchParams.set("q", q);         // 👈 send q to backend
+               fetch(url.toString(), { headers: { Accept: "application/json" } })
+             .then((r) => r.json())
+             .then((data) => {
+                   if (!alive) return;
+                   const rows = Array.isArray(data?.data) ? data.data : data;
+                   setItems(rows || []);
+                 })
+             .catch(() => alive && setErr("Failed to load products"))
+             .finally(() => alive && setLoading(false));
+           return () => { alive = false; };
+         }, [q]);  // 👈 refetch when query changes
 
     // Simple client-side filter by name/category
     const filtered = useMemo(() => {
