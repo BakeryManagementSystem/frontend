@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import ApiService from '../services/api';
 
 const AuthContext = createContext();
 
@@ -14,11 +14,10 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [token, setToken] = useState(localStorage.getItem('token'));
+  const [token, setToken] = useState(localStorage.getItem('auth_token'));
 
   useEffect(() => {
     if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       // Verify token and get user info
       fetchUser();
     } else {
@@ -28,9 +27,10 @@ export const AuthProvider = ({ children }) => {
 
   const fetchUser = async () => {
     try {
-      const response = await axios.get('/api/user');
-      setUser(response.data);
+      const response = await ApiService.getUser();
+      setUser(response.user || response);
     } catch (error) {
+      console.error('Failed to fetch user:', error);
       // Token is invalid
       logout();
     } finally {
@@ -40,47 +40,54 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (credentials) => {
     try {
-      const response = await axios.post('/api/login', credentials);
-      const { token, user } = response.data;
+      const response = await ApiService.login(credentials);
+      const { token, user } = response;
 
       setToken(token);
       setUser(user);
-      localStorage.setItem('token', token);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      localStorage.setItem('auth_token', token);
 
-      return { success: true };
+      return { success: true, user };
     } catch (error) {
+      console.error('Login error:', error);
       return {
         success: false,
-        error: error.response?.data?.message || 'Login failed'
+        error: error.message || 'Login failed'
       };
     }
   };
 
   const register = async (userData) => {
     try {
-      const response = await axios.post('/api/register', userData);
-      const { token, user } = response.data;
+      const response = await ApiService.register(userData);
+      const { token, user } = response;
 
       setToken(token);
       setUser(user);
-      localStorage.setItem('token', token);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      localStorage.setItem('auth_token', token);
 
-      return { success: true };
+      return { success: true, user };
     } catch (error) {
+      console.error('Registration error:', error);
       return {
         success: false,
-        error: error.response?.data?.message || 'Registration failed'
+        error: error.message || 'Registration failed'
       };
     }
   };
 
-  const logout = () => {
-    setUser(null);
-    setToken(null);
-    localStorage.removeItem('token');
-    delete axios.defaults.headers.common['Authorization'];
+  const logout = async () => {
+    try {
+      if (token) {
+        await ApiService.logout();
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setUser(null);
+      setToken(null);
+      localStorage.removeItem('auth_token');
+    }
   };
 
   const value = {
@@ -90,8 +97,9 @@ export const AuthProvider = ({ children }) => {
     logout,
     loading,
     isAuthenticated: !!user,
-    isBuyer: user?.type === 'buyer',
-    isSeller: user?.type === 'seller',
+    isBuyer: user?.user_type === 'buyer',
+    isSeller: user?.user_type === 'seller' || user?.user_type === 'owner',
+    isOwner: user?.user_type === 'owner',
   };
 
   return (

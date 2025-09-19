@@ -63,23 +63,23 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
 
-                {/* Customer Protected Routes */}
-                <Route path="/customer" element={
+                {/* Buyer Protected Routes */}
+                <Route path="/buyer" element={
                   <ProtectedRoute userType="buyer">
                     <BuyerDashboard />
                   </ProtectedRoute>
                 } />
-                <Route path="/customer/orders" element={
+                <Route path="/buyer/orders" element={
                   <ProtectedRoute userType="buyer">
                     <OrderHistory />
                   </ProtectedRoute>
                 } />
-                <Route path="/customer/favorites" element={
+                <Route path="/buyer/favorites" element={
                   <ProtectedRoute userType="buyer">
                     <Wishlist />
                   </ProtectedRoute>
                 } />
-                <Route path="/customer/profile" element={
+                <Route path="/buyer/profile" element={
                   <ProtectedRoute userType="buyer">
                     <Profile />
                   </ProtectedRoute>
@@ -90,34 +90,66 @@ function App() {
                   </ProtectedRoute>
                 } />
 
-                {/* Baker/Manager Protected Routes */}
-                <Route path="/baker" element={
+                {/* Seller Protected Routes */}
+                <Route path="/seller" element={
                   <ProtectedRoute userType="seller">
                     <SellerDashboard />
                   </ProtectedRoute>
                 } />
-                <Route path="/baker/products" element={
+                <Route path="/seller/products" element={
                   <ProtectedRoute userType="seller">
                     <SellerProducts />
                   </ProtectedRoute>
                 } />
-                <Route path="/baker/orders" element={
+                <Route path="/seller/orders" element={
                   <ProtectedRoute userType="seller">
                     <SellerOrders />
                   </ProtectedRoute>
                 } />
-                <Route path="/baker/profile" element={
+                <Route path="/seller/profile" element={
                   <ProtectedRoute userType="seller">
                     <SellerProfile />
                   </ProtectedRoute>
                 } />
-                <Route path="/baker/bakery" element={
+                <Route path="/seller/shop" element={
                   <ProtectedRoute userType="seller">
                     <SellerShop />
                   </ProtectedRoute>
                 } />
-                <Route path="/baker/analytics" element={
+                <Route path="/seller/analytics" element={
                   <ProtectedRoute userType="seller">
+                    <SellerAnalytics />
+                  </ProtectedRoute>
+                } />
+
+                {/* Owner Protected Routes (same as seller routes) */}
+                <Route path="/owner" element={
+                  <ProtectedRoute userType="owner">
+                    <SellerDashboard />
+                  </ProtectedRoute>
+                } />
+                <Route path="/owner/products" element={
+                  <ProtectedRoute userType="owner">
+                    <SellerProducts />
+                  </ProtectedRoute>
+                } />
+                <Route path="/owner/orders" element={
+                  <ProtectedRoute userType="owner">
+                    <SellerOrders />
+                  </ProtectedRoute>
+                } />
+                <Route path="/owner/profile" element={
+                  <ProtectedRoute userType="owner">
+                    <SellerProfile />
+                  </ProtectedRoute>
+                } />
+                <Route path="/owner/shop" element={
+                  <ProtectedRoute userType="owner">
+                    <SellerShop />
+                  </ProtectedRoute>
+                } />
+                <Route path="/owner/analytics" element={
+                  <ProtectedRoute userType="owner">
                     <SellerAnalytics />
                   </ProtectedRoute>
                 } />
