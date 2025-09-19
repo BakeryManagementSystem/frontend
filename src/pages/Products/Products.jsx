@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useParams } from 'react-router-dom';
 import ProductCard from '../../components/common/ProductCard/ProductCard';
+import Pagination from '../../components/common/Pagination/Pagination';
 import ApiService from '../../services/api';
 import {
   Filter,
@@ -387,6 +388,16 @@ const Products = () => {
                   Clear Filters
                 </button>
               </div>
+            )}
+
+            {/* Pagination Component */}
+            {totalProducts > 0 && (
+              <Pagination
+                currentPage={currentPage}
+                totalItems={totalProducts}
+                itemsPerPage={12}
+                onPageChange={page => setCurrentPage(page)}
+              />
             )}
           </main>
         </div>
