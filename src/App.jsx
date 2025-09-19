@@ -79,6 +79,11 @@ function App() {
                     <Wishlist />
                   </ProtectedRoute>
                 } />
+                <Route path="/buyer/wishlist" element={
+                  <ProtectedRoute userType="buyer">
+                    <Wishlist />
+                  </ProtectedRoute>
+                } />
                 <Route path="/buyer/profile" element={
                   <ProtectedRoute userType="buyer">
                     <Profile />

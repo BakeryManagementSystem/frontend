@@ -91,6 +91,28 @@ class ApiService {
   async getShopProfile(ownerId) {
     return this.request(`/shops/${ownerId}`);
   }
+
+  // Wishlist API
+  async getWishlist() {
+    return this.request('/buyer/wishlist');
+  }
+
+  async addToWishlist(productId) {
+    return this.request('/buyer/wishlist', {
+      method: 'POST',
+      body: JSON.stringify({ product_id: productId }),
+    });
+  }
+
+  async removeFromWishlist(productId) {
+    return this.request(`/buyer/wishlist/${productId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async checkWishlist(productId) {
+    return this.request(`/buyer/wishlist/check/${productId}`);
+  }
 }
 
 export default new ApiService();

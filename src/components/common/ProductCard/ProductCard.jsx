@@ -1,13 +1,31 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../../../context/CartContext';
 import { useAuth } from '../../../context/AuthContext';
+import ApiService from '../../../services/api';
 import { Heart, ShoppingCart, Star, Eye } from 'lucide-react';
 import './ProductCard.css';
 
 const ProductCard = ({ product, showWishlist = true }) => {
   const { addToCart } = useCart();
-  const { isBuyer } = useAuth();
+  const { isBuyer, isAuthenticated } = useAuth();
+  const [isInWishlist, setIsInWishlist] = useState(false);
+  const [wishlistLoading, setWishlistLoading] = useState(false);
+
+  useEffect(() => {
+    if (isAuthenticated && isBuyer) {
+      checkWishlistStatus();
+    }
+  }, [product.id, isAuthenticated, isBuyer]);
+
+  const checkWishlistStatus = async () => {
+    try {
+      const response = await ApiService.checkWishlist(product.id);
+      setIsInWishlist(response.in_wishlist);
+    } catch (error) {
+      console.error('Failed to check wishlist status:', error);
+    }
+  };
 
   const handleAddToCart = (e) => {
     e.preventDefault();
@@ -15,11 +33,36 @@ const ProductCard = ({ product, showWishlist = true }) => {
     addToCart(product);
   };
 
-  const handleWishlist = (e) => {
+  const handleWishlist = async (e) => {
     e.preventDefault();
     e.stopPropagation();
-    // Add wishlist functionality here
-    console.log('Add to wishlist:', product.id);
+
+    if (!isAuthenticated) {
+      alert('Please login to add items to your wishlist');
+      return;
+    }
+
+    if (!isBuyer) {
+      alert('Only buyers can add items to wishlist');
+      return;
+    }
+
+    setWishlistLoading(true);
+
+    try {
+      if (isInWishlist) {
+        await ApiService.removeFromWishlist(product.id);
+        setIsInWishlist(false);
+      } else {
+        await ApiService.addToWishlist(product.id);
+        setIsInWishlist(true);
+      }
+    } catch (error) {
+      console.error('Failed to update wishlist:', error);
+      alert('Failed to update wishlist. Please try again.');
+    } finally {
+      setWishlistLoading(false);
+    }
   };
 
   const formatPrice = (price) => {
@@ -67,13 +110,16 @@ const ProductCard = ({ product, showWishlist = true }) => {
           )}
 
           <div className="product-actions">
-            <button
-              className="action-btn wishlist-btn"
-              onClick={handleWishlist}
-              title="Add to Wishlist"
-            >
-              <Heart size={18} />
-            </button>
+            {showWishlist && isAuthenticated && isBuyer && (
+              <button
+                className={`action-btn wishlist-btn ${isInWishlist ? 'active' : ''}`}
+                onClick={handleWishlist}
+                disabled={wishlistLoading}
+                title={isInWishlist ? "Remove from Wishlist" : "Add to Wishlist"}
+              >
+                <Heart size={18} fill={isInWishlist ? "currentColor" : "none"} />
+              </button>
+            )}
             <button
               className="action-btn view-btn"
               title="Quick View"
@@ -101,34 +147,35 @@ const ProductCard = ({ product, showWishlist = true }) => {
             </span>
           </div>
 
-          <div className="product-price">
-            {product.originalPrice && product.originalPrice > product.price && (
-              <span className="original-price">
-                {formatPrice(product.originalPrice)}
-              </span>
-            )}
-            <span className="current-price">
-              {formatPrice(product.price)}
-            </span>
+          <div className="product-seller">
+            by {product.seller}
           </div>
 
-          <div className="product-seller">
-            by {product.seller || 'BMS Store'}
+          <div className="product-price">
+            {product.originalPrice && (
+              <span className="original-price">{formatPrice(product.originalPrice)}</span>
+            )}
+            <span className="current-price">{formatPrice(product.discountPrice || product.price)}</span>
           </div>
+
+          {!product.inStock && (
+            <div className="out-of-stock">
+              Out of Stock
+            </div>
+          )}
         </div>
       </Link>
 
-      {isBuyer && (
-        <div className="product-card-footer">
-          <button
-            className="btn btn-primary btn-full add-to-cart-btn"
-            onClick={handleAddToCart}
-          >
-            <ShoppingCart size={16} />
-            Add to Cart
-          </button>
-        </div>
-      )}
+      <div className="product-actions-bottom">
+        <button
+          className="btn btn-primary btn-sm add-to-cart"
+          onClick={handleAddToCart}
+          disabled={!product.inStock}
+        >
+          <ShoppingCart size={16} />
+          Add to Cart
+        </button>
+      </div>
     </div>
   );
 };
