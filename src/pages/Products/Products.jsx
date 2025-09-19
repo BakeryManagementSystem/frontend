@@ -394,6 +394,7 @@ const Products = () => {
             {totalProducts > 0 && (
               <Pagination
                 currentPage={currentPage}
+                totalPages={Math.ceil(totalProducts / 12)}
                 totalItems={totalProducts}
                 itemsPerPage={12}
                 onPageChange={page => setCurrentPage(page)}
