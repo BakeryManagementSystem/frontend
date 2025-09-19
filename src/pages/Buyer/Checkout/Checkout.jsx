@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import { useCart } from '../../../context/CartContext';
+import { useNotifications } from '../../../context/NotificationContext';
+import ApiService from '../../../services/api';
 import {
   CreditCard,
   Truck,
@@ -10,23 +12,28 @@ import {
   Lock,
   ShoppingBag,
   ArrowLeft,
-  CheckCircle
+  CheckCircle,
+  AlertCircle,
+  Clock
 } from 'lucide-react';
 import './Checkout.css';
 
 const Checkout = () => {
   const { user } = useAuth();
   const { items, getTotalPrice, clearCart } = useCart();
+  const { addNotification } = useNotifications();
   const navigate = useNavigate();
 
   const [step, setStep] = useState(1); // 1: Shipping, 2: Payment, 3: Review, 4: Complete
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [orderId, setOrderId] = useState(null);
 
   const [shippingData, setShippingData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
+    firstName: user?.name?.split(' ')[0] || '',
+    lastName: user?.name?.split(' ')[1] || '',
+    email: user?.email || '',
+    phone: user?.phone || '',
     address: '',
     city: '',
     state: '',
@@ -38,7 +45,7 @@ const Checkout = () => {
     cardNumber: '',
     expiryDate: '',
     cvv: '',
-    cardholderName: '',
+    cardholderName: user?.name || '',
     billingAddress: {
       sameAsShipping: true,
       address: '',
@@ -49,183 +56,167 @@ const Checkout = () => {
   });
 
   const [shippingMethod, setShippingMethod] = useState('standard');
-  const [errors, setErrors] = useState({});
 
   useEffect(() => {
-    // If cart is empty, redirect to products
-    if (items.length === 0) {
-      navigate('/products');
+    if (!items.length) {
+      navigate('/cart');
     }
+  }, [items, navigate]);
 
-    // Pre-fill with user data if available
-    if (user) {
-      setShippingData(prev => ({
-        ...prev,
-        firstName: user.name?.split(' ')[0] || '',
-        lastName: user.name?.split(' ')[1] || '',
-        email: user.email || ''
-      }));
-    }
-  }, [items, navigate, user]);
+  const subtotal = getTotalPrice();
+  const shippingCost = shippingMethod === 'express' ? 15.00 : (subtotal >= 25 ? 0 : 7.50);
+  const tax = subtotal * 0.08;
+  const total = subtotal + shippingCost + tax;
 
-  const shippingOptions = [
-    { id: 'standard', name: 'Standard Shipping', price: 5.99, days: '5-7 business days' },
-    { id: 'express', name: 'Express Shipping', price: 12.99, days: '2-3 business days' },
-    { id: 'overnight', name: 'Overnight Shipping', price: 24.99, days: '1 business day' }
-  ];
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(price);
+  };
 
-  const handleInputChange = (section, field, value) => {
-    if (section === 'shipping') {
-      setShippingData(prev => ({ ...prev, [field]: value }));
-    } else if (section === 'payment') {
-      if (field.startsWith('billing.')) {
-        const billingField = field.split('.')[1];
-        setPaymentData(prev => ({
-          ...prev,
-          billingAddress: {
-            ...prev.billingAddress,
-            [billingField]: value
-          }
-        }));
-      } else {
-        setPaymentData(prev => ({ ...prev, [field]: value }));
-      }
-    }
-
-    // Clear errors
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
+  const handleShippingSubmit = (e) => {
+    e.preventDefault();
+    if (validateShippingData()) {
+      setStep(2);
     }
   };
 
-  const validateShipping = () => {
-    const newErrors = {};
+  const handlePaymentSubmit = (e) => {
+    e.preventDefault();
+    if (validatePaymentData()) {
+      setStep(3);
+    }
+  };
+
+  const validateShippingData = () => {
     const required = ['firstName', 'lastName', 'email', 'phone', 'address', 'city', 'state', 'zipCode'];
-
-    required.forEach(field => {
-      if (!shippingData[field]?.trim()) {
-        newErrors[field] = `${field.charAt(0).toUpperCase() + field.slice(1)} is required`;
+    for (let field of required) {
+      if (!shippingData[field]) {
+        setError(`${field.charAt(0).toUpperCase() + field.slice(1)} is required`);
+        return false;
       }
-    });
-
-    if (shippingData.email && !/\S+@\S+\.\S+/.test(shippingData.email)) {
-      newErrors.email = 'Email is invalid';
     }
-
-    return newErrors;
+    setError('');
+    return true;
   };
 
-  const validatePayment = () => {
-    const newErrors = {};
-
-    if (!paymentData.cardNumber?.replace(/\s/g, '')) {
-      newErrors.cardNumber = 'Card number is required';
-    } else if (paymentData.cardNumber.replace(/\s/g, '').length < 16) {
-      newErrors.cardNumber = 'Card number must be 16 digits';
+  const validatePaymentData = () => {
+    if (!paymentData.cardNumber || !paymentData.expiryDate || !paymentData.cvv || !paymentData.cardholderName) {
+      setError('All payment fields are required');
+      return false;
     }
-
-    if (!paymentData.expiryDate) {
-      newErrors.expiryDate = 'Expiry date is required';
-    }
-
-    if (!paymentData.cvv) {
-      newErrors.cvv = 'CVV is required';
-    } else if (paymentData.cvv.length < 3) {
-      newErrors.cvv = 'CVV must be 3-4 digits';
-    }
-
-    if (!paymentData.cardholderName?.trim()) {
-      newErrors.cardholderName = 'Cardholder name is required';
-    }
-
-    return newErrors;
-  };
-
-  const handleNext = () => {
-    let formErrors = {};
-
-    if (step === 1) {
-      formErrors = validateShipping();
-    } else if (step === 2) {
-      formErrors = validatePayment();
-    }
-
-    if (Object.keys(formErrors).length > 0) {
-      setErrors(formErrors);
-      return;
-    }
-
-    setErrors({});
-    setStep(step + 1);
-  };
-
-  const handleBack = () => {
-    setStep(step - 1);
+    setError('');
+    return true;
   };
 
   const handlePlaceOrder = async () => {
     setLoading(true);
+    setError('');
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      // Step 1: Create the order (this will be pending and wait for seller acceptance)
+      const orderData = {
+        items: items.map(item => ({
+          product_id: item.id,
+          quantity: item.quantity,
+          unit_price: item.price
+        })),
+        shipping_address: shippingData,
+        shipping_method: shippingMethod,
+        subtotal: subtotal,
+        shipping_cost: shippingCost,
+        tax: tax,
+        total: total,
+        status: 'pending' // Order starts as pending, waiting for seller acceptance
+      };
 
-      // Clear cart and go to success
-      clearCart();
-      setStep(4);
+      const orderResponse = await ApiService.createOrder(orderData);
+
+      if (orderResponse.success) {
+        setOrderId(orderResponse.order.id);
+        setStep(4);
+
+        // Clear the cart after successful order creation
+        clearCart();
+
+        // Add notification for the buyer
+        addNotification({
+          id: Date.now(),
+          type: 'order_created',
+          title: 'Order Created Successfully',
+          message: `Your order #${orderResponse.order.id} has been created and sent to sellers for approval.`,
+          read_at: null,
+          created_at: new Date().toISOString()
+        });
+
+        // The backend will automatically notify sellers about the new order
+
+      } else {
+        throw new Error(orderResponse.message || 'Failed to create order');
+      }
     } catch (error) {
-      setErrors({ order: 'Failed to place order. Please try again.' });
+      console.error('Order creation failed:', error);
+      setError(error.message || 'Failed to place order. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  const formatCardNumber = (value) => {
-    const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
-    const matches = v.match(/\d{4,16}/g);
-    const match = matches && matches[0] || '';
-    const parts = [];
-    for (let i = 0, len = match.length; i < len; i += 4) {
-      parts.push(match.substring(i, i + 4));
-    }
-    if (parts.length) {
-      return parts.join(' ');
-    } else {
-      return v;
-    }
+  const handleShippingChange = (field, value) => {
+    setShippingData(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
-  const selectedShipping = shippingOptions.find(option => option.id === shippingMethod);
-  const subtotal = getTotalPrice();
-  const tax = subtotal * 0.08; // 8% tax
-  const shipping = selectedShipping?.price || 0;
-  const total = subtotal + tax + shipping;
+  const handlePaymentChange = (field, value) => {
+    setPaymentData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
 
   if (step === 4) {
     return (
       <div className="checkout-page">
         <div className="container">
-          <div className="order-success">
-            <div className="success-icon">
-              <CheckCircle size={64} />
-            </div>
+          <div className="checkout-success">
+            <CheckCircle size={64} className="success-icon" />
             <h1>Order Placed Successfully!</h1>
-            <p>Thank you for your purchase. You will receive an email confirmation shortly.</p>
-            <div className="order-summary">
-              <div className="order-number">Order #BMS{Date.now()}</div>
-              <div className="order-total">Total: ${total.toFixed(2)}</div>
+            <p>Your order #{orderId} has been created and sent to our bakery partners.</p>
+
+            <div className="success-details">
+              <div className="detail-item">
+                <Clock size={20} />
+                <div>
+                  <h4>What happens next?</h4>
+                  <p>Our bakery partners will review your order and confirm availability. You'll receive a notification once they accept your order.</p>
+                </div>
+              </div>
+
+              <div className="detail-item">
+                <CreditCard size={20} />
+                <div>
+                  <h4>Payment</h4>
+                  <p>Payment will be processed only after the bakery accepts your order and confirms the delivery details.</p>
+                </div>
+              </div>
+
+              <div className="detail-item">
+                <Truck size={20} />
+                <div>
+                  <h4>Delivery</h4>
+                  <p>You'll receive tracking information once your order is prepared and ready for delivery.</p>
+                </div>
+              </div>
             </div>
+
             <div className="success-actions">
-              <button
-                className="btn btn-primary"
-                onClick={() => navigate('/buyer/orders')}
-              >
-                View Orders
+              <button onClick={() => navigate('/buyer/orders')} className="btn btn-primary">
+                View My Orders
               </button>
-              <button
-                className="btn btn-outline"
-                onClick={() => navigate('/products')}
-              >
+              <button onClick={() => navigate('/products')} className="btn btn-outline">
                 Continue Shopping
               </button>
             </div>
@@ -238,335 +229,321 @@ const Checkout = () => {
   return (
     <div className="checkout-page">
       <div className="container">
-        {/* Header */}
         <div className="checkout-header">
-          <button className="back-btn" onClick={() => navigate('/cart')}>
+          <button onClick={() => navigate('/cart')} className="back-btn">
             <ArrowLeft size={20} />
             Back to Cart
           </button>
           <h1>Checkout</h1>
         </div>
 
-        {/* Progress Steps */}
         <div className="checkout-progress">
-          <div className={`step ${step >= 1 ? 'active' : ''} ${step > 1 ? 'completed' : ''}`}>
-            <div className="step-icon">
-              <Truck size={16} />
-            </div>
+          <div className={`progress-step ${step >= 1 ? 'active' : ''}`}>
+            <div className="step-number">1</div>
             <span>Shipping</span>
           </div>
-          <div className={`step ${step >= 2 ? 'active' : ''} ${step > 2 ? 'completed' : ''}`}>
-            <div className="step-icon">
-              <CreditCard size={16} />
-            </div>
+          <div className={`progress-step ${step >= 2 ? 'active' : ''}`}>
+            <div className="step-number">2</div>
             <span>Payment</span>
           </div>
-          <div className={`step ${step >= 3 ? 'active' : ''} ${step > 3 ? 'completed' : ''}`}>
-            <div className="step-icon">
-              <CheckCircle size={16} />
-            </div>
+          <div className={`progress-step ${step >= 3 ? 'active' : ''}`}>
+            <div className="step-number">3</div>
             <span>Review</span>
           </div>
         </div>
 
+        {error && (
+          <div className="error-message">
+            <AlertCircle size={16} />
+            {error}
+          </div>
+        )}
+
         <div className="checkout-content">
-          {/* Main Content */}
           <div className="checkout-main">
-            {/* Step 1: Shipping Information */}
             {step === 1 && (
-              <div className="checkout-step">
+              <div className="checkout-section">
                 <h2>Shipping Information</h2>
-
-                <div className="form-grid">
-                  <div className="form-group">
-                    <label className="form-label">First Name</label>
-                    <input
-                      type="text"
-                      value={shippingData.firstName}
-                      onChange={(e) => handleInputChange('shipping', 'firstName', e.target.value)}
-                      className={`form-input ${errors.firstName ? 'error' : ''}`}
-                    />
-                    {errors.firstName && <div className="error-message">{errors.firstName}</div>}
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">Last Name</label>
-                    <input
-                      type="text"
-                      value={shippingData.lastName}
-                      onChange={(e) => handleInputChange('shipping', 'lastName', e.target.value)}
-                      className={`form-input ${errors.lastName ? 'error' : ''}`}
-                    />
-                    {errors.lastName && <div className="error-message">{errors.lastName}</div>}
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">Email</label>
-                    <input
-                      type="email"
-                      value={shippingData.email}
-                      onChange={(e) => handleInputChange('shipping', 'email', e.target.value)}
-                      className={`form-input ${errors.email ? 'error' : ''}`}
-                    />
-                    {errors.email && <div className="error-message">{errors.email}</div>}
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">Phone</label>
-                    <input
-                      type="tel"
-                      value={shippingData.phone}
-                      onChange={(e) => handleInputChange('shipping', 'phone', e.target.value)}
-                      className={`form-input ${errors.phone ? 'error' : ''}`}
-                    />
-                    {errors.phone && <div className="error-message">{errors.phone}</div>}
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Address</label>
-                  <input
-                    type="text"
-                    value={shippingData.address}
-                    onChange={(e) => handleInputChange('shipping', 'address', e.target.value)}
-                    className={`form-input ${errors.address ? 'error' : ''}`}
-                  />
-                  {errors.address && <div className="error-message">{errors.address}</div>}
-                </div>
-
-                <div className="form-grid">
-                  <div className="form-group">
-                    <label className="form-label">City</label>
-                    <input
-                      type="text"
-                      value={shippingData.city}
-                      onChange={(e) => handleInputChange('shipping', 'city', e.target.value)}
-                      className={`form-input ${errors.city ? 'error' : ''}`}
-                    />
-                    {errors.city && <div className="error-message">{errors.city}</div>}
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">State</label>
-                    <input
-                      type="text"
-                      value={shippingData.state}
-                      onChange={(e) => handleInputChange('shipping', 'state', e.target.value)}
-                      className={`form-input ${errors.state ? 'error' : ''}`}
-                    />
-                    {errors.state && <div className="error-message">{errors.state}</div>}
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">ZIP Code</label>
-                    <input
-                      type="text"
-                      value={shippingData.zipCode}
-                      onChange={(e) => handleInputChange('shipping', 'zipCode', e.target.value)}
-                      className={`form-input ${errors.zipCode ? 'error' : ''}`}
-                    />
-                    {errors.zipCode && <div className="error-message">{errors.zipCode}</div>}
-                  </div>
-                </div>
-
-                <div className="shipping-methods">
-                  <h3>Shipping Method</h3>
-                  {shippingOptions.map(option => (
-                    <label key={option.id} className="shipping-option">
+                <form onSubmit={handleShippingSubmit}>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>First Name *</label>
                       <input
-                        type="radio"
-                        name="shipping"
-                        value={option.id}
-                        checked={shippingMethod === option.id}
-                        onChange={(e) => setShippingMethod(e.target.value)}
+                        type="text"
+                        value={shippingData.firstName}
+                        onChange={(e) => handleShippingChange('firstName', e.target.value)}
+                        required
                       />
-                      <div className="option-content">
-                        <div className="option-name">{option.name}</div>
-                        <div className="option-details">{option.days}</div>
-                      </div>
-                      <div className="option-price">${option.price}</div>
-                    </label>
-                  ))}
-                </div>
+                    </div>
+                    <div className="form-group">
+                      <label>Last Name *</label>
+                      <input
+                        type="text"
+                        value={shippingData.lastName}
+                        onChange={(e) => handleShippingChange('lastName', e.target.value)}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Email *</label>
+                      <input
+                        type="email"
+                        value={shippingData.email}
+                        onChange={(e) => handleShippingChange('email', e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Phone *</label>
+                      <input
+                        type="tel"
+                        value={shippingData.phone}
+                        onChange={(e) => handleShippingChange('phone', e.target.value)}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Address *</label>
+                    <input
+                      type="text"
+                      value={shippingData.address}
+                      onChange={(e) => handleShippingChange('address', e.target.value)}
+                      placeholder="Street address"
+                      required
+                    />
+                  </div>
+
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>City *</label>
+                      <input
+                        type="text"
+                        value={shippingData.city}
+                        onChange={(e) => handleShippingChange('city', e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>State *</label>
+                      <input
+                        type="text"
+                        value={shippingData.state}
+                        onChange={(e) => handleShippingChange('state', e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>ZIP Code *</label>
+                      <input
+                        type="text"
+                        value={shippingData.zipCode}
+                        onChange={(e) => handleShippingChange('zipCode', e.target.value)}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="shipping-methods">
+                    <h3>Shipping Method</h3>
+                    <div className="shipping-options">
+                      <label className="shipping-option">
+                        <input
+                          type="radio"
+                          value="standard"
+                          checked={shippingMethod === 'standard'}
+                          onChange={(e) => setShippingMethod(e.target.value)}
+                        />
+                        <div>
+                          <strong>Standard Delivery</strong>
+                          <span>{subtotal >= 25 ? 'FREE' : '$7.50'} • 3-5 business days</span>
+                        </div>
+                      </label>
+                      <label className="shipping-option">
+                        <input
+                          type="radio"
+                          value="express"
+                          checked={shippingMethod === 'express'}
+                          onChange={(e) => setShippingMethod(e.target.value)}
+                        />
+                        <div>
+                          <strong>Express Delivery</strong>
+                          <span>$15.00 • 1-2 business days</span>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+
+                  <button type="submit" className="btn btn-primary btn-lg">
+                    Continue to Payment
+                  </button>
+                </form>
               </div>
             )}
 
-            {/* Step 2: Payment Information */}
             {step === 2 && (
-              <div className="checkout-step">
+              <div className="checkout-section">
                 <h2>Payment Information</h2>
-
-                <div className="payment-form">
+                <form onSubmit={handlePaymentSubmit}>
                   <div className="form-group">
-                    <label className="form-label">Card Number</label>
-                    <input
-                      type="text"
-                      value={paymentData.cardNumber}
-                      onChange={(e) => handleInputChange('payment', 'cardNumber', formatCardNumber(e.target.value))}
-                      className={`form-input ${errors.cardNumber ? 'error' : ''}`}
-                      placeholder="1234 5678 9012 3456"
-                      maxLength="19"
-                    />
-                    {errors.cardNumber && <div className="error-message">{errors.cardNumber}</div>}
-                  </div>
-
-                  <div className="form-grid">
-                    <div className="form-group">
-                      <label className="form-label">Expiry Date</label>
-                      <input
-                        type="text"
-                        value={paymentData.expiryDate}
-                        onChange={(e) => handleInputChange('payment', 'expiryDate', e.target.value)}
-                        className={`form-input ${errors.expiryDate ? 'error' : ''}`}
-                        placeholder="MM/YY"
-                        maxLength="5"
-                      />
-                      {errors.expiryDate && <div className="error-message">{errors.expiryDate}</div>}
-                    </div>
-
-                    <div className="form-group">
-                      <label className="form-label">CVV</label>
-                      <input
-                        type="text"
-                        value={paymentData.cvv}
-                        onChange={(e) => handleInputChange('payment', 'cvv', e.target.value.replace(/\D/g, ''))}
-                        className={`form-input ${errors.cvv ? 'error' : ''}`}
-                        placeholder="123"
-                        maxLength="4"
-                      />
-                      {errors.cvv && <div className="error-message">{errors.cvv}</div>}
-                    </div>
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">Cardholder Name</label>
+                    <label>Cardholder Name *</label>
                     <input
                       type="text"
                       value={paymentData.cardholderName}
-                      onChange={(e) => handleInputChange('payment', 'cardholderName', e.target.value)}
-                      className={`form-input ${errors.cardholderName ? 'error' : ''}`}
+                      onChange={(e) => handlePaymentChange('cardholderName', e.target.value)}
+                      required
                     />
-                    {errors.cardholderName && <div className="error-message">{errors.cardholderName}</div>}
                   </div>
-                </div>
+
+                  <div className="form-group">
+                    <label>Card Number *</label>
+                    <input
+                      type="text"
+                      value={paymentData.cardNumber}
+                      onChange={(e) => handlePaymentChange('cardNumber', e.target.value)}
+                      placeholder="1234 5678 9012 3456"
+                      required
+                    />
+                  </div>
+
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Expiry Date *</label>
+                      <input
+                        type="text"
+                        value={paymentData.expiryDate}
+                        onChange={(e) => handlePaymentChange('expiryDate', e.target.value)}
+                        placeholder="MM/YY"
+                        required
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>CVV *</label>
+                      <input
+                        type="text"
+                        value={paymentData.cvv}
+                        onChange={(e) => handlePaymentChange('cvv', e.target.value)}
+                        placeholder="123"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="security-notice">
+                    <Lock size={16} />
+                    <span>Your payment information is secured with 256-bit SSL encryption</span>
+                  </div>
+
+                  <div className="form-actions">
+                    <button type="button" onClick={() => setStep(1)} className="btn btn-outline">
+                      Back to Shipping
+                    </button>
+                    <button type="submit" className="btn btn-primary btn-lg">
+                      Review Order
+                    </button>
+                  </div>
+                </form>
               </div>
             )}
 
-            {/* Step 3: Order Review */}
             {step === 3 && (
-              <div className="checkout-step">
+              <div className="checkout-section">
                 <h2>Review Your Order</h2>
 
-                <div className="order-review">
-                  <div className="review-section">
-                    <h3>Shipping Address</h3>
-                    <div className="review-content">
-                      <p>{shippingData.firstName} {shippingData.lastName}</p>
-                      <p>{shippingData.address}</p>
-                      <p>{shippingData.city}, {shippingData.state} {shippingData.zipCode}</p>
-                      <p>{shippingData.email} • {shippingData.phone}</p>
-                    </div>
-                    <button className="edit-btn" onClick={() => setStep(1)}>Edit</button>
+                <div className="review-section">
+                  <h3>Shipping Address</h3>
+                  <div className="review-content">
+                    <p>{shippingData.firstName} {shippingData.lastName}</p>
+                    <p>{shippingData.address}</p>
+                    <p>{shippingData.city}, {shippingData.state} {shippingData.zipCode}</p>
+                    <p>{shippingData.phone}</p>
                   </div>
+                  <button onClick={() => setStep(1)} className="edit-btn">Edit</button>
+                </div>
 
-                  <div className="review-section">
-                    <h3>Payment Method</h3>
-                    <div className="review-content">
-                      <p>**** **** **** {paymentData.cardNumber.slice(-4)}</p>
-                      <p>{paymentData.cardholderName}</p>
-                    </div>
-                    <button className="edit-btn" onClick={() => setStep(2)}>Edit</button>
+                <div className="review-section">
+                  <h3>Payment Method</h3>
+                  <div className="review-content">
+                    <p>**** **** **** {paymentData.cardNumber.slice(-4)}</p>
+                    <p>{paymentData.cardholderName}</p>
                   </div>
+                  <button onClick={() => setStep(2)} className="edit-btn">Edit</button>
+                </div>
 
-                  <div className="review-section">
-                    <h3>Shipping Method</h3>
-                    <div className="review-content">
-                      <p>{selectedShipping?.name}</p>
-                      <p>{selectedShipping?.days}</p>
-                    </div>
+                <div className="review-section">
+                  <h3>Order Items</h3>
+                  <div className="review-items">
+                    {items.map(item => (
+                      <div key={item.id} className="review-item">
+                        <img src={item.image} alt={item.name} />
+                        <div className="item-details">
+                          <h4>{item.name}</h4>
+                          <p>Quantity: {item.quantity}</p>
+                        </div>
+                        <span className="item-price">{formatPrice(item.price * item.quantity)}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
-                {errors.order && (
-                  <div className="alert alert-error">
-                    {errors.order}
+                <div className="order-notice">
+                  <AlertCircle size={16} />
+                  <div>
+                    <strong>Important:</strong> Your order will be sent to our bakery partners for approval.
+                    Payment will only be processed after they accept your order and confirm availability.
                   </div>
-                )}
+                </div>
+
+                <div className="form-actions">
+                  <button onClick={() => setStep(2)} className="btn btn-outline">
+                    Back to Payment
+                  </button>
+                  <button
+                    onClick={handlePlaceOrder}
+                    className="btn btn-primary btn-lg"
+                    disabled={loading}
+                  >
+                    {loading ? 'Placing Order...' : 'Place Order'}
+                  </button>
+                </div>
               </div>
             )}
-
-            {/* Navigation Buttons */}
-            <div className="checkout-actions">
-              {step > 1 && step < 4 && (
-                <button className="btn btn-secondary" onClick={handleBack}>
-                  Back
-                </button>
-              )}
-
-              {step < 3 && (
-                <button className="btn btn-primary" onClick={handleNext}>
-                  Continue
-                </button>
-              )}
-
-              {step === 3 && (
-                <button
-                  className="btn btn-primary"
-                  onClick={handlePlaceOrder}
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <>
-                      <div className="loading"></div>
-                      Processing...
-                    </>
-                  ) : (
-                    'Place Order'
-                  )}
-                </button>
-              )}
-            </div>
           </div>
 
-          {/* Order Summary Sidebar */}
+          {/* Order Summary */}
           <div className="order-summary">
             <h3>Order Summary</h3>
 
-            <div className="cart-items">
+            <div className="summary-items">
               {items.map(item => (
-                <div key={item.id} className="cart-item">
-                  <img src={item.image} alt={item.name} className="item-image" />
-                  <div className="item-details">
-                    <div className="item-name">{item.name}</div>
-                    <div className="item-quantity">Qty: {item.quantity}</div>
-                  </div>
-                  <div className="item-price">${(item.price * item.quantity).toFixed(2)}</div>
+                <div key={item.id} className="summary-item">
+                  <span>{item.name} × {item.quantity}</span>
+                  <span>{formatPrice(item.price * item.quantity)}</span>
                 </div>
               ))}
             </div>
 
-            <div className="summary-breakdown">
-              <div className="summary-line">
-                <span>Subtotal:</span>
-                <span>${subtotal.toFixed(2)}</span>
+            <div className="summary-totals">
+              <div className="total-line">
+                <span>Subtotal</span>
+                <span>{formatPrice(subtotal)}</span>
               </div>
-              <div className="summary-line">
-                <span>Shipping:</span>
-                <span>${shipping.toFixed(2)}</span>
+              <div className="total-line">
+                <span>Shipping</span>
+                <span>{shippingCost === 0 ? 'FREE' : formatPrice(shippingCost)}</span>
               </div>
-              <div className="summary-line">
-                <span>Tax:</span>
-                <span>${tax.toFixed(2)}</span>
+              <div className="total-line">
+                <span>Tax</span>
+                <span>{formatPrice(tax)}</span>
               </div>
-              <div className="summary-line total">
-                <span>Total:</span>
-                <span>${total.toFixed(2)}</span>
+              <div className="total-line total">
+                <span>Total</span>
+                <span>{formatPrice(total)}</span>
               </div>
-            </div>
-
-            <div className="security-notice">
-              <Lock size={16} />
-              <span>Your payment information is secure and encrypted</span>
             </div>
           </div>
         </div>

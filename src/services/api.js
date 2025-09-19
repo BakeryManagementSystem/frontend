@@ -113,6 +113,64 @@ class ApiService {
   async checkWishlist(productId) {
     return this.request(`/buyer/wishlist/check/${productId}`);
   }
+
+  // Orders API
+  async createOrder(orderData) {
+    return this.request('/orders/checkout', {
+      method: 'POST',
+      body: JSON.stringify(orderData),
+    });
+  }
+
+  async getOrders() {
+    return this.request('/orders');
+  }
+
+  async getOrder(orderId) {
+    return this.request(`/orders/${orderId}`);
+  }
+
+  async updateOrderStatus(orderId, status) {
+    return this.request(`/orders/${orderId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status }),
+    });
+  }
+
+  async getSellerOrders() {
+    return this.request('/seller/orders');
+  }
+
+  // Notifications API
+  async getNotifications() {
+    return this.request('/notifications');
+  }
+
+  async markNotificationAsRead(notificationId) {
+    return this.request(`/notifications/${notificationId}/read`, {
+      method: 'PATCH',
+    });
+  }
+
+  async markAllNotificationsAsRead() {
+    return this.request('/notifications/read-all', {
+      method: 'PATCH',
+    });
+  }
+
+  async deleteNotification(notificationId) {
+    return this.request(`/notifications/${notificationId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Payment API
+  async processPayment(paymentData) {
+    return this.request('/payments/process', {
+      method: 'POST',
+      body: JSON.stringify(paymentData),
+    });
+  }
 }
 
 export default new ApiService();
