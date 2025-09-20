@@ -40,12 +40,27 @@
   line-height: 1.6;
   opacity: 0.9;
   margin-bottom: var(--spacing-xl);
+  color: white; /* Fix 2: Make description text white */
 }
 
 .hero-actions {
   display: flex;
   gap: var(--spacing-lg);
   flex-wrap: wrap;
+}
+
+/* Fix 1: Join as Baker button white styling */
+.hero-actions .btn-outline {
+  background-color: white;
+  color: var(--primary-color);
+  border: 2px solid white;
+}
+
+.hero-actions .btn-outline:hover {
+  background-color: white;
+  color: var(--primary-hover);
+  border: 2px solid white;
+  transform: translateY(-2px);
 }
 
 .hero-image {
@@ -107,6 +122,9 @@
   text-align: center;
   margin-bottom: var(--spacing-2xl);
   position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .section-header h2 {
@@ -119,12 +137,11 @@
 .section-header p {
   font-size: var(--font-size-lg);
   color: var(--text-secondary);
+  margin-bottom: var(--spacing-md);
 }
 
 .section-link {
-  position: absolute;
-  top: 0;
-  right: 0;
+  position: static; /* Changed from absolute to static */
   color: var(--primary-color);
   text-decoration: none;
   font-weight: 500;
@@ -132,6 +149,7 @@
   align-items: center;
   gap: var(--spacing-sm);
   transition: color 0.2s ease;
+  margin-top: var(--spacing-sm);
 }
 
 .section-link:hover {
@@ -183,6 +201,21 @@
   font-size: var(--font-size-sm);
   color: var(--text-secondary);
   margin: 0;
+}
+
+/* Add loading state for categories */
+.categories-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  color: var(--text-secondary);
+}
+
+.no-categories {
+  text-align: center;
+  padding: var(--spacing-2xl);
+  color: var(--text-secondary);
 }
 
 /* Products Sections */
@@ -274,7 +307,15 @@
 }
 
 .stat-icon {
-  color: var(--accent-color);
+  width: 80px;
+  height: 80px;
+  background: var(--primary-color); /* Add primary purple background */
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white; /* White icons on purple background */
+  margin-bottom: var(--spacing-sm);
 }
 
 .stat-value {
