@@ -96,7 +96,7 @@
   align-items: center;
   background: var(--bg-secondary, #f8fafc);
   border-radius: 12px;
-  border: 1px solid var(--border-light, #e2e8f0);
+  border: 1px solid var(--accent-color, #9b75d0);
   overflow: hidden;
   transition: all 0.2s ease;
 }

@@ -177,7 +177,6 @@ const Header = () => {
             {/* Desktop Search */}
             <div className="search-container desktop-search">
               <form onSubmit={handleSearch} className="search-form">
-                <Search size={16} className="search-icon" />
                 <input
                   type="text"
                   placeholder="Search for bakery items..."
