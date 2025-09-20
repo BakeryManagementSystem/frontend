@@ -5,8 +5,8 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Clean install with verbose output
-RUN npm ci --verbose
+# Remove package-lock and install fresh to avoid rollup issues
+RUN rm -f package-lock.json && npm install
 
 # Copy source code
 COPY . .
