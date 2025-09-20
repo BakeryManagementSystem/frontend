@@ -423,8 +423,8 @@
 /* Stats Section */
 .stats-section {
   padding: var(--spacing-2xl) 0;
-  background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
-  color: var(--text-inverse);
+  background: linear-gradient(135deg, #f8fafc, #e2e8f0); /* Light gray gradient */
+  color: var(--text-primary);
 }
 
 .stats-grid {
@@ -444,24 +444,25 @@
 .stat-icon {
   width: 80px;
   height: 80px;
-  background: var(--primary-color); /* Add primary purple background */
-  border-radius: 50%;
+  background: var(--primary-color) !important; /* Purple background for icons */
+  border-radius: 50% !important;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white; /* White icons on purple background */
+  color: white !important; /* White icons on purple background */
   margin-bottom: var(--spacing-sm);
+  box-shadow: 0 4px 15px rgba(102, 57, 166, 0.2); /* Purple shadow */
 }
 
 .stat-value {
   font-size: var(--font-size-4xl);
   font-weight: 800;
-  color: var(--text-inverse);
+  color: var(--text-primary); /* Dark text on light background */
 }
 
 .stat-label {
   font-size: var(--font-size-base);
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--text-secondary); /* Secondary text color */
 }
 
 /* CTA Section */
