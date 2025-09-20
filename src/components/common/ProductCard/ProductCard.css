@@ -59,16 +59,14 @@
   right: var(--spacing-md);
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-xs);
   opacity: 0;
-  transform: translateX(10px);
-  transition: all 0.3s ease;
+  transition: opacity 0.3s ease;
   z-index: 2;
 }
 
 .product-card:hover .product-actions {
   opacity: 1;
-  transform: translateX(0);
 }
 
 .action-btn {
@@ -76,24 +74,30 @@
   height: 36px;
   border: none;
   border-radius: 50%;
-  background-color: var(--bg-card);
+  background-color: rgba(255, 255, 255, 0.9);
   color: var(--text-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
+  backdrop-filter: blur(4px);
   box-shadow: var(--shadow-md);
 }
 
 .action-btn:hover {
-  background-color: var(--primary-color);
-  color: var(--text-inverse);
+  background-color: var(--bg-card);
+  color: var(--primary-color);
   transform: scale(1.1);
 }
 
-.wishlist-btn:hover {
-  background-color: var(--error-color);
+.wishlist-btn.active {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.wishlist-btn.active:hover {
+  background-color: var(--primary-hover);
 }
 
 .product-info {
@@ -101,23 +105,22 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
 }
 
 .product-category {
   font-size: var(--font-size-xs);
-  color: var(--text-muted);
+  color: var(--text-secondary);
   text-transform: uppercase;
-  font-weight: 500;
   letter-spacing: 0.5px;
+  margin-bottom: var(--spacing-xs);
 }
 
 .product-name {
   font-size: var(--font-size-base);
   font-weight: 600;
   color: var(--text-primary);
+  margin-bottom: var(--spacing-sm);
   line-height: 1.4;
-  margin: 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -127,7 +130,8 @@
 .product-rating {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-xs);
 }
 
 .stars {
@@ -138,19 +142,25 @@
 
 .rating-count {
   font-size: var(--font-size-xs);
-  color: var(--text-muted);
+  color: var(--text-secondary);
+}
+
+.product-seller {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-sm);
 }
 
 .product-price {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
-  margin-top: auto;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-sm);
 }
 
 .original-price {
   font-size: var(--font-size-sm);
-  color: var(--text-muted);
+  color: var(--text-secondary);
   text-decoration: line-through;
 }
 
@@ -160,9 +170,12 @@
   color: var(--primary-color);
 }
 
-.product-seller {
+.out-of-stock {
   font-size: var(--font-size-xs);
-  color: var(--text-muted);
+  color: var(--error-color);
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-top: auto;
 }
 
 .product-card-footer {
@@ -180,33 +193,17 @@
   box-shadow: var(--shadow-md);
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  .product-info {
-    padding: var(--spacing-md);
-  }
+/* Product Actions Bottom */
+.product-actions-bottom {
+  padding: 0 var(--spacing-lg) var(--spacing-lg);
+}
 
-  .product-card-footer {
-    padding: var(--spacing-sm) var(--spacing-md);
-  }
-
-  .product-actions {
-    opacity: 1;
-    transform: translateX(0);
-  }
-
-  .action-btn {
-    width: 32px;
-    height: 32px;
-  }
-
-  .product-name {
-    font-size: var(--font-size-sm);
-  }
-
-  .current-price {
-    font-size: var(--font-size-base);
-  }
+.add-to-cart {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
 }
 
 /* Loading state */
@@ -226,5 +223,33 @@
   }
   100% {
     background-position: -200% 0;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .product-info {
+    padding: var(--spacing-md);
+  }
+
+  .product-card-footer {
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+
+  .product-actions {
+    opacity: 1;
+  }
+
+  .action-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .product-name {
+    font-size: var(--font-size-sm);
+  }
+
+  .current-price {
+    font-size: var(--font-size-base);
   }
 }

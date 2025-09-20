@@ -51,8 +51,8 @@ export const CartProvider = ({ children }) => {
     setItems(prevItems => prevItems.filter(item => item.id !== productId));
   };
 
-  const updateQuantity = (productId, quantity) => {
-    if (quantity <= 0) {
+  const updateQuantity = (productId, newQuantity) => {
+    if (newQuantity <= 0) {
       removeFromCart(productId);
       return;
     }
@@ -60,7 +60,7 @@ export const CartProvider = ({ children }) => {
     setItems(prevItems =>
       prevItems.map(item =>
         item.id === productId
-          ? { ...item, quantity }
+          ? { ...item, quantity: newQuantity }
           : item
       )
     );
@@ -78,13 +78,13 @@ export const CartProvider = ({ children }) => {
     return items.reduce((total, item) => total + (item.price * item.quantity), 0);
   };
 
-  const toggleCart = () => {
-    setIsOpen(prev => !prev);
+  const getItemById = (productId) => {
+    return items.find(item => item.id === productId);
   };
 
-  const closeCart = () => {
-    setIsOpen(false);
-  };
+  const openCart = () => setIsOpen(true);
+  const closeCart = () => setIsOpen(false);
+  const toggleCart = () => setIsOpen(!isOpen);
 
   const value = {
     items,
@@ -95,8 +95,10 @@ export const CartProvider = ({ children }) => {
     clearCart,
     getItemCount,
     getTotalPrice,
-    toggleCart,
+    getItemById,
+    openCart,
     closeCart,
+    toggleCart
   };
 
   return (

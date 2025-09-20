@@ -1,25 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useParams } from 'react-router-dom';
 import ProductCard from '../../components/common/ProductCard/ProductCard';
+import Pagination from '../../components/common/Pagination/Pagination';
+import ApiService from '../../services/api';
 import {
   Filter,
   Grid,
   List,
-  SlidersHorizontal,
-  Star,
-  X,
-  ChevronDown
+  Star
 } from 'lucide-react';
 import './Products.css';
 
 const Products = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const { category } = useParams();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [viewMode, setViewMode] = useState('grid');
   const [showFilters, setShowFilters] = useState(false);
   const [sortBy, setSortBy] = useState('featured');
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [categories, setCategories] = useState([]);
   const [filters, setFilters] = useState({
     category: category || '',
     priceRange: [0, 1000],
@@ -33,195 +36,159 @@ const Products = () => {
 
   useEffect(() => {
     fetchProducts();
-  }, [searchParams, category, sortBy, filters]);
+    fetchCategories();
+  }, [searchParams, category, sortBy, filters, currentPage]);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await ApiService.getCategories();
+      if (response && response.data) {
+        setCategories(response.data.map(cat => cat.name || cat.category));
+      }
+    } catch (error) {
+      console.error('Failed to fetch categories:', error);
+      // Fallback to default categories
+      setCategories([
+        'Breads',
+        'Pastries',
+        'Cakes',
+        'Muffins',
+        'Donuts',
+        'Bagels',
+        'Cookies',
+        'Specialty'
+      ]);
+    }
+  };
 
   const fetchProducts = async () => {
     setLoading(true);
-    // Simulate API call with mock data
-    setTimeout(() => {
-      const mockProducts = [
-        {
-          id: 1,
-          name: "Artisan Sourdough Bread",
-          price: 8.99,
-          originalPrice: 10.99,
-          image: "/placeholder-bread.jpg",
-          category: "Breads",
-          rating: 4.8,
-          reviewCount: 128,
-          seller: "Heritage Bakery",
-          discount: 18,
-          inStock: true,
-          freeShipping: true
-        },
-        {
-          id: 2,
-          name: "Chocolate Croissants (6-pack)",
-          price: 12.99,
-          image: "/placeholder-croissant.jpg",
-          category: "Pastries",
-          rating: 4.9,
-          reviewCount: 89,
-          seller: "French Corner Bakery",
-          inStock: true,
-          freeShipping: false
-        },
-        {
-          id: 3,
-          name: "Custom Birthday Cake (8-inch)",
-          price: 45.99,
-          originalPrice: 55.99,
-          image: "/placeholder-cake.jpg",
-          category: "Cakes",
-          rating: 4.7,
-          reviewCount: 203,
-          seller: "Sweet Dreams Bakery",
-          discount: 18,
-          inStock: true,
-          freeShipping: true
-        },
-        {
-          id: 4,
-          name: "Fresh Blueberry Muffins (12-pack)",
-          price: 18.99,
-          image: "/placeholder-muffins.jpg",
-          category: "Muffins",
-          rating: 4.6,
-          reviewCount: 156,
-          seller: "Morning Glory Bakery",
-          inStock: false,
-          freeShipping: true
-        },
-        {
-          id: 5,
-          name: "Cinnamon Sugar Donuts (6-pack)",
-          price: 9.99,
-          image: "/placeholder-donuts.jpg",
-          category: "Donuts",
-          rating: 4.5,
-          reviewCount: 67,
-          seller: "Golden Donut Shop",
-          inStock: true,
-          freeShipping: false
-        },
-        {
-          id: 6,
-          name: "Gluten-Free Brownies (9-pack)",
-          price: 16.99,
-          originalPrice: 19.99,
-          image: "/placeholder-brownies.jpg",
-          category: "Specialty",
-          rating: 4.4,
-          reviewCount: 142,
-          seller: "Healthy Bites Bakery",
-          discount: 15,
-          inStock: true,
-          freeShipping: true
-        },
-        {
-          id: 7,
-          name: "Classic Bagels Variety Pack (12-pack)",
-          price: 14.99,
-          image: "/placeholder-bagels.jpg",
-          category: "Bagels",
-          rating: 4.6,
-          reviewCount: 98,
-          seller: "Brooklyn Bagel Co",
-          inStock: true,
-          freeShipping: false
-        },
-        {
-          id: 8,
-          name: "Wedding Cupcakes (24-pack)",
-          price: 59.99,
-          originalPrice: 69.99,
-          image: "/placeholder-wedding-cupcakes.jpg",
-          category: "Specialty",
-          rating: 4.8,
-          reviewCount: 76,
-          seller: "Elegant Events Bakery",
-          discount: 14,
-          inStock: true,
-          freeShipping: true
-        },
-        {
-          id: 9,
-          name: "Seasonal Fruit Tarts (4-pack)",
-          price: 22.99,
-          image: "/placeholder-tarts.jpg",
-          category: "Pastries",
-          rating: 4.7,
-          reviewCount: 134,
-          seller: "Garden Fresh Bakery",
-          inStock: true,
-          freeShipping: true
-        },
-        {
-          id: 10,
-          name: "Artisan Pizza Dough (2-pack)",
-          price: 6.99,
-          image: "/placeholder-dough.jpg",
-          category: "Specialty",
-          rating: 4.3,
-          reviewCount: 89,
-          seller: "Italian Kitchen Bakery",
-          inStock: true,
-          freeShipping: false
-        }
-      ];
+    setError(null);
 
-      // Apply filters
-      let filteredProducts = mockProducts;
+    try {
+      // Build API parameters
+      const apiParams = {
+        per_page: 12,
+        page: currentPage
+      };
 
+      // Add search query
       if (searchQuery) {
-        filteredProducts = filteredProducts.filter(product =>
-          product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          product.category.toLowerCase().includes(searchQuery.toLowerCase())
-        );
+        apiParams.q = searchQuery;
       }
 
+      // Add category filter
       if (filters.category) {
-        filteredProducts = filteredProducts.filter(product =>
-          product.category.toLowerCase() === filters.category.toLowerCase()
-        );
+        apiParams.category = filters.category;
       }
 
-      if (filters.rating > 0) {
-        filteredProducts = filteredProducts.filter(product =>
-          product.rating >= filters.rating
-        );
-      }
+      // Fetch from API
+      const response = await ApiService.getProducts(apiParams);
 
-      if (filters.inStock) {
-        filteredProducts = filteredProducts.filter(product => product.inStock);
-      }
+      if (response && response.data) {
+        let fetchedProducts = response.data.map(product => ({
+          id: product.id,
+          name: product.name,
+          price: parseFloat(product.price),
+          originalPrice: product.discount_price ? parseFloat(product.price) : null,
+          discountPrice: product.discount_price ? parseFloat(product.discount_price) : null,
+          image: product.image_url || product.image_path || '/placeholder-product.jpg',
+          category: product.category || 'General',
+          rating: calculateAverageRating(product.reviews || []),
+          reviewCount: (product.reviews || []).length,
+          seller: product.owner?.shop_name || product.owner?.name || 'Unknown Seller',
+          discount: product.discount_price ?
+            Math.round(((parseFloat(product.price) - parseFloat(product.discount_price)) / parseFloat(product.price)) * 100) : 0,
+          inStock: product.stock_quantity > 0,
+          freeShipping: product.price >= 25, // Free shipping for orders over $25
+          description: product.description,
+          sku: product.sku,
+          weight: product.weight,
+          dimensions: product.dimensions,
+          ingredients: product.ingredients || [],
+          allergens: product.allergens || [],
+          isFeatured: product.is_featured || false,
+          status: product.status
+        }));
 
-      if (filters.freeShipping) {
-        filteredProducts = filteredProducts.filter(product => product.freeShipping);
-      }
+        // Apply client-side filters (since backend doesn't support all filters yet)
+        fetchedProducts = applyClientSideFilters(fetchedProducts);
 
-      // Apply sorting
-      switch (sortBy) {
-        case 'price-low':
-          filteredProducts.sort((a, b) => a.price - b.price);
-          break;
-        case 'price-high':
-          filteredProducts.sort((a, b) => b.price - a.price);
-          break;
-        case 'rating':
-          filteredProducts.sort((a, b) => b.rating - a.rating);
-          break;
-        case 'newest':
-          // In real app, would sort by date
-          break;
-        default:
-          // Featured - no sorting
-          break;
-      }
+        // Apply sorting
+        fetchedProducts = applySorting(fetchedProducts);
 
-      setProducts(filteredProducts);
+        setProducts(fetchedProducts);
+        setTotalProducts(response.meta?.total || fetchedProducts.length);
+      } else {
+        setProducts([]);
+        setTotalProducts(0);
+      }
+    } catch (error) {
+      console.error('Failed to fetch products:', error);
+      setError('Failed to load products. Please try again later.');
+      setProducts([]);
+      setTotalProducts(0);
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
+  };
+
+  const calculateAverageRating = (reviews) => {
+    if (!reviews || reviews.length === 0) return 4.5; // Default rating
+    const sum = reviews.reduce((acc, review) => acc + review.rating, 0);
+    return Math.round((sum / reviews.length) * 10) / 10;
+  };
+
+  const applyClientSideFilters = (products) => {
+    let filtered = [...products];
+
+    // Price range filter
+    if (filters.priceRange) {
+      filtered = filtered.filter(product => {
+        const price = product.discountPrice || product.price;
+        return price >= filters.priceRange[0] && price <= filters.priceRange[1];
+      });
+    }
+
+    // Rating filter
+    if (filters.rating > 0) {
+      filtered = filtered.filter(product => product.rating >= filters.rating);
+    }
+
+    // In stock filter
+    if (filters.inStock) {
+      filtered = filtered.filter(product => product.inStock);
+    }
+
+    // Free shipping filter
+    if (filters.freeShipping) {
+      filtered = filtered.filter(product => product.freeShipping);
+    }
+
+    return filtered;
+  };
+
+  const applySorting = (products) => {
+    const sorted = [...products];
+
+    switch (sortBy) {
+      case 'price-low':
+        return sorted.sort((a, b) => (a.discountPrice || a.price) - (b.discountPrice || b.price));
+      case 'price-high':
+        return sorted.sort((a, b) => (b.discountPrice || b.price) - (a.discountPrice || a.price));
+      case 'rating':
+        return sorted.sort((a, b) => b.rating - a.rating);
+      case 'newest':
+        return sorted.sort((a, b) => b.id - a.id); // Assuming higher ID means newer
+      case 'featured':
+      default:
+        return sorted.sort((a, b) => {
+          // Featured products first, then by rating
+          if (a.isFeatured && !b.isFeatured) return -1;
+          if (!a.isFeatured && b.isFeatured) return 1;
+          return b.rating - a.rating;
+        });
+    }
   };
 
   const handleFilterChange = (filterName, value) => {
@@ -229,6 +196,7 @@ const Products = () => {
       ...filters,
       [filterName]: value
     });
+    setCurrentPage(1); // Reset to first page when filters change
   };
 
   const clearFilters = () => {
@@ -239,18 +207,8 @@ const Products = () => {
       inStock: false,
       freeShipping: false
     });
+    setCurrentPage(1);
   };
-
-  const categories = [
-    'Breads',
-    'Pastries',
-    'Cakes',
-    'Muffins',
-    'Donuts',
-    'Bagels',
-    'Cookies',
-    'Specialty'
-  ];
 
   const getPageTitle = () => {
     if (category) {
@@ -262,6 +220,23 @@ const Products = () => {
     return 'All Products';
   };
 
+  // Show error state
+  if (error) {
+    return (
+      <div className="products-page">
+        <div className="container">
+          <div className="error-state">
+            <h2>Oops! Something went wrong</h2>
+            <p>{error}</p>
+            <button onClick={fetchProducts} className="btn btn-primary">
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="products-page">
       <div className="container">
@@ -269,7 +244,7 @@ const Products = () => {
         <div className="products-header">
           <div className="products-title">
             <h1>{getPageTitle()}</h1>
-            <p>{products.length} products found</p>
+            <p>{totalProducts} products found</p>
           </div>
 
           <div className="products-controls">
@@ -413,6 +388,17 @@ const Products = () => {
                   Clear Filters
                 </button>
               </div>
+            )}
+
+            {/* Pagination Component */}
+            {totalProducts > 0 && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={Math.ceil(totalProducts / 12)}
+                totalItems={totalProducts}
+                itemsPerPage={12}
+                onPageChange={page => setCurrentPage(page)}
+              />
             )}
           </main>
         </div>

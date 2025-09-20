@@ -21,9 +21,9 @@ const ProtectedRoute = ({ children, userType }) => {
   }
 
   // Check user type if specified
-  if (userType && user?.type !== userType) {
+  if (userType && user?.user_type !== userType) {
     // Redirect to appropriate dashboard based on user type
-    const redirectPath = user?.type === 'buyer' ? '/buyer' : '/seller';
+    const redirectPath = user?.user_type === 'buyer' ? '/buyer' : '/seller';
     return <Navigate to={redirectPath} replace />;
   }
 

@@ -37,10 +37,19 @@ const Login = () => {
     try {
       const result = await login(formData);
       if (result.success) {
-        // Redirect to the page they were trying to visit or dashboard
+        // Redirect to the page they were trying to visit or appropriate dashboard
         if (from === '/') {
-          // If coming from home, redirect to appropriate dashboard
-          navigate('/buyer'); // Default to buyer dashboard
+          // If coming from home, redirect to appropriate dashboard based on user type
+          const user = result.user;
+          if (user.user_type === 'buyer') {
+            navigate('/buyer');
+          } else if (user.user_type === 'seller') {
+            navigate('/seller');
+          } else if (user.user_type === 'owner') {
+            navigate('/owner');
+          } else {
+            navigate('/'); // Fallback to home
+          }
         } else {
           navigate(from, { replace: true });
         }

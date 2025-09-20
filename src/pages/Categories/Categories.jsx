@@ -13,109 +13,106 @@ const Categories = () => {
   }, []);
 
   const fetchCategories = async () => {
-    setLoading(true);
-    // Simulate API call with mock data
-    setTimeout(() => {
-      setCategories([
-        {
-          id: 1,
-          name: 'Bread & Rolls',
-          slug: 'bread-rolls',
-          description: 'Fresh artisan breads, dinner rolls, baguettes, and specialty loaves',
-          productCount: 150,
-          image: 'https://images.unsplash.com/photo-1549931319-a545dcf3bc73?w=400&h=300&fit=crop&crop=center',
-          icon: <Wheat size={32} />,
-          color: '#D2691E',
-          trending: true,
-          subcategories: ['Sourdough', 'Whole Wheat', 'Baguettes', 'Dinner Rolls', 'Specialty Breads']
-        },
-        {
-          id: 2,
-          name: 'Pastries',
-          slug: 'pastries',
-          description: 'Delicate pastries, croissants, danishes, and sweet breakfast treats',
-          productCount: 200,
-          image: 'https://images.unsplash.com/photo-1555507036-ab794f4eed25?w=400&h=300&fit=crop&crop=center',
-          icon: <Croissant size={32} />,
-          color: '#DEB887',
-          trending: true,
-          subcategories: ['Croissants', 'Danishes', 'Puff Pastries', 'Eclairs', 'Breakfast Pastries']
-        },
-        {
-          id: 3,
-          name: 'Cakes',
-          slug: 'cakes',
-          description: 'Custom cakes, layer cakes, cheesecakes, and celebration desserts',
-          productCount: 80,
-          image: 'https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=400&h=300&fit=crop&crop=center',
-          icon: <Cake size={32} />,
-          color: '#FF69B4',
-          trending: false,
-          subcategories: ['Birthday Cakes', 'Wedding Cakes', 'Cheesecakes', 'Layer Cakes', 'Custom Designs']
-        },
-        {
-          id: 4,
-          name: 'Cookies',
-          slug: 'cookies',
-          description: 'Freshly baked cookies, biscotti, macarons, and sweet treats',
-          productCount: 120,
-          image: 'https://images.unsplash.com/photo-1499636136210-6f4ee915583e?w=400&h=300&fit=crop&crop=center',
-          icon: <Cookie size={32} />,
-          color: '#CD853F',
-          trending: false,
-          subcategories: ['Chocolate Chip', 'Sugar Cookies', 'Macarons', 'Biscotti', 'Seasonal Cookies']
-        },
-        {
-          id: 5,
-          name: 'Muffins & Cupcakes',
-          slug: 'muffins-cupcakes',
-          description: 'Delicious muffins, cupcakes, and individual sweet treats',
-          productCount: 90,
-          image: 'https://images.unsplash.com/photo-1587668178277-295251f900ce?w=400&h=300&fit=crop&crop=center',
-          icon: <Cherry size={32} />,
-          color: '#FFB6C1',
-          trending: false,
-          subcategories: ['Blueberry Muffins', 'Chocolate Cupcakes', 'Seasonal Flavors', 'Mini Cupcakes', 'Specialty Muffins']
-        },
-        {
-          id: 6,
-          name: 'Donuts',
-          slug: 'donuts',
-          description: 'Fresh donuts, glazed, filled, and specialty varieties',
-          productCount: 60,
-          image: 'https://images.unsplash.com/photo-1551024601-bec78aea704b?w=400&h=300&fit=crop&crop=center',
-          icon: <Donut size={32} />,
-          color: '#FF6347',
-          trending: true,
-          subcategories: ['Glazed Donuts', 'Filled Donuts', 'Cake Donuts', 'Old-Fashioned', 'Specialty Donuts']
-        },
-        {
-          id: 7,
-          name: 'Bagels',
-          slug: 'bagels',
-          description: 'Traditional and specialty bagels, fresh baked daily',
-          productCount: 45,
-          image: 'https://images.unsplash.com/photo-1608198093002-ad4e005484ec?w=400&h=300&fit=crop&crop=center',
-          icon: <Circle size={32} />,
-          color: '#DAA520',
-          trending: false,
-          subcategories: ['Plain Bagels', 'Everything Bagels', 'Sesame Bagels', 'Specialty Flavors', 'Mini Bagels']
-        },
-        {
-          id: 8,
-          name: 'Specialty & Dietary',
-          slug: 'specialty',
-          description: 'Gluten-free, vegan, keto-friendly, and dietary-specific baked goods',
-          productCount: 70,
-          image: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=400&h=300&fit=crop&crop=center',
-          icon: <Sparkles size={32} />,
-          color: '#9370DB',
-          trending: true,
-          subcategories: ['Gluten-Free', 'Vegan Options', 'Keto-Friendly', 'Sugar-Free', 'Organic']
-        }
-      ]);
-      setLoading(false);
-    }, 1000);
+    // Remove loading animation - fetch categories immediately
+    setCategories([
+      {
+        id: 1,
+        name: 'Bread & Rolls',
+        slug: 'bread-rolls',
+        description: 'Fresh artisan breads, dinner rolls, baguettes, and specialty loaves',
+        productCount: 150,
+        image: 'https://images.unsplash.com/photo-1549931319-a545dcf3bc73?w=400&h=300&fit=crop&crop=center',
+        icon: <Wheat size={32} />,
+        color: '#D2691E',
+        trending: true,
+        subcategories: ['Sourdough', 'Whole Wheat', 'Baguettes', 'Dinner Rolls', 'Specialty Breads']
+      },
+      {
+        id: 2,
+        name: 'Pastries',
+        slug: 'pastries',
+        description: 'Delicate pastries, croissants, danishes, and sweet breakfast treats',
+        productCount: 200,
+        image: 'https://images.unsplash.com/photo-1555507036-ab794f4eed25?w=400&h=300&fit=crop&crop=center',
+        icon: <Croissant size={32} />,
+        color: '#DEB887',
+        trending: true,
+        subcategories: ['Croissants', 'Danishes', 'Puff Pastries', 'Eclairs', 'Breakfast Pastries']
+      },
+      {
+        id: 3,
+        name: 'Cakes',
+        slug: 'cakes',
+        description: 'Custom cakes, layer cakes, cheesecakes, and celebration desserts',
+        productCount: 80,
+        image: 'https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=400&h=300&fit=crop&crop=center',
+        icon: <Cake size={32} />,
+        color: '#FF69B4',
+        trending: false,
+        subcategories: ['Birthday Cakes', 'Wedding Cakes', 'Cheesecakes', 'Layer Cakes', 'Custom Designs']
+      },
+      {
+        id: 4,
+        name: 'Cookies',
+        slug: 'cookies',
+        description: 'Freshly baked cookies, biscotti, macarons, and sweet treats',
+        productCount: 120,
+        image: 'https://images.unsplash.com/photo-1499636136210-6f4ee915583e?w=400&h=300&fit=crop&crop=center',
+        icon: <Cookie size={32} />,
+        color: '#CD853F',
+        trending: false,
+        subcategories: ['Chocolate Chip', 'Sugar Cookies', 'Macarons', 'Biscotti', 'Seasonal Cookies']
+      },
+      {
+        id: 5,
+        name: 'Muffins & Cupcakes',
+        slug: 'muffins-cupcakes',
+        description: 'Delicious muffins, cupcakes, and individual sweet treats',
+        productCount: 90,
+        image: 'https://images.unsplash.com/photo-1587668178277-295251f900ce?w=400&h=300&fit=crop&crop=center',
+        icon: <Cherry size={32} />,
+        color: '#FFB6C1',
+        trending: false,
+        subcategories: ['Blueberry Muffins', 'Chocolate Cupcakes', 'Seasonal Flavors', 'Mini Cupcakes', 'Specialty Muffins']
+      },
+      {
+        id: 6,
+        name: 'Donuts',
+        slug: 'donuts',
+        description: 'Fresh donuts, glazed, filled, and specialty varieties',
+        productCount: 60,
+        image: 'https://images.unsplash.com/photo-1551024601-bec78aea704b?w=400&h=300&fit=crop&crop=center',
+        icon: <Donut size={32} />,
+        color: '#FF6347',
+        trending: true,
+        subcategories: ['Glazed Donuts', 'Filled Donuts', 'Cake Donuts', 'Old-Fashioned', 'Specialty Donuts']
+      },
+      {
+        id: 7,
+        name: 'Bagels',
+        slug: 'bagels',
+        description: 'Traditional and specialty bagels, fresh baked daily',
+        productCount: 45,
+        image: 'https://images.unsplash.com/photo-1608198093002-ad4e005484ec?w=400&h=300&fit=crop&crop=center',
+        icon: <Circle size={32} />,
+        color: '#DAA520',
+        trending: false,
+        subcategories: ['Plain Bagels', 'Everything Bagels', 'Sesame Bagels', 'Poppy Seed', 'Specialty Flavors']
+      },
+      {
+        id: 8,
+        name: 'Specialty Items',
+        slug: 'specialty',
+        description: 'Seasonal and specialty baked goods, custom orders',
+        productCount: 35,
+        image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&h=300&fit=crop&crop=center',
+        icon: <Sparkles size={32} />,
+        color: '#9370DB',
+        trending: false,
+        subcategories: ['Seasonal Items', 'Gluten-Free', 'Vegan Options', 'Custom Orders', 'Holiday Specials']
+      }
+    ]);
+    setLoading(false);
   };
 
   const handleCategoryClick = (categorySlug) => {
