@@ -47,15 +47,45 @@ const Home = () => {
           page: 1
         });
 
-        // Fetch categories
+        // Fetch categories with better error handling
         const categoriesResponse = await apiService.getCategories();
+        console.log('Categories response:', categoriesResponse); // Debug log
 
         setFeaturedProducts(featuredResponse.data || []);
         setTrendingProducts(trendingResponse.data || []);
-        setCategories(categoriesResponse.data || []);
+
+        // Handle different response formats for categories
+        if (categoriesResponse) {
+          if (Array.isArray(categoriesResponse)) {
+            setCategories(categoriesResponse);
+          } else if (categoriesResponse.data && Array.isArray(categoriesResponse.data)) {
+            setCategories(categoriesResponse.data);
+          } else {
+            console.warn('Unexpected categories response format:', categoriesResponse);
+            // Set fallback categories if backend has no data
+            setCategories([
+              { id: 1, name: 'Bread', products_count: 15 },
+              { id: 2, name: 'Pastries', products_count: 12 },
+              { id: 3, name: 'Cakes', products_count: 8 },
+              { id: 4, name: 'Cookies', products_count: 20 },
+              { id: 5, name: 'Cupcakes', products_count: 10 },
+              { id: 6, name: 'Specialty', products_count: 5 }
+            ]);
+          }
+        }
       } catch (err) {
         console.error('Error fetching data:', err);
         setError('Failed to load data. Please try again later.');
+
+        // Set fallback categories even on error
+        setCategories([
+          { id: 1, name: 'Bread', products_count: 15 },
+          { id: 2, name: 'Pastries', products_count: 12 },
+          { id: 3, name: 'Cakes', products_count: 8 },
+          { id: 4, name: 'Cookies', products_count: 20 },
+          { id: 5, name: 'Cupcakes', products_count: 10 },
+          { id: 6, name: 'Specialty', products_count: 5 }
+        ]);
       } finally {
         setLoading(false);
       }
@@ -133,8 +163,32 @@ const Home = () => {
                 </Link>
               </div>
             </div>
-            <div className="hero-image">
-              <img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?w=800&h=600&fit=crop&crop=center" alt="Fresh Bakery Items" />
+            <div className="hero-visual">
+              <div className="floating-elements">
+                <div className="floating-item item-1">
+                  <Cake size={40} />
+                </div>
+                <div className="floating-item item-2">
+                  <Cookie size={35} />
+                </div>
+                <div className="floating-item item-3">
+                  <Croissant size={30} />
+                </div>
+                <div className="floating-item item-4">
+                  <Wheat size={38} />
+                </div>
+                <div className="floating-item item-5">
+                  <Cherry size={25} />
+                </div>
+                <div className="floating-item item-6">
+                  <PieChart size={32} />
+                </div>
+              </div>
+              <div className="hero-gradient-bg">
+                <div className="gradient-circle circle-1"></div>
+                <div className="gradient-circle circle-2"></div>
+                <div className="gradient-circle circle-3"></div>
+              </div>
             </div>
           </div>
         </div>
