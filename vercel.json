@@ -1,7 +1,11 @@
 {
-  "buildCommand": "npm ci && npm run build",
+  "installCommand": "npm install --legacy-peer-deps --no-optional --force",
+  "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "installCommand": "npm ci --no-optional",
-  "framework": "vite"
+  "framework": "vite",
+  "functions": {
+    "app/api/**/*.js": {
+      "runtime": "nodejs18.x"
+    }
+  }
 }
-
