@@ -52,6 +52,11 @@
   border-radius: var(--radius-lg);
   overflow: hidden;
   background-color: var(--bg-secondary);
+  max-width: 340px;
+  max-height: 340px;
+  margin: 0 auto;
+  width: 100%;
+  height: auto;
 }
 
 .main-product-image {

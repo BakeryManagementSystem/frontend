@@ -86,7 +86,6 @@ const Login = () => {
                   Email Address
                 </label>
                 <div className="input-wrapper">
-                  <Mail className="input-icon" size={20} />
                   <input
                     type="email"
                     id="email"
@@ -105,7 +104,6 @@ const Login = () => {
                   Password
                 </label>
                 <div className="input-wrapper">
-                  <Lock className="input-icon" size={20} />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     id="password"
