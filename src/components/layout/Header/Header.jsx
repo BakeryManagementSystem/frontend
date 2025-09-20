@@ -339,10 +339,10 @@ const Header = () => {
                 </>
               ) : (
                 <div className="auth-buttons">
-                  <Link to="/login" className="btn btn-outline btn-sm">
+                  <Link to="/login" className="btn btn-outline">
                     Login
                   </Link>
-                  <Link to="/register" className="btn btn-primary btn-sm">
+                  <Link to="/register" className="btn btn-primary">
                     Register
                   </Link>
                 </div>

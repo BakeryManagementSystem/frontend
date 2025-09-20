@@ -86,7 +86,7 @@
 /* Desktop Search Container */
 .desktop-search {
   flex: 1;
-  max-width: 320px;
+  max-width: 300px;
   min-width: 180px;
 }
 
@@ -449,7 +449,7 @@
   background: var(--bg-secondary, #f8fafc);
   border-radius: 8px;
   overflow: hidden;
-  border: 1px solid var(--border-light, #e2e8f0);
+  border: 1px solid var(--primary-color, #6639a6);
 }
 
 .mobile-search input {
@@ -467,7 +467,7 @@
 }
 
 .mobile-search button {
-  background: var(--accent-color, #9b75d0);
+  background: var(--primary-color, #6639a6);
   border: none;
   color: white;
   padding: 12px 14px;
@@ -558,6 +558,45 @@
   border-color: var(--secondary-color, #7f4fc3);
   color: white;
   transform: translateY(-1px);
+}
+
+/* Mobile Auth Buttons (Login/Register) */
+@media (max-width: 900px) {
+  .mobile-auth-link {
+    display: block;
+    width: 100%;
+    margin: 10px 0 0 0;
+    padding: 12px 0;
+    text-align: center;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s, border 0.2s;
+  }
+  .mobile-auth-link:first-child {
+    margin-top: 0;
+  }
+  .mobile-auth-link[href*="login"] {
+    background: transparent;
+    color: var(--primary-color, #6639a6);
+    border: 1px solid var(--primary-color, #6639a6);
+  }
+  .mobile-auth-link[href*="login"]:hover {
+    background: var(--primary-bg, #f8fafc);
+    color: var(--primary-hover, #4f2c80);
+    border-color: var(--primary-hover, #4f2c80);
+  }
+  .mobile-auth-link[href*="register"] {
+    background: var(--primary-color, #6639a6);
+    color: #fff;
+    border: 1px solid var(--primary-color, #6639a6);
+  }
+  .mobile-auth-link[href*="register"]:hover {
+    background: var(--primary-hover, #4f2c80);
+    border-color: var(--primary-hover, #4f2c80);
+    color: #fff;
+  }
 }
 
 /* Mobile User Dropdown */
