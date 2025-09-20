@@ -147,8 +147,13 @@ class ApiService {
     });
   }
 
+  // Seller/Owner Orders API
   async getSellerOrders() {
-    return this.request('/seller/orders');
+    return this.request('/owner/purchases');
+  }
+
+  async getSellerOrderStats() {
+    return this.request('/seller/orders/stats');
   }
 
   // Notifications API

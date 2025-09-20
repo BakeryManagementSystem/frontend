@@ -84,9 +84,9 @@ const Header = () => {
 
   const handleAddProductClick = () => {
     if (user?.user_type === 'seller') {
-      navigate('/seller/products/add');
+      navigate('/seller/products/new');
     } else if (user?.user_type === 'owner') {
-      navigate('/owner/products/add');
+      navigate('/owner/products/new');
     }
     setIsMenuOpen(false);
     setIsUserMenuOpen(false);

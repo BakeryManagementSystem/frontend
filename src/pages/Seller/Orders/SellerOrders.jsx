@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext';
+import ApiService from '../../../services/api';
 import {
   Package,
   Search,
@@ -18,6 +19,7 @@ const SellerOrders = () => {
   const { user } = useAuth();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
@@ -27,131 +29,46 @@ const SellerOrders = () => {
 
   const fetchOrders = async () => {
     setLoading(true);
-    // Simulate API call with mock data
-    setTimeout(() => {
-      const mockOrders = [
-        {
-          id: 'ORD-101',
-          customer: {
-            name: 'John Smith',
-            email: 'john.smith@email.com',
-            avatar: '/placeholder-avatar.jpg'
-          },
-          products: [
-            {
-              id: 1,
-              name: 'Premium Wireless Headphones',
-              quantity: 1,
-              price: 199.99,
-              image: '/placeholder-product.jpg'
-            }
-          ],
-          total: 199.99,
-          status: 'pending',
-          orderDate: '2024-01-15T10:30:00Z',
-          shippingAddress: {
-            street: '123 Main St',
-            city: 'New York',
-            state: 'NY',
-            zipCode: '10001'
-          }
+    setError('');
+
+    try {
+      const response = await ApiService.getSellerOrders();
+
+      // Transform the backend response to match the component's expected format
+      const transformedOrders = response.purchases?.map(purchase => ({
+        id: `ORD-${purchase.order_id}`,
+        orderId: purchase.order_id,
+        customer: {
+          name: purchase.buyer?.name || 'Unknown Customer',
+          email: purchase.buyer?.email || '',
+          avatar: '/placeholder-avatar.jpg'
         },
-        {
-          id: 'ORD-102',
-          customer: {
-            name: 'Sarah Johnson',
-            email: 'sarah.j@email.com',
-            avatar: '/placeholder-avatar.jpg'
-          },
-          products: [
-            {
-              id: 2,
-              name: 'Smart Home Camera',
-              quantity: 2,
-              price: 89.99,
-              image: '/placeholder-product.jpg'
-            }
-          ],
-          total: 179.98,
-          status: 'shipped',
-          orderDate: '2024-01-14T14:20:00Z',
-          shippedDate: '2024-01-15T09:00:00Z',
-          trackingNumber: 'TRK123456789',
-          shippingAddress: {
-            street: '456 Oak Ave',
-            city: 'Los Angeles',
-            state: 'CA',
-            zipCode: '90210'
-          }
-        },
-        {
-          id: 'ORD-103',
-          customer: {
-            name: 'Mike Wilson',
-            email: 'mike.w@email.com',
-            avatar: '/placeholder-avatar.jpg'
-          },
-          products: [
-            {
-              id: 3,
-              name: 'Coffee Maker Pro',
-              quantity: 1,
-              price: 149.99,
-              image: '/placeholder-product.jpg'
-            }
-          ],
-          total: 149.99,
-          status: 'delivered',
-          orderDate: '2024-01-13T16:45:00Z',
-          shippedDate: '2024-01-14T08:30:00Z',
-          deliveredDate: '2024-01-16T12:15:00Z',
-          trackingNumber: 'TRK987654321',
-          shippingAddress: {
-            street: '789 Pine Rd',
-            city: 'Chicago',
-            state: 'IL',
-            zipCode: '60601'
-          }
-        },
-        {
-          id: 'ORD-104',
-          customer: {
-            name: 'Emma Davis',
-            email: 'emma.d@email.com',
-            avatar: '/placeholder-avatar.jpg'
-          },
-          products: [
-            {
-              id: 4,
-              name: 'Bluetooth Earbuds',
-              quantity: 1,
-              price: 79.99,
-              image: '/placeholder-product.jpg'
-            }
-          ],
-          total: 79.99,
-          status: 'cancelled',
-          orderDate: '2024-01-12T11:20:00Z',
-          cancelledDate: '2024-01-13T09:00:00Z',
-          cancelReason: 'Customer requested cancellation',
-          shippingAddress: {
-            street: '321 Elm St',
-            city: 'Miami',
-            state: 'FL',
-            zipCode: '33101'
-          }
+        products: [{
+          id: purchase.product_id,
+          name: purchase.product?.name || 'Unknown Product',
+          quantity: purchase.quantity,
+          price: parseFloat(purchase.unit_price),
+          image: purchase.product?.image_url || '/placeholder-product.jpg'
+        }],
+        total: parseFloat(purchase.line_total),
+        status: 'pending', // Default status since backend doesn't provide order status in purchases
+        orderDate: purchase.sold_at,
+        shippingAddress: {
+          street: 'N/A',
+          city: 'N/A',
+          state: 'N/A',
+          zipCode: 'N/A'
         }
-      ];
+      })) || [];
 
-      // Apply status filter
-      let filteredOrders = mockOrders;
-      if (statusFilter !== 'all') {
-        filteredOrders = mockOrders.filter(order => order.status === statusFilter);
-      }
-
-      setOrders(filteredOrders);
+      setOrders(transformedOrders);
+    } catch (error) {
+      console.error('Failed to fetch orders:', error);
+      setError('Failed to load orders. Please try again.');
+      setOrders([]);
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   const getStatusIcon = (status) => {

@@ -35,6 +35,7 @@ import SellerOrders from './pages/Seller/Orders/SellerOrders';
 import SellerProfile from './pages/Seller/Profile/SellerProfile';
 import SellerShop from './pages/Seller/Shop/SellerShop';
 import SellerAnalytics from './pages/Seller/Analytics/SellerAnalytics';
+import AddProduct from './pages/Seller/Products/AddProduct';
 
 // Protected Route Component
 import ProtectedRoute from './components/common/ProtectedRoute/ProtectedRoute';
@@ -110,6 +111,11 @@ function App() {
                       <SellerProducts />
                     </ProtectedRoute>
                   } />
+                  <Route path="/seller/products/new" element={
+                    <ProtectedRoute userType="seller">
+                      <AddProduct />
+                    </ProtectedRoute>
+                  } />
                   <Route path="/seller/orders" element={
                     <ProtectedRoute userType="seller">
                       <SellerOrders />
@@ -140,6 +146,11 @@ function App() {
                   <Route path="/owner/products" element={
                     <ProtectedRoute userType="owner">
                       <SellerProducts />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/owner/products/new" element={
+                    <ProtectedRoute userType="owner">
+                      <AddProduct />
                     </ProtectedRoute>
                   } />
                   <Route path="/owner/orders" element={
