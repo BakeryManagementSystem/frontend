@@ -81,18 +81,35 @@ const About = () => {
   return (
     <div className="about-page">
       {/* Hero Section */}
-      <section className="about-hero">
+      <section className="about-hero modern-hero">
+        <div className="modern-hero-bg">
+          <svg width="100%" height="100%" viewBox="0 0 1440 320" fill="none" xmlns="http://www.w3.org/2000/svg" className="hero-svg-bg">
+            <defs>
+              <linearGradient id="heroGradient" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stopColor="var(--primary-color)" stopOpacity="0.3" />
+                <stop offset="100%" stopColor="var(--primary-hover)" stopOpacity="0.1" />
+              </linearGradient>
+            </defs>
+            <path fill="url(#heroGradient)" d="M0,160L60,170.7C120,181,240,203,360,197.3C480,192,600,160,720,133.3C840,107,960,85,1080,101.3C1200,117,1320,171,1380,197.3L1440,224L1440,0L1380,0C1320,0,1200,0,1080,0C960,0,840,0,720,0C600,0,480,0,360,0C240,0,120,0,60,0L0,0Z"></path>
+          </svg>
+        </div>
         <div className="container">
-          <div className="hero-content">
-            <h1>About BMS</h1>
-            <p className="hero-subtitle">
-              Building the future of e-commerce, one connection at a time
+          <div className="modern-hero-content">
+            <h2 className="modern-hero-title">
+              Building the Future of <span className="highlight">Bakery</span>
+            </h2>
+            <p className="modern-hero-subtitle">
+              Join a thriving community where innovation meets trust. Discover amazing products,
+              connect with reliable sellers, and grow your business with BMS.
             </p>
-            <p className="hero-description">
-              BMS is more than just a marketplace – we're a community that brings together
-              passionate sellers and discerning buyers from around the world. Our mission is
-              to create a trusted, innovative platform where commerce thrives and relationships flourish.
-            </p>
+            <div className="modern-hero-actions">
+              <Link to="/register" className="btn btn-primary btn-lg">
+                Get Started Today
+              </Link>
+              <Link to="/contact" className="btn btn-outline btn-lg btn-white">
+                Contact Us
+              </Link>
+            </div>
           </div>
         </div>
       </section>
@@ -132,7 +149,15 @@ const About = () => {
               </p>
             </div>
             <div className="mission-image">
-              <img src="/placeholder-mission.jpg" alt="Our Mission" />
+              {/* Floating animated SVG icon */}
+              <div className="floating-animation">
+                <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="60" cy="60" r="50" fill="#6639a6" opacity="0.15"/>
+                  <circle cx="60" cy="60" r="35" fill="#6639a6" opacity="0.3"/>
+                  <circle cx="60" cy="60" r="20" fill="#6639a6"/>
+                  <path d="M60 40 Q70 60 60 80 Q50 60 60 40 Z" fill="#fff" opacity="0.7"/>
+                </svg>
+              </div>
             </div>
           </div>
         </div>
@@ -183,37 +208,12 @@ const About = () => {
         </div>
       </section>
 
-      {/* Team */}
-      <section className="team-section">
-        <div className="container">
-          <div className="section-header">
-            <h2>Meet Our Team</h2>
-            <p>The passionate people behind BMS</p>
-          </div>
-
-          <div className="team-grid">
-            {team.map((member, index) => (
-              <div key={index} className="team-member">
-                <div className="member-image">
-                  <img src={member.image} alt={member.name} />
-                </div>
-                <div className="member-info">
-                  <h3>{member.name}</h3>
-                  <div className="member-role">{member.role}</div>
-                  <p>{member.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* CTA Section */}
       <section className="about-cta">
         <div className="container">
           <div className="cta-content">
-            <h2>Ready to Join Our Community?</h2>
-            <p>
+            <h2 style={{ color: '#fff' }}>Ready to Join Our Community?</h2>
+            <p style={{ color: '#fff' }}>
               Whether you're looking to discover amazing products or grow your business,
               BMS provides the platform and support you need to succeed.
             </p>
@@ -221,7 +221,7 @@ const About = () => {
               <Link to="/register" className="btn btn-primary btn-lg">
                 Get Started Today
               </Link>
-              <Link to="/contact" className="btn btn-outline btn-lg">
+              <Link to="/contact" className="btn btn-outline btn-lg btn-white">
                 Contact Us
               </Link>
             </div>
