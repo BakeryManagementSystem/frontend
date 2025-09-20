@@ -27,7 +27,17 @@ class ApiService {
       const response = await fetch(url, config);
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        // Handle different types of errors
+        const errorData = await response.json().catch(() => ({}));
+
+        if (response.status === 422) {
+          // Validation errors from Laravel
+          const validationErrors = errorData.errors || {};
+          const firstError = Object.values(validationErrors)[0];
+          throw new Error(firstError ? firstError[0] : 'Validation failed');
+        }
+
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
       }
 
       return await response.json();
