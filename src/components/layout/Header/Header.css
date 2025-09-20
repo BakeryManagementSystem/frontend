@@ -420,8 +420,6 @@
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: var(--shadow-lg, 0 10px 15px -3px rgb(102 57 166 / 0.1));
   z-index: 999;
-  max-height: 70vh;
-  overflow-y: auto;
   opacity: 0;
   visibility: hidden;
   transform: translateY(-10px);
@@ -704,11 +702,6 @@
     display: flex;
   }
 
-  /* Mobile navigation improvements */
-  .mobile-nav {
-    max-height: 60vh;
-  }
-
   .mobile-nav-content {
     padding: 8px 12px 12px 12px;
   }
@@ -780,10 +773,6 @@
     min-width: 240px;
   }
 
-  .mobile-nav {
-    max-height: 50vh;
-  }
-
   .mobile-nav-content {
     padding: 6px 8px 8px 8px;
   }
@@ -837,10 +826,6 @@
     padding: 4px;
     min-width: 32px;
     min-height: 32px;
-  }
-
-  .mobile-nav {
-    max-height: 45vh;
   }
 
   .mobile-user-dropdown {
