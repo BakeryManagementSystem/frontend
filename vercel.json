@@ -1,11 +1,5 @@
 {
-  "installCommand": "npm install --legacy-peer-deps --no-optional --force",
-  "buildCommand": "npm run build",
+  "buildCommand": "npm run vercel-build",
   "outputDirectory": "dist",
-  "framework": "vite",
-  "functions": {
-    "app/api/**/*.js": {
-      "runtime": "nodejs18.x"
-    }
-  }
+  "framework": null
 }
