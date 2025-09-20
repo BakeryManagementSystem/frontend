@@ -121,12 +121,22 @@ export const NotificationProvider = ({ children }) => {
     try {
       await ApiService.deleteNotification(notificationId);
       setNotifications(prev => prev.filter(notif => notif.id !== notificationId));
-      const notification = notifications.find(n => n.id === notificationId);
-      if (notification && !notification.read_at) {
-        setUnreadCount(prev => Math.max(0, prev - 1));
-      }
+      // Update unread count if the removed notification was unread
+      setUnreadCount(prev => {
+        const notification = notifications.find(n => n.id === notificationId);
+        return notification && !notification.read_at ? Math.max(0, prev - 1) : prev;
+      });
     } catch (error) {
-      console.error('Failed to delete notification:', error);
+      // Handle API errors gracefully - still update local state
+      if (error.message?.includes('404')) {
+        setNotifications(prev => prev.filter(notif => notif.id !== notificationId));
+        setUnreadCount(prev => {
+          const notification = notifications.find(n => n.id === notificationId);
+          return notification && !notification.read_at ? Math.max(0, prev - 1) : prev;
+        });
+      } else {
+        console.error('Failed to remove notification:', error);
+      }
     }
   };
 
