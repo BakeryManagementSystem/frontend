@@ -66,8 +66,8 @@ const Register = () => {
 
     if (!formData.password) {
       newErrors.password = 'Password is required';
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+    } else if (formData.password.length < 8) {
+      newErrors.password = 'Password must be at least 8 characters';
     }
 
     if (!formData.confirmPassword) {
@@ -96,8 +96,13 @@ const Register = () => {
     setErrors({});
 
     try {
-      const { confirmPassword, acceptTerms, ...registrationData } = formData;
-      const result = await register(registrationData);
+      const { confirmPassword, acceptTerms, phone, userType, ...registrationData } = formData;
+      // Map frontend field names to backend expected field names
+      const backendData = {
+        ...registrationData,
+        user_type: userType // Convert camelCase to snake_case
+      };
+      const result = await register(backendData);
 
       if (result.success) {
         // Redirect to appropriate dashboard based on user type
@@ -170,7 +175,6 @@ const Register = () => {
                   Full Name
                 </label>
                 <div className="input-wrapper">
-                  <User className="input-icon" size={20} />
                   <input
                     type="text"
                     id="name"
@@ -190,7 +194,6 @@ const Register = () => {
                   Email Address
                 </label>
                 <div className="input-wrapper">
-                  <Mail className="input-icon" size={20} />
                   <input
                     type="email"
                     id="email"
@@ -210,7 +213,6 @@ const Register = () => {
                   Phone Number
                 </label>
                 <div className="input-wrapper">
-                  <Phone className="input-icon" size={20} />
                   <input
                     type="tel"
                     id="phone"
@@ -230,7 +232,6 @@ const Register = () => {
                   Password
                 </label>
                 <div className="input-wrapper">
-                  <Lock className="input-icon" size={20} />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     id="password"
@@ -257,7 +258,6 @@ const Register = () => {
                   Confirm Password
                 </label>
                 <div className="input-wrapper">
-                  <Lock className="input-icon" size={20} />
                   <input
                     type={showConfirmPassword ? 'text' : 'password'}
                     id="confirmPassword"

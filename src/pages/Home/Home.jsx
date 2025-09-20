@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import ProductCard from '../../components/common/ProductCard/ProductCard';
+import apiService from '../../services/api';
 import {
   Search,
   TrendingUp,
@@ -23,94 +24,96 @@ import './Home.css';
 const Home = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [trendingProducts, setTrendingProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Mock data - in real app, this would come from API
+  // Fetch data from backend API
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setFeaturedProducts([
-        {
-          id: 1,
-          name: "Artisan Chocolate Croissants",
-          price: 4.99,
-          originalPrice: 6.99,
-          image: "https://images.unsplash.com/photo-1555507036-ab794f4eed25?w=400&h=300&fit=crop&crop=center",
-          category: "Pastries",
-          rating: 4.8,
-          reviewCount: 128,
-          seller: "Main Bakery",
-          discount: 29
-        },
-        {
-          id: 2,
-          name: "Fresh Sourdough Bread",
-          price: 5.99,
-          image: "https://images.unsplash.com/photo-1549931319-a545dcf3bc73?w=400&h=300&fit=crop&crop=center",
-          category: "Breads",
-          rating: 4.9,
-          reviewCount: 89,
-          seller: "Main Bakery"
-        },
-        {
-          id: 3,
-          name: "Classic Vanilla Cupcakes (6-pack)",
-          price: 12.99,
-          originalPrice: 15.99,
-          image: "https://images.unsplash.com/photo-1587668178277-295251f900ce?w=400&h=300&fit=crop&crop=center",
-          category: "Cupcakes",
-          rating: 4.7,
-          reviewCount: 203,
-          seller: "Sweet Delights",
-          discount: 19
-        },
-        {
-          id: 4,
-          name: "Seasonal Fruit Tart",
-          price: 18.99,
-          image: "https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=400&h=300&fit=crop&crop=center",
-          category: "Cakes",
-          rating: 4.6,
-          reviewCount: 156,
-          seller: "Artisan Cakes"
-        }
-      ]);
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
 
-      setTrendingProducts([
-        {
-          id: 5,
-          name: "Cinnamon Rolls (4-pack)",
-          price: 8.99,
-          image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=300&fit=crop&crop=center",
-          category: "Pastries",
-          rating: 4.8,
-          reviewCount: 67,
-          seller: "Morning Delights"
-        },
-        {
-          id: 6,
-          name: "Gluten-Free Brownies",
-          price: 9.99,
-          image: "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=400&h=300&fit=crop&crop=center",
-          category: "Specialty",
-          rating: 4.5,
-          reviewCount: 142,
-          seller: "Healthy Treats"
-        }
-      ]);
+        // Fetch featured products (latest products with limit)
+        const featuredResponse = await apiService.getProducts({
+          per_page: 4,
+          page: 1
+        });
 
-      setLoading(false);
-    }, 1000);
+        // Fetch trending products (you might want to add a specific endpoint for trending)
+        const trendingResponse = await apiService.getProducts({
+          per_page: 2,
+          page: 1
+        });
+
+        // Fetch categories with better error handling
+        const categoriesResponse = await apiService.getCategories();
+        console.log('Categories response:', categoriesResponse); // Debug log
+
+        setFeaturedProducts(featuredResponse.data || []);
+        setTrendingProducts(trendingResponse.data || []);
+
+        // Handle different response formats for categories
+        if (categoriesResponse) {
+          if (Array.isArray(categoriesResponse)) {
+            setCategories(categoriesResponse);
+          } else if (categoriesResponse.data && Array.isArray(categoriesResponse.data)) {
+            setCategories(categoriesResponse.data);
+          } else {
+            console.warn('Unexpected categories response format:', categoriesResponse);
+            // Set fallback categories if backend has no data
+            setCategories([
+              { id: 1, name: 'Bread', products_count: 15 },
+              { id: 2, name: 'Pastries', products_count: 12 },
+              { id: 3, name: 'Cakes', products_count: 8 },
+              { id: 4, name: 'Cookies', products_count: 20 },
+              { id: 5, name: 'Cupcakes', products_count: 10 },
+              { id: 6, name: 'Specialty', products_count: 5 }
+            ]);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching data:', err);
+        setError('Failed to load data. Please try again later.');
+
+        // Set fallback categories even on error
+        setCategories([
+          { id: 1, name: 'Bread', products_count: 15 },
+          { id: 2, name: 'Pastries', products_count: 12 },
+          { id: 3, name: 'Cakes', products_count: 8 },
+          { id: 4, name: 'Cookies', products_count: 20 },
+          { id: 5, name: 'Cupcakes', products_count: 10 },
+          { id: 6, name: 'Specialty', products_count: 5 }
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
-  const categories = [
-    { name: "Breads", icon: <Wheat size={24} />, count: "150+", color: "#D2691E" },
-    { name: "Pastries", icon: <Croissant size={24} />, count: "200+", color: "#DEB887" },
-    { name: "Cakes", icon: <Cake size={24} />, count: "80+", color: "#FF69B4" },
-    { name: "Cookies", icon: <Cookie size={24} />, count: "120+", color: "#CD853F" },
-    { name: "Cupcakes", icon: <Cherry size={24} />, count: "90+", color: "#FFB6C1" },
-    { name: "Specialty", icon: <PieChart size={24} />, count: "60+", color: "#9370DB" }
-  ];
+  // Map category names to icons and colors
+  const getCategoryIcon = (categoryName) => {
+    const iconMap = {
+      'bread': { icon: <Wheat size={24} />, color: "#D2691E" },
+      'breads': { icon: <Wheat size={24} />, color: "#D2691E" },
+      'pastry': { icon: <Croissant size={24} />, color: "#DEB887" },
+      'pastries': { icon: <Croissant size={24} />, color: "#DEB887" },
+      'cake': { icon: <Cake size={24} />, color: "#FF69B4" },
+      'cakes': { icon: <Cake size={24} />, color: "#FF69B4" },
+      'cookie': { icon: <Cookie size={24} />, color: "#CD853F" },
+      'cookies': { icon: <Cookie size={24} />, color: "#CD853F" },
+      'cupcake': { icon: <Cherry size={24} />, color: "#FFB6C1" },
+      'cupcakes': { icon: <Cherry size={24} />, color: "#FFB6C1" },
+      'specialty': { icon: <PieChart size={24} />, color: "#9370DB" },
+      'default': { icon: <PieChart size={24} />, color: "#9370DB" }
+    };
+
+    const key = categoryName?.toLowerCase() || 'default';
+    return iconMap[key] || iconMap['default'];
+  };
 
   const stats = [
     { icon: <Users size={32} />, value: "10K+", label: "Happy Customers" },
@@ -118,6 +121,22 @@ const Home = () => {
     { icon: <Star size={32} />, value: "4.9", label: "Average Rating" },
     { icon: <TrendingUp size={32} />, value: "99%", label: "Fresh Guarantee" }
   ];
+
+  if (error) {
+    return (
+      <div className="home">
+        <div className="container">
+          <div className="error-message">
+            <h2>Oops! Something went wrong</h2>
+            <p>{error}</p>
+            <button onClick={() => window.location.reload()} className="btn btn-primary">
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="home">
@@ -144,8 +163,32 @@ const Home = () => {
                 </Link>
               </div>
             </div>
-            <div className="hero-image">
-              <img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?w=800&h=600&fit=crop&crop=center" alt="Fresh Bakery Items" />
+            <div className="hero-visual">
+              <div className="floating-elements">
+                <div className="floating-item item-1">
+                  <Cake size={40} />
+                </div>
+                <div className="floating-item item-2">
+                  <Cookie size={35} />
+                </div>
+                <div className="floating-item item-3">
+                  <Croissant size={30} />
+                </div>
+                <div className="floating-item item-4">
+                  <Wheat size={38} />
+                </div>
+                <div className="floating-item item-5">
+                  <Cherry size={25} />
+                </div>
+                <div className="floating-item item-6">
+                  <PieChart size={32} />
+                </div>
+              </div>
+              <div className="hero-gradient-bg">
+                <div className="gradient-circle circle-1"></div>
+                <div className="gradient-circle circle-2"></div>
+                <div className="gradient-circle circle-3"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -188,19 +231,22 @@ const Home = () => {
             <p>Explore our delicious range of baked goods</p>
           </div>
           <div className="categories-grid">
-            {categories.map((category, index) => (
-              <Link
-                key={index}
-                to={`/categories/${category.name.toLowerCase()}`}
-                className="category-card"
-              >
-                <div className="category-icon" style={{ color: category.color }}>
-                  {category.icon}
-                </div>
-                <h3 className="category-name">{category.name}</h3>
-                <p className="category-count">{category.count} items</p>
-              </Link>
-            ))}
+            {categories.map((category) => {
+              const { icon, color } = getCategoryIcon(category.name);
+              return (
+                <Link
+                  key={category.id}
+                  to={`/categories/${category.name.toLowerCase()}`}
+                  className="category-card"
+                >
+                  <div className="category-icon" style={{ color }}>
+                    {icon}
+                  </div>
+                  <h3 className="category-name">{category.name}</h3>
+                  <p className="category-count">{category.products_count || 0} items</p>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -230,9 +276,15 @@ const Home = () => {
             </div>
           ) : (
             <div className="products-grid">
-              {featuredProducts.map(product => (
-                <ProductCard key={product.id} product={product} />
-              ))}
+              {featuredProducts.length > 0 ? (
+                featuredProducts.map(product => (
+                  <ProductCard key={product.id} product={product} />
+                ))
+              ) : (
+                <div className="no-products">
+                  <p>No featured products available at the moment.</p>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -277,9 +329,15 @@ const Home = () => {
             </div>
           ) : (
             <div className="products-grid limited">
-              {trendingProducts.map(product => (
-                <ProductCard key={product.id} product={product} />
-              ))}
+              {trendingProducts.length > 0 ? (
+                trendingProducts.map(product => (
+                  <ProductCard key={product.id} product={product} />
+                ))
+              ) : (
+                <div className="no-products">
+                  <p>No trending products available at the moment.</p>
+                </div>
+              )}
             </div>
           )}
         </div>

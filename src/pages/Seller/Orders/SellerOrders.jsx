@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext';
+import ApiService from '../../../services/api';
 import {
   Package,
   Search,
@@ -10,7 +11,8 @@ import {
   Clock,
   AlertCircle,
   Download,
-  MessageCircle
+  MessageCircle,
+  RefreshCw
 } from 'lucide-react';
 import './SellerOrders.css';
 
@@ -18,8 +20,10 @@ const SellerOrders = () => {
   const { user } = useAuth();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     fetchOrders();
@@ -27,131 +31,91 @@ const SellerOrders = () => {
 
   const fetchOrders = async () => {
     setLoading(true);
-    // Simulate API call with mock data
-    setTimeout(() => {
-      const mockOrders = [
-        {
-          id: 'ORD-101',
-          customer: {
-            name: 'John Smith',
-            email: 'john.smith@email.com',
-            avatar: '/placeholder-avatar.jpg'
-          },
-          products: [
-            {
-              id: 1,
-              name: 'Premium Wireless Headphones',
-              quantity: 1,
-              price: 199.99,
-              image: '/placeholder-product.jpg'
-            }
-          ],
-          total: 199.99,
-          status: 'pending',
-          orderDate: '2024-01-15T10:30:00Z',
-          shippingAddress: {
-            street: '123 Main St',
-            city: 'New York',
-            state: 'NY',
-            zipCode: '10001'
-          }
-        },
-        {
-          id: 'ORD-102',
-          customer: {
-            name: 'Sarah Johnson',
-            email: 'sarah.j@email.com',
-            avatar: '/placeholder-avatar.jpg'
-          },
-          products: [
-            {
-              id: 2,
-              name: 'Smart Home Camera',
-              quantity: 2,
-              price: 89.99,
-              image: '/placeholder-product.jpg'
-            }
-          ],
-          total: 179.98,
-          status: 'shipped',
-          orderDate: '2024-01-14T14:20:00Z',
-          shippedDate: '2024-01-15T09:00:00Z',
-          trackingNumber: 'TRK123456789',
-          shippingAddress: {
-            street: '456 Oak Ave',
-            city: 'Los Angeles',
-            state: 'CA',
-            zipCode: '90210'
-          }
-        },
-        {
-          id: 'ORD-103',
-          customer: {
-            name: 'Mike Wilson',
-            email: 'mike.w@email.com',
-            avatar: '/placeholder-avatar.jpg'
-          },
-          products: [
-            {
-              id: 3,
-              name: 'Coffee Maker Pro',
-              quantity: 1,
-              price: 149.99,
-              image: '/placeholder-product.jpg'
-            }
-          ],
-          total: 149.99,
-          status: 'delivered',
-          orderDate: '2024-01-13T16:45:00Z',
-          shippedDate: '2024-01-14T08:30:00Z',
-          deliveredDate: '2024-01-16T12:15:00Z',
-          trackingNumber: 'TRK987654321',
-          shippingAddress: {
-            street: '789 Pine Rd',
-            city: 'Chicago',
-            state: 'IL',
-            zipCode: '60601'
-          }
-        },
-        {
-          id: 'ORD-104',
-          customer: {
-            name: 'Emma Davis',
-            email: 'emma.d@email.com',
-            avatar: '/placeholder-avatar.jpg'
-          },
-          products: [
-            {
-              id: 4,
-              name: 'Bluetooth Earbuds',
-              quantity: 1,
-              price: 79.99,
-              image: '/placeholder-product.jpg'
-            }
-          ],
-          total: 79.99,
-          status: 'cancelled',
-          orderDate: '2024-01-12T11:20:00Z',
-          cancelledDate: '2024-01-13T09:00:00Z',
-          cancelReason: 'Customer requested cancellation',
-          shippingAddress: {
-            street: '321 Elm St',
-            city: 'Miami',
-            state: 'FL',
-            zipCode: '33101'
-          }
-        }
-      ];
+    setError('');
 
-      // Apply status filter
-      let filteredOrders = mockOrders;
-      if (statusFilter !== 'all') {
-        filteredOrders = mockOrders.filter(order => order.status === statusFilter);
+    try {
+      const params = statusFilter !== 'all' ? { status: statusFilter } : {};
+      const response = await ApiService.getSellerOrders(params);
+
+      // Check if response has the expected structure
+      if (response.success && response.orders) {
+        // Use the proper orders data structure from seller orders API
+        const transformedOrders = response.orders.map(order => ({
+          id: order.id,
+          orderId: order.id,
+          customer: {
+            name: order.buyer?.name || order.customer?.name || 'Unknown Customer',
+            email: order.buyer?.email || order.customer?.email || '',
+            avatar: '/placeholder-avatar.jpg'
+          },
+          products: order.orderItems?.map(item => ({
+            id: item.product_id,
+            name: item.product?.name || 'Unknown Product',
+            quantity: item.quantity,
+            price: parseFloat(item.unit_price || item.price || 0),
+            image: item.product?.image_url || item.product?.image_path || '/placeholder-product.jpg',
+            stock: item.product?.stock_quantity || 0 // Add stock information
+          })) || [],
+          total: parseFloat(order.total || 0),
+          status: order.status || 'pending',
+          orderDate: order.created_at,
+          shippingAddress: order.shipping_address || {
+            street: 'N/A',
+            city: 'N/A',
+            state: 'N/A',
+            zipCode: 'N/A'
+          }
+        }));
+
+        setOrders(transformedOrders);
+      } else if (response.data) {
+        // Handle alternative response structure
+        const transformedOrders = response.data.map(order => ({
+          id: order.id,
+          orderId: order.id,
+          customer: {
+            name: order.buyer?.name || order.customer?.name || 'Unknown Customer',
+            email: order.buyer?.email || order.customer?.email || '',
+            avatar: '/placeholder-avatar.jpg'
+          },
+          products: order.order_items?.map(item => ({
+            id: item.product_id,
+            name: item.product?.name || 'Unknown Product',
+            quantity: item.quantity,
+            price: parseFloat(item.unit_price || item.price || 0),
+            image: item.product?.image_url || item.product?.image_path || '/placeholder-product.jpg',
+            stock: item.product?.stock_quantity || 0
+          })) || [],
+          total: parseFloat(order.total || 0),
+          status: order.status || 'pending',
+          orderDate: order.created_at,
+          shippingAddress: order.shipping_address || {
+            street: 'N/A',
+            city: 'N/A',
+            state: 'N/A',
+            zipCode: 'N/A'
+          }
+        }));
+
+        setOrders(transformedOrders);
+      } else {
+        // Fallback for empty or unexpected response
+        setOrders([]);
+        setError('No orders found or unexpected response format.');
       }
-
-      setOrders(filteredOrders);
+    } catch (error) {
+      console.error('Failed to fetch orders:', error);
+      setError(`Failed to load orders: ${error.message}`);
+      setOrders([]);
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
+  };
+
+  const refreshOrders = async () => {
+    setRefreshing(true);
+    await fetchOrders();
+    setRefreshing(false);
   };
 
   const getStatusIcon = (status) => {
@@ -184,7 +148,7 @@ const SellerOrders = () => {
   };
 
   const filteredOrders = orders.filter(order =>
-    order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    String(order.id).toLowerCase().includes(searchQuery.toLowerCase()) ||
     order.customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     order.customer.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -235,6 +199,11 @@ const SellerOrders = () => {
               </button>
             ))}
           </div>
+
+          <button className="btn btn-refresh" onClick={refreshOrders} disabled={refreshing}>
+            {refreshing ? <RefreshCw className="icon-spin" size={16} /> : <RefreshCw size={16} />}
+            Refresh
+          </button>
         </div>
 
         {/* Orders List */}

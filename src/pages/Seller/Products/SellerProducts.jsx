@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
+import ApiService from '../../../services/api';
 import {
   Plus,
   Search,
@@ -20,6 +21,7 @@ const SellerProducts = () => {
   const { user } = useAuth();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
@@ -32,162 +34,22 @@ const SellerProducts = () => {
 
   const fetchProducts = async () => {
     setLoading(true);
-    // Simulate API call with mock data
-    setTimeout(() => {
-      const mockProducts = [
-        {
-          id: 1,
-          name: "Artisan Sourdough Bread",
-          sku: "BRD-001",
-          price: 8.99,
-          stock: 6,
-          status: 'active',
-          category: "Breads",
-          image: "/placeholder-sourdough.jpg",
-          rating: 4.8,
-          reviewCount: 128,
-          sales: 89,
-          createdAt: "2024-01-15",
-          lastUpdated: "2024-01-20"
-        },
-        {
-          id: 2,
-          name: "Chocolate Croissants (6-pack)",
-          sku: "PST-002",
-          price: 12.99,
-          stock: 12,
-          status: 'active',
-          category: "Pastries",
-          image: "/placeholder-croissants.jpg",
-          rating: 4.9,
-          reviewCount: 203,
-          sales: 67,
-          createdAt: "2024-01-12",
-          lastUpdated: "2024-01-18"
-        },
-        {
-          id: 3,
-          name: "Custom Birthday Cake (8-inch)",
-          sku: "CKE-003",
-          price: 45.99,
-          stock: 2,
-          status: 'low_stock',
-          category: "Cakes",
-          image: "/placeholder-birthday-cake.jpg",
-          rating: 4.7,
-          reviewCount: 156,
-          sales: 23,
-          createdAt: "2024-01-10",
-          lastUpdated: "2024-01-19"
-        },
-        {
-          id: 4,
-          name: "Fresh Blueberry Muffins (12-pack)",
-          sku: "MUF-004",
-          price: 18.99,
-          stock: 0,
-          status: 'out_of_stock',
-          category: "Muffins",
-          image: "/placeholder-muffins.jpg",
-          rating: 4.6,
-          reviewCount: 67,
-          sales: 45,
-          createdAt: "2024-01-08",
-          lastUpdated: "2024-01-16"
-        },
-        {
-          id: 5,
-          name: "Cinnamon Sugar Donuts (6-pack)",
-          sku: "DNT-005",
-          price: 9.99,
-          stock: 8,
-          status: 'active',
-          category: "Donuts",
-          image: "/placeholder-donuts.jpg",
-          rating: 4.5,
-          reviewCount: 89,
-          sales: 56,
-          createdAt: "2024-01-06",
-          lastUpdated: "2024-01-17"
-        },
-        {
-          id: 6,
-          name: "Gluten-Free Brownies (9-pack)",
-          sku: "SPE-006",
-          price: 16.99,
-          stock: 4,
-          status: 'low_stock',
-          category: "Specialty",
-          image: "/placeholder-brownies.jpg",
-          rating: 4.4,
-          reviewCount: 142,
-          sales: 34,
-          createdAt: "2024-01-05",
-          lastUpdated: "2024-01-15"
-        },
-        {
-          id: 7,
-          name: "Everything Bagels (12-pack)",
-          sku: "BGL-007",
-          price: 14.99,
-          stock: 15,
-          status: 'active',
-          category: "Bagels",
-          image: "/placeholder-bagels.jpg",
-          rating: 4.6,
-          reviewCount: 98,
-          sales: 78,
-          createdAt: "2024-01-04",
-          lastUpdated: "2024-01-14"
-        },
-        {
-          id: 8,
-          name: "Wedding Cupcakes (24-pack)",
-          sku: "CPC-008",
-          price: 59.99,
-          stock: 3,
-          status: 'low_stock',
-          category: "Specialty",
-          image: "/placeholder-wedding-cupcakes.jpg",
-          rating: 4.8,
-          reviewCount: 76,
-          sales: 12,
-          createdAt: "2024-01-03",
-          lastUpdated: "2024-01-13"
-        }
-      ];
+    setError('');
+    try {
+      const params = {
+        filter,
+        sort: sortBy,
+        search: searchQuery
+      };
 
-      // Apply filters
-      let filteredProducts = mockProducts;
-      if (filter !== 'all') {
-        filteredProducts = mockProducts.filter(product => product.status === filter);
-      }
-
-      // Apply sorting
-      switch (sortBy) {
-        case 'name':
-          filteredProducts.sort((a, b) => a.name.localeCompare(b.name));
-          break;
-        case 'price-low':
-          filteredProducts.sort((a, b) => a.price - b.price);
-          break;
-        case 'price-high':
-          filteredProducts.sort((a, b) => b.price - a.price);
-          break;
-        case 'stock':
-          filteredProducts.sort((a, b) => a.stock - b.stock);
-          break;
-        case 'sales':
-          filteredProducts.sort((a, b) => b.sales - a.sales);
-          break;
-        default: // newest
-          filteredProducts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-          break;
-      }
-
-      setProducts(filteredProducts);
+      const response = await ApiService.getSellerProducts(params);
+      setProducts(response.data || response.products || []);
+    } catch (error) {
+      console.error('Failed to fetch products:', error);
+      setError('Failed to load products. Please try again.');
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   const getStatusBadge = (status, stock) => {

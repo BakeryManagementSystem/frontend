@@ -199,7 +199,6 @@ const Contact = () => {
                     Full Name
                   </label>
                   <div className="input-wrapper">
-                    <User className="input-icon" size={20} />
                     <input
                       type="text"
                       id="name"
@@ -218,7 +217,6 @@ const Contact = () => {
                     Email Address
                   </label>
                   <div className="input-wrapper">
-                    <Mail className="input-icon" size={20} />
                     <input
                       type="email"
                       id="email"
@@ -337,29 +335,6 @@ const Contact = () => {
                     <div className="faq-answer">{faq.answer}</div>
                   </details>
                 ))}
-              </div>
-            </div>
-
-            {/* Quick Actions */}
-            <div className="quick-actions-section">
-              <h3>Quick Actions</h3>
-              <div className="quick-actions">
-                <a href="mailto:support@bms.com" className="quick-action-btn">
-                  <Mail size={18} />
-                  Email Support
-                </a>
-                <a href="tel:+15551234567" className="quick-action-btn">
-                  <Phone size={18} />
-                  Call Now
-                </a>
-                <a href="/help" className="quick-action-btn">
-                  <HelpCircle size={18} />
-                  Help Center
-                </a>
-                <a href="/live-chat" className="quick-action-btn">
-                  <MessageCircle size={18} />
-                  Live Chat
-                </a>
               </div>
             </div>
           </div>

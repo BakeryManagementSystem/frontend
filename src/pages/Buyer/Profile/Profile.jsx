@@ -1,41 +1,43 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext';
+import ApiService from '../../../services/api';
 import {
   User,
   Mail,
   Phone,
   MapPin,
-  Camera,
+  Calendar,
   Save,
   Edit,
   Eye,
   EyeOff,
-  AlertCircle
+  AlertCircle,
+  CheckCircle
 } from 'lucide-react';
 import './Profile.css';
 
 const Profile = () => {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const [profileData, setProfileData] = useState({
     name: '',
     email: '',
     phone: '',
+    date_of_birth: '',
+    avatar: '',
     address: {
       street: '',
       city: '',
       state: '',
       zipCode: '',
       country: ''
-    },
-    dateOfBirth: '',
-    avatar: ''
+    }
   });
   const [isEditing, setIsEditing] = useState(false);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [passwordData, setPasswordData] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
+    current_password: '',
+    new_password: '',
+    new_password_confirmation: ''
   });
   const [showPasswords, setShowPasswords] = useState({
     current: false,
@@ -43,7 +45,8 @@ const Profile = () => {
     confirm: false
   });
   const [errors, setErrors] = useState({});
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState('');
 
   useEffect(() => {
@@ -51,23 +54,45 @@ const Profile = () => {
   }, []);
 
   const fetchProfile = async () => {
-    // Simulate API call with mock data
-    setTimeout(() => {
+    setLoading(true);
+    try {
+      const response = await ApiService.getUserProfile();
+
+      // Enhanced profile data mapping to include all possible registration fields
       setProfileData({
-        name: user?.name || 'John Doe',
-        email: user?.email || 'john.doe@example.com',
-        phone: '+1 (555) 123-4567',
-        address: {
-          street: '123 Main Street',
-          city: 'New York',
-          state: 'NY',
-          zipCode: '10001',
-          country: 'United States'
+        name: response.user?.name || response.name || '',
+        email: response.user?.email || response.email || '',
+        phone: response.user?.phone || response.phone || '',
+        date_of_birth: response.user?.date_of_birth || response.date_of_birth || '',
+        avatar: response.user?.avatar || response.avatar || '',
+        // Additional registration fields that might be missing
+        first_name: response.user?.first_name || response.first_name || '',
+        last_name: response.user?.last_name || response.last_name || '',
+        gender: response.user?.gender || response.gender || '',
+        business_name: response.user?.business_name || response.business_name || '',
+        business_type: response.user?.business_type || response.business_type || '',
+        tax_id: response.user?.tax_id || response.tax_id || '',
+        website: response.user?.website || response.website || '',
+        bio: response.user?.bio || response.bio || '',
+        user_type: response.user?.user_type || response.user_type || user?.user_type || '',
+        address: response.user?.address || response.address || {
+          street: response.user?.street || response.street || '',
+          city: response.user?.city || response.city || '',
+          state: response.user?.state || response.state || '',
+          zipCode: response.user?.zip_code || response.zip_code || response.zipCode || '',
+          country: response.user?.country || response.country || ''
         },
-        dateOfBirth: '1990-05-15',
-        avatar: '/placeholder-avatar.jpg'
+        // Account information
+        email_verified_at: response.user?.email_verified_at || response.email_verified_at,
+        created_at: response.user?.created_at || response.created_at,
+        updated_at: response.user?.updated_at || response.updated_at
       });
-    }, 500);
+    } catch (error) {
+      console.error('Failed to fetch profile:', error);
+      setErrors({ general: 'Failed to load profile data. Please try again.' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleInputChange = (e) => {
@@ -124,92 +149,82 @@ const Profile = () => {
     if (!profileData.email.trim()) {
       newErrors.email = 'Email is required';
     } else if (!/\S+@\S+\.\S+/.test(profileData.email)) {
-      newErrors.email = 'Email is invalid';
+      newErrors.email = 'Please enter a valid email address';
     }
 
-    if (!profileData.phone.trim()) {
-      newErrors.phone = 'Phone number is required';
-    }
-
-    return newErrors;
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const validatePassword = () => {
     const newErrors = {};
 
-    if (!passwordData.currentPassword) {
-      newErrors.currentPassword = 'Current password is required';
+    if (!passwordData.current_password) {
+      newErrors.current_password = 'Current password is required';
     }
 
-    if (!passwordData.newPassword) {
-      newErrors.newPassword = 'New password is required';
-    } else if (passwordData.newPassword.length < 6) {
-      newErrors.newPassword = 'Password must be at least 6 characters';
+    if (!passwordData.new_password) {
+      newErrors.new_password = 'New password is required';
+    } else if (passwordData.new_password.length < 8) {
+      newErrors.new_password = 'Password must be at least 8 characters long';
     }
 
-    if (!passwordData.confirmPassword) {
-      newErrors.confirmPassword = 'Please confirm your password';
-    } else if (passwordData.newPassword !== passwordData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+    if (passwordData.new_password !== passwordData.new_password_confirmation) {
+      newErrors.new_password_confirmation = 'Passwords do not match';
     }
 
-    return newErrors;
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
-  const handleProfileSubmit = async (e) => {
-    e.preventDefault();
+  const handleSaveProfile = async () => {
+    if (!validateProfile()) return;
 
-    const formErrors = validateProfile();
-    if (Object.keys(formErrors).length > 0) {
-      setErrors(formErrors);
-      return;
-    }
-
-    setLoading(true);
+    setSaving(true);
     setErrors({});
+    setSuccess('');
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      setIsEditing(false);
+      const response = await ApiService.updateUserProfile(profileData);
       setSuccess('Profile updated successfully!');
+      setIsEditing(false);
+
+      // Update user context if needed
+      if (updateUser) {
+        updateUser(response.user || profileData);
+      }
+
       setTimeout(() => setSuccess(''), 3000);
     } catch (error) {
-      setErrors({ general: 'Failed to update profile. Please try again.' });
+      console.error('Failed to update profile:', error);
+      setErrors({ general: error.message || 'Failed to update profile. Please try again.' });
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
-  const handlePasswordSubmit = async (e) => {
-    e.preventDefault();
+  const handleUpdatePassword = async () => {
+    if (!validatePassword()) return;
 
-    const formErrors = validatePassword();
-    if (Object.keys(formErrors).length > 0) {
-      setErrors(formErrors);
-      return;
-    }
-
-    setLoading(true);
+    setSaving(true);
     setErrors({});
+    setSuccess('');
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
+      await ApiService.updateUserPassword(passwordData);
+      setSuccess('Password updated successfully!');
       setShowPasswordForm(false);
       setPasswordData({
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: ''
+        current_password: '',
+        new_password: '',
+        new_password_confirmation: ''
       });
-      setSuccess('Password updated successfully!');
       setTimeout(() => setSuccess(''), 3000);
     } catch (error) {
-      setErrors({ password: 'Failed to update password. Please try again.' });
+      console.error('Failed to update password:', error);
+      setErrors({ general: error.message || 'Failed to update password. Please try again.' });
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
@@ -220,350 +235,296 @@ const Profile = () => {
     }));
   };
 
+  if (loading) {
+    return (
+      <div className="profile">
+        <div className="container">
+          <div className="loading">
+            <div className="loading-spinner"></div>
+            <p>Loading profile...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="profile-page">
+    <div className="profile">
       <div className="container">
-        {/* Page Header */}
-        <div className="page-header">
+        <div className="profile-header">
           <h1>My Profile</h1>
           <p>Manage your account information and preferences</p>
         </div>
 
-        {/* Success Message */}
-        {success && (
-          <div className="alert alert-success">
-            {success}
+        {errors.general && (
+          <div className="alert alert-error">
+            <AlertCircle size={20} />
+            <span>{errors.general}</span>
           </div>
         )}
 
-        {/* General Error */}
-        {errors.general && (
-          <div className="alert alert-error">
-            <AlertCircle size={16} />
-            {errors.general}
+        {success && (
+          <div className="alert alert-success">
+            <CheckCircle size={20} />
+            <span>{success}</span>
           </div>
         )}
 
         <div className="profile-content">
-          {/* Avatar Section */}
-          <div className="avatar-section">
-            <div className="avatar-container">
-              <img
-                src={profileData.avatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face'}
-                alt="Profile Avatar"
-                className="avatar-image"
-              />
-              <button className="avatar-edit-btn">
-                <Camera size={16} />
-              </button>
-            </div>
-            <div className="avatar-info">
-              <h3>{profileData.name}</h3>
-              <p>{profileData.email}</p>
-              <span className="member-since">Member since January 2024</span>
-            </div>
-          </div>
-
-          {/* Profile Form */}
-          <div className="profile-form-section">
+          {/* Profile Information */}
+          <div className="profile-section">
             <div className="section-header">
               <h2>Personal Information</h2>
-              {!isEditing && (
-                <button
-                  className="btn btn-outline"
-                  onClick={() => setIsEditing(true)}
-                >
-                  <Edit size={16} />
-                  Edit Profile
-                </button>
-              )}
+              <button
+                onClick={() => setIsEditing(!isEditing)}
+                className="btn btn-outline"
+                disabled={saving}
+              >
+                <Edit size={16} />
+                {isEditing ? 'Cancel' : 'Edit'}
+              </button>
             </div>
 
-            <form onSubmit={handleProfileSubmit} className="profile-form">
-              <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="name" className="form-label">Full Name</label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={profileData.name}
-                    onChange={handleInputChange}
-                    className={`form-input ${errors.name ? 'error' : ''}`}
-                    disabled={!isEditing}
-                  />
-                  {errors.name && <div className="error-message">{errors.name}</div>}
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="email" className="form-label">Email Address</label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={profileData.email}
-                    onChange={handleInputChange}
-                    className={`form-input ${errors.email ? 'error' : ''}`}
-                    disabled={!isEditing}
-                  />
-                  {errors.email && <div className="error-message">{errors.email}</div>}
-                </div>
-              </div>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="phone" className="form-label">Phone Number</label>
-                  <input
-                    type="tel"
-                    id="phone"
-                    name="phone"
-                    value={profileData.phone}
-                    onChange={handleInputChange}
-                    className={`form-input ${errors.phone ? 'error' : ''}`}
-                    disabled={!isEditing}
-                  />
-                  {errors.phone && <div className="error-message">{errors.phone}</div>}
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="dateOfBirth" className="form-label">Date of Birth</label>
-                  <input
-                    type="date"
-                    id="dateOfBirth"
-                    name="dateOfBirth"
-                    value={profileData.dateOfBirth}
-                    onChange={handleInputChange}
-                    className="form-input"
-                    disabled={!isEditing}
-                  />
-                </div>
+            <div className="form-grid">
+              <div className="form-group">
+                <label htmlFor="name">
+                  <User size={16} />
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={profileData.name}
+                  onChange={handleInputChange}
+                  disabled={!isEditing}
+                  className={errors.name ? 'error' : ''}
+                />
+                {errors.name && <span className="error-text">{errors.name}</span>}
               </div>
 
               <div className="form-group">
-                <label htmlFor="address.street" className="form-label">Street Address</label>
+                <label htmlFor="email">
+                  <Mail size={16} />
+                  Email Address
+                </label>
                 <input
-                  type="text"
-                  id="address.street"
-                  name="address.street"
-                  value={profileData.address.street}
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={profileData.email}
                   onChange={handleInputChange}
-                  className="form-input"
+                  disabled={!isEditing}
+                  className={errors.email ? 'error' : ''}
+                />
+                {errors.email && <span className="error-text">{errors.email}</span>}
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="phone">
+                  <Phone size={16} />
+                  Phone Number
+                </label>
+                <input
+                  type="tel"
+                  id="phone"
+                  name="phone"
+                  value={profileData.phone}
+                  onChange={handleInputChange}
                   disabled={!isEditing}
                 />
               </div>
 
-              <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="date_of_birth">
+                  <Calendar size={16} />
+                  Date of Birth
+                </label>
+                <input
+                  type="date"
+                  id="date_of_birth"
+                  name="date_of_birth"
+                  value={profileData.date_of_birth}
+                  onChange={handleInputChange}
+                  disabled={!isEditing}
+                />
+              </div>
+            </div>
+
+            {/* Address Section */}
+            <div className="address-section">
+              <h3>
+                <MapPin size={16} />
+                Address Information
+              </h3>
+              <div className="form-grid">
+                <div className="form-group full-width">
+                  <label htmlFor="address.street">Street Address</label>
+                  <input
+                    type="text"
+                    id="address.street"
+                    name="address.street"
+                    value={profileData.address.street}
+                    onChange={handleInputChange}
+                    disabled={!isEditing}
+                  />
+                </div>
+
                 <div className="form-group">
-                  <label htmlFor="address.city" className="form-label">City</label>
+                  <label htmlFor="address.city">City</label>
                   <input
                     type="text"
                     id="address.city"
                     name="address.city"
                     value={profileData.address.city}
                     onChange={handleInputChange}
-                    className="form-input"
                     disabled={!isEditing}
                   />
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="address.state" className="form-label">State</label>
+                  <label htmlFor="address.state">State</label>
                   <input
                     type="text"
                     id="address.state"
                     name="address.state"
                     value={profileData.address.state}
                     onChange={handleInputChange}
-                    className="form-input"
                     disabled={!isEditing}
                   />
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="address.zipCode" className="form-label">ZIP Code</label>
+                  <label htmlFor="address.zipCode">ZIP Code</label>
                   <input
                     type="text"
                     id="address.zipCode"
                     name="address.zipCode"
                     value={profileData.address.zipCode}
                     onChange={handleInputChange}
-                    className="form-input"
+                    disabled={!isEditing}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="address.country">Country</label>
+                  <input
+                    type="text"
+                    id="address.country"
+                    name="address.country"
+                    value={profileData.address.country}
+                    onChange={handleInputChange}
                     disabled={!isEditing}
                   />
                 </div>
               </div>
+            </div>
 
-              <div className="form-group">
-                <label htmlFor="address.country" className="form-label">Country</label>
-                <select
-                  id="address.country"
-                  name="address.country"
-                  value={profileData.address.country}
-                  onChange={handleInputChange}
-                  className="form-select"
-                  disabled={!isEditing}
+            {isEditing && (
+              <div className="form-actions">
+                <button
+                  onClick={handleSaveProfile}
+                  className="btn btn-primary"
+                  disabled={saving}
                 >
-                  <option value="United States">United States</option>
-                  <option value="Canada">Canada</option>
-                  <option value="United Kingdom">United Kingdom</option>
-                  <option value="Australia">Australia</option>
-                </select>
+                  <Save size={16} />
+                  {saving ? 'Saving...' : 'Save Changes'}
+                </button>
               </div>
-
-              {isEditing && (
-                <div className="form-actions">
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={() => {
-                      setIsEditing(false);
-                      setErrors({});
-                      fetchProfile(); // Reset form
-                    }}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="btn btn-primary"
-                    disabled={loading}
-                  >
-                    {loading ? (
-                      <>
-                        <div className="loading"></div>
-                        Saving...
-                      </>
-                    ) : (
-                      <>
-                        <Save size={16} />
-                        Save Changes
-                      </>
-                    )}
-                  </button>
-                </div>
-              )}
-            </form>
+            )}
           </div>
 
           {/* Password Section */}
-          <div className="password-section">
+          <div className="profile-section">
             <div className="section-header">
-              <h2>Security</h2>
+              <h2>Password & Security</h2>
               <button
-                className="btn btn-outline"
                 onClick={() => setShowPasswordForm(!showPasswordForm)}
+                className="btn btn-outline"
+                disabled={saving}
               >
-                Change Password
+                {showPasswordForm ? 'Cancel' : 'Change Password'}
               </button>
             </div>
 
             {showPasswordForm && (
-              <form onSubmit={handlePasswordSubmit} className="password-form">
-                {errors.password && (
-                  <div className="alert alert-error">
-                    <AlertCircle size={16} />
-                    {errors.password}
-                  </div>
-                )}
-
+              <div className="password-form">
                 <div className="form-group">
-                  <label htmlFor="currentPassword" className="form-label">Current Password</label>
-                  <div className="password-input-wrapper">
+                  <label htmlFor="current_password">Current Password</label>
+                  <div className="password-input">
                     <input
                       type={showPasswords.current ? 'text' : 'password'}
-                      id="currentPassword"
-                      name="currentPassword"
-                      value={passwordData.currentPassword}
+                      id="current_password"
+                      name="current_password"
+                      value={passwordData.current_password}
                       onChange={handlePasswordChange}
-                      className={`form-input ${errors.currentPassword ? 'error' : ''}`}
+                      className={errors.current_password ? 'error' : ''}
                     />
                     <button
                       type="button"
-                      className="password-toggle"
                       onClick={() => togglePasswordVisibility('current')}
+                      className="password-toggle"
                     >
                       {showPasswords.current ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
                   </div>
-                  {errors.currentPassword && <div className="error-message">{errors.currentPassword}</div>}
+                  {errors.current_password && <span className="error-text">{errors.current_password}</span>}
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="newPassword" className="form-label">New Password</label>
-                  <div className="password-input-wrapper">
+                  <label htmlFor="new_password">New Password</label>
+                  <div className="password-input">
                     <input
                       type={showPasswords.new ? 'text' : 'password'}
-                      id="newPassword"
-                      name="newPassword"
-                      value={passwordData.newPassword}
+                      id="new_password"
+                      name="new_password"
+                      value={passwordData.new_password}
                       onChange={handlePasswordChange}
-                      className={`form-input ${errors.newPassword ? 'error' : ''}`}
+                      className={errors.new_password ? 'error' : ''}
                     />
                     <button
                       type="button"
-                      className="password-toggle"
                       onClick={() => togglePasswordVisibility('new')}
+                      className="password-toggle"
                     >
                       {showPasswords.new ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
                   </div>
-                  {errors.newPassword && <div className="error-message">{errors.newPassword}</div>}
+                  {errors.new_password && <span className="error-text">{errors.new_password}</span>}
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="confirmPassword" className="form-label">Confirm New Password</label>
-                  <div className="password-input-wrapper">
+                  <label htmlFor="new_password_confirmation">Confirm New Password</label>
+                  <div className="password-input">
                     <input
                       type={showPasswords.confirm ? 'text' : 'password'}
-                      id="confirmPassword"
-                      name="confirmPassword"
-                      value={passwordData.confirmPassword}
+                      id="new_password_confirmation"
+                      name="new_password_confirmation"
+                      value={passwordData.new_password_confirmation}
                       onChange={handlePasswordChange}
-                      className={`form-input ${errors.confirmPassword ? 'error' : ''}`}
+                      className={errors.new_password_confirmation ? 'error' : ''}
                     />
                     <button
                       type="button"
-                      className="password-toggle"
                       onClick={() => togglePasswordVisibility('confirm')}
+                      className="password-toggle"
                     >
                       {showPasswords.confirm ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
                   </div>
-                  {errors.confirmPassword && <div className="error-message">{errors.confirmPassword}</div>}
+                  {errors.new_password_confirmation && <span className="error-text">{errors.new_password_confirmation}</span>}
                 </div>
 
                 <div className="form-actions">
                   <button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={() => {
-                      setShowPasswordForm(false);
-                      setPasswordData({
-                        currentPassword: '',
-                        newPassword: '',
-                        confirmPassword: ''
-                      });
-                      setErrors({});
-                    }}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
+                    onClick={handleUpdatePassword}
                     className="btn btn-primary"
-                    disabled={loading}
+                    disabled={saving}
                   >
-                    {loading ? (
-                      <>
-                        <div className="loading"></div>
-                        Updating...
-                      </>
-                    ) : (
-                      'Update Password'
-                    )}
+                    {saving ? 'Updating...' : 'Update Password'}
                   </button>
                 </div>
-              </form>
+              </div>
             )}
           </div>
         </div>

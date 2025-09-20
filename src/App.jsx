@@ -35,12 +35,15 @@ import SellerOrders from './pages/Seller/Orders/SellerOrders';
 import SellerProfile from './pages/Seller/Profile/SellerProfile';
 import SellerShop from './pages/Seller/Shop/SellerShop';
 import SellerAnalytics from './pages/Seller/Analytics/SellerAnalytics';
+import AddProduct from './pages/Seller/Products/AddProduct';
+import EditProduct from './pages/Seller/Products/EditProduct';
 
 // Protected Route Component
 import ProtectedRoute from './components/common/ProtectedRoute/ProtectedRoute';
 
 // Shop Pages (Bakery Shop Pages)
 import ShopDetail from './pages/Shop/ShopDetail/ShopDetail';
+import BakeryShops from './pages/Categories/BakeryShops';
 
 function App() {
   return (
@@ -58,6 +61,7 @@ function App() {
                   <Route path="/products/:id" element={<ProductDetail />} />
                   <Route path="/categories" element={<Categories />} />
                   <Route path="/categories/:category" element={<Products />} />
+                  <Route path="/categories/bakery-shops" element={<BakeryShops />} />
                   <Route path="/bakery/:shopId" element={<ShopDetail />} />
                   <Route path="/about" element={<About />} />
                   <Route path="/contact" element={<Contact />} />
@@ -110,6 +114,16 @@ function App() {
                       <SellerProducts />
                     </ProtectedRoute>
                   } />
+                  <Route path="/seller/products/new" element={
+                    <ProtectedRoute userType="seller">
+                      <AddProduct />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/seller/products/:id/edit" element={
+                    <ProtectedRoute userType="seller">
+                      <EditProduct />
+                    </ProtectedRoute>
+                  } />
                   <Route path="/seller/orders" element={
                     <ProtectedRoute userType="seller">
                       <SellerOrders />
@@ -140,6 +154,16 @@ function App() {
                   <Route path="/owner/products" element={
                     <ProtectedRoute userType="owner">
                       <SellerProducts />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/owner/products/new" element={
+                    <ProtectedRoute userType="owner">
+                      <AddProduct />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/owner/products/:id/edit" element={
+                    <ProtectedRoute userType="owner">
+                      <EditProduct />
                     </ProtectedRoute>
                   } />
                   <Route path="/owner/orders" element={
