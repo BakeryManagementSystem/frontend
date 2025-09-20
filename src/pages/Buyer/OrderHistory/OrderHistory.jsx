@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext';
+import ApiService from '../../../services/api';
 import {
   Package,
   Truck,
@@ -8,7 +9,9 @@ import {
   Eye,
   Search,
   Filter,
-  Download
+  Download,
+  AlertCircle,
+  X
 } from 'lucide-react';
 import './OrderHistory.css';
 
@@ -16,94 +19,60 @@ const OrderHistory = () => {
   const { user } = useAuth();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [filter, setFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     fetchOrders();
-  }, [filter]);
+  }, [filter, searchQuery, currentPage]);
 
   const fetchOrders = async () => {
     setLoading(true);
-    // Simulate API call with mock data
-    setTimeout(() => {
-      const mockOrders = [
-        {
-          id: 'ORD-001',
-          date: '2024-01-15',
-          total: 199.99,
-          status: 'delivered',
-          items: [
-            {
-              id: 1,
-              name: 'Premium Wireless Headphones',
-              price: 199.99,
-              quantity: 1,
-              image: '/placeholder-product.jpg'
-            }
-          ],
-          estimatedDelivery: '2024-01-18',
-          trackingNumber: 'BMS123456789'
-        },
-        {
-          id: 'ORD-002',
-          date: '2024-01-12',
-          total: 89.99,
-          status: 'shipped',
-          items: [
-            {
-              id: 2,
-              name: 'Smart Home Camera',
-              price: 89.99,
-              quantity: 1,
-              image: '/placeholder-product.jpg'
-            }
-          ],
-          estimatedDelivery: '2024-01-16',
-          trackingNumber: 'BMS987654321'
-        },
-        {
-          id: 'ORD-003',
-          date: '2024-01-10',
-          total: 149.99,
-          status: 'processing',
-          items: [
-            {
-              id: 3,
-              name: 'Coffee Maker Pro',
-              price: 149.99,
-              quantity: 1,
-              image: '/placeholder-product.jpg'
-            }
-          ],
-          estimatedDelivery: '2024-01-17'
-        },
-        {
-          id: 'ORD-004',
-          date: '2024-01-08',
-          total: 79.99,
-          status: 'cancelled',
-          items: [
-            {
-              id: 4,
-              name: 'Bluetooth Earbuds',
-              price: 79.99,
-              quantity: 1,
-              image: '/placeholder-product.jpg'
-            }
-          ]
-        }
-      ];
+    setError(null);
 
-      // Apply filter
-      let filteredOrders = mockOrders;
+    try {
+      const params = {
+        page: currentPage,
+        per_page: 10
+      };
+
       if (filter !== 'all') {
-        filteredOrders = mockOrders.filter(order => order.status === filter);
+        params.status = filter;
       }
 
-      setOrders(filteredOrders);
+      if (searchQuery.trim()) {
+        params.search = searchQuery.trim();
+      }
+
+      const response = await ApiService.getBuyerOrders(params);
+
+      setOrders(response.data || []);
+      setTotalPages(response.meta?.last_page || 1);
+
+    } catch (error) {
+      console.error('Failed to fetch orders:', error);
+      setError('Failed to load orders. Please try again.');
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
+  };
+
+  const handleCancelOrder = async (orderId) => {
+    if (!window.confirm('Are you sure you want to cancel this order?')) {
+      return;
+    }
+
+    try {
+      await ApiService.cancelBuyerOrder(orderId);
+      fetchOrders(); // Refresh orders list
+      alert('Order cancelled successfully');
+    } catch (error) {
+      console.error('Failed to cancel order:', error);
+      alert('Failed to cancel order. Please try again.');
+    }
   };
 
   const getStatusIcon = (status) => {
@@ -114,27 +83,73 @@ const OrderHistory = () => {
         return <Truck className="status-icon shipped" size={16} />;
       case 'processing':
         return <Clock className="status-icon processing" size={16} />;
+      case 'pending':
+        return <Clock className="status-icon pending" size={16} />;
       case 'cancelled':
-        return <Package className="status-icon cancelled" size={16} />;
+        return <X className="status-icon cancelled" size={16} />;
       default:
         return <Package className="status-icon" size={16} />;
     }
   };
 
   const getStatusText = (status) => {
-    return status.charAt(0).toUpperCase() + status.slice(1);
+    switch (status) {
+      case 'delivered':
+        return 'Delivered';
+      case 'shipped':
+        return 'Shipped';
+      case 'processing':
+        return 'Processing';
+      case 'pending':
+        return 'Pending';
+      case 'cancelled':
+        return 'Cancelled';
+      default:
+        return status.charAt(0).toUpperCase() + status.slice(1);
+    }
   };
 
-  const filteredOrders = orders.filter(order =>
-    order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    order.items.some(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(price);
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
 
   if (loading) {
     return (
-      <div className="order-history loading">
+      <div className="order-history">
         <div className="container">
-          <div className="loading-text">Loading your orders...</div>
+          <div className="loading">
+            <div className="loading-spinner"></div>
+            <p>Loading your orders...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="order-history">
+        <div className="container">
+          <div className="error-state">
+            <AlertCircle size={48} />
+            <h2>Unable to load orders</h2>
+            <p>{error}</p>
+            <button onClick={fetchOrders} className="btn btn-primary">
+              Try Again
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -143,47 +158,71 @@ const OrderHistory = () => {
   return (
     <div className="order-history">
       <div className="container">
-        {/* Page Header */}
         <div className="page-header">
           <h1>Order History</h1>
           <p>Track and manage all your orders</p>
         </div>
 
-        {/* Controls */}
-        <div className="order-controls">
-          <div className="search-bar">
-            <Search className="search-icon" size={20} />
+        {/* Filters and Search */}
+        <div className="filters-section">
+          <div className="search-box">
+            <Search size={20} />
             <input
               type="text"
               placeholder="Search orders..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="search-input"
             />
           </div>
-
           <div className="filter-tabs">
-            {['all', 'processing', 'shipped', 'delivered', 'cancelled'].map(status => (
-              <button
-                key={status}
-                className={`filter-tab ${filter === status ? 'active' : ''}`}
-                onClick={() => setFilter(status)}
-              >
-                {status.charAt(0).toUpperCase() + status.slice(1)}
-              </button>
-            ))}
+            <button
+              className={`filter-tab ${filter === 'all' ? 'active' : ''}`}
+              onClick={() => setFilter('all')}
+            >
+              All Orders
+            </button>
+            <button
+              className={`filter-tab ${filter === 'pending' ? 'active' : ''}`}
+              onClick={() => setFilter('pending')}
+            >
+              Pending
+            </button>
+            <button
+              className={`filter-tab ${filter === 'processing' ? 'active' : ''}`}
+              onClick={() => setFilter('processing')}
+            >
+              Processing
+            </button>
+            <button
+              className={`filter-tab ${filter === 'shipped' ? 'active' : ''}`}
+              onClick={() => setFilter('shipped')}
+            >
+              Shipped
+            </button>
+            <button
+              className={`filter-tab ${filter === 'delivered' ? 'active' : ''}`}
+              onClick={() => setFilter('delivered')}
+            >
+              Delivered
+            </button>
+            <button
+              className={`filter-tab ${filter === 'cancelled' ? 'active' : ''}`}
+              onClick={() => setFilter('cancelled')}
+            >
+              Cancelled
+            </button>
           </div>
         </div>
 
         {/* Orders List */}
         <div className="orders-list">
-          {filteredOrders.length > 0 ? (
-            filteredOrders.map(order => (
+          {orders.length > 0 ? (
+            orders.map((order) => (
               <div key={order.id} className="order-card">
                 <div className="order-header">
                   <div className="order-info">
                     <h3>Order #{order.id}</h3>
-                    <p>Placed on {new Date(order.date).toLocaleDateString()}</p>
+                    <p className="order-date">Placed on {formatDate(order.created_at)}</p>
                   </div>
                   <div className="order-status">
                     {getStatusIcon(order.status)}
@@ -192,65 +231,96 @@ const OrderHistory = () => {
                 </div>
 
                 <div className="order-items">
-                  {order.items.map(item => (
-                    <div key={item.id} className="order-item">
-                      <img src={item.image} alt={item.name} className="item-image" />
-                      <div className="item-details">
-                        <h4>{item.name}</h4>
-                        <p>Quantity: {item.quantity}</p>
-                        <div className="item-price">${item.price}</div>
+                  {order.items && order.items.length > 0 ? (
+                    order.items.slice(0, 3).map((item, index) => (
+                      <div key={index} className="order-item">
+                        <img
+                          src={item.product_image || '/placeholder-product.jpg'}
+                          alt={item.product_name}
+                          className="item-image"
+                        />
+                        <div className="item-details">
+                          <h4>{item.product_name}</h4>
+                          <p>Quantity: {item.quantity}</p>
+                          <p className="item-price">{formatPrice(item.unit_price)}</p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))
+                  ) : (
+                    <p>No items found</p>
+                  )}
+                  {order.items && order.items.length > 3 && (
+                    <p className="more-items">
+                      +{order.items.length - 3} more item{order.items.length - 3 !== 1 ? 's' : ''}
+                    </p>
+                  )}
                 </div>
 
                 <div className="order-footer">
                   <div className="order-total">
-                    <strong>Total: ${order.total}</strong>
+                    <strong>Total: {formatPrice(order.total_amount)}</strong>
                   </div>
-
                   <div className="order-actions">
-                    <button className="btn btn-outline btn-sm">
+                    {order.status === 'pending' && (
+                      <button
+                        onClick={() => handleCancelOrder(order.id)}
+                        className="btn btn-outline btn-sm"
+                      >
+                        Cancel Order
+                      </button>
+                    )}
+                    <button
+                      onClick={() => window.location.href = `/buyer/orders/${order.id}`}
+                      className="btn btn-primary btn-sm"
+                    >
                       <Eye size={16} />
                       View Details
                     </button>
-
-                    {order.status === 'delivered' && (
-                      <button className="btn btn-primary btn-sm">
-                        Write Review
-                      </button>
-                    )}
-
-                    {order.trackingNumber && (
-                      <button className="btn btn-secondary btn-sm">
-                        <Truck size={16} />
-                        Track Package
-                      </button>
-                    )}
-
-                    <button className="btn btn-outline btn-sm">
-                      <Download size={16} />
-                      Invoice
-                    </button>
                   </div>
                 </div>
-
-                {order.estimatedDelivery && order.status !== 'delivered' && order.status !== 'cancelled' && (
-                  <div className="delivery-info">
-                    Expected delivery: {new Date(order.estimatedDelivery).toLocaleDateString()}
-                  </div>
-                )}
               </div>
             ))
           ) : (
-            <div className="no-orders">
+            <div className="empty-state">
               <Package size={64} />
-              <h3>No orders found</h3>
-              <p>You haven't placed any orders yet or no orders match your search.</p>
-              <button className="btn btn-primary">Start Shopping</button>
+              <h2>No orders found</h2>
+              <p>
+                {filter === 'all'
+                  ? "You haven't placed any orders yet"
+                  : `No ${filter} orders found`}
+              </p>
+              <button
+                onClick={() => window.location.href = '/products'}
+                className="btn btn-primary"
+              >
+                Start Shopping
+              </button>
             </div>
           )}
         </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="pagination">
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+              className="btn btn-outline"
+            >
+              Previous
+            </button>
+            <span className="page-info">
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+              className="btn btn-outline"
+            >
+              Next
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

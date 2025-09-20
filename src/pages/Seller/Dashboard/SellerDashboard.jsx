@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
+import ApiService from '../../../services/api';
 import {
   Store,
   Package,
@@ -25,6 +26,7 @@ const SellerDashboard = () => {
     recentActivities: []
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     fetchDashboardData();
@@ -32,101 +34,21 @@ const SellerDashboard = () => {
 
   const fetchDashboardData = async () => {
     setLoading(true);
-    // Simulate API call with mock data
-    setTimeout(() => {
+    setError('');
+    try {
+      const response = await ApiService.getSellerDashboard();
       setDashboardData({
-        stats: {
-          totalProducts: 32,
-          totalOrders: 156,
-          totalRevenue: 8650.75,
-          averageRating: 4.8,
-          pendingOrders: 12,
-          lowStockItems: 5
-        },
-        recentOrders: [
-          {
-            id: 'ORD-101',
-            customer: 'Maria Garcia',
-            product: 'Custom Wedding Cake (3-tier)',
-            amount: 185.99,
-            status: 'pending',
-            date: '2024-01-15'
-          },
-          {
-            id: 'ORD-102',
-            customer: 'David Chen',
-            product: 'Chocolate Croissants (12-pack)',
-            amount: 24.99,
-            status: 'shipped',
-            date: '2024-01-14'
-          },
-          {
-            id: 'ORD-103',
-            customer: 'Jennifer Brown',
-            product: 'Artisan Sourdough Bread',
-            amount: 8.99,
-            status: 'delivered',
-            date: '2024-01-13'
-          }
-        ],
-        topProducts: [
-          {
-            id: 1,
-            name: 'Artisan Sourdough Bread',
-            sales: 89,
-            revenue: 799.11,
-            image: '/placeholder-sourdough.jpg',
-            rating: 4.8,
-            stock: 6
-          },
-          {
-            id: 2,
-            name: 'Chocolate Croissants (6-pack)',
-            sales: 67,
-            revenue: 869.33,
-            image: '/placeholder-croissants.jpg',
-            rating: 4.9,
-            stock: 12
-          },
-          {
-            id: 3,
-            name: 'Custom Birthday Cakes',
-            sales: 23,
-            revenue: 1057.77,
-            image: '/placeholder-birthday-cake.jpg',
-            rating: 4.7,
-            stock: 0
-          }
-        ],
-        recentActivities: [
-          {
-            id: 1,
-            type: 'order',
-            message: 'New order received for Custom Wedding Cake',
-            time: '2 hours ago'
-          },
-          {
-            id: 2,
-            type: 'product',
-            message: 'Blueberry Muffins stock running low (3 remaining)',
-            time: '4 hours ago'
-          },
-          {
-            id: 3,
-            type: 'review',
-            message: 'New 5-star review for Chocolate Croissants',
-            time: '6 hours ago'
-          },
-          {
-            id: 4,
-            type: 'order',
-            message: 'Order shipped: Sourdough Bread to Maria L.',
-            time: '1 day ago'
-          }
-        ]
+        stats: response.stats || {},
+        recentOrders: response.recentOrders || [],
+        topProducts: response.topProducts || [],
+        recentActivities: response.recentActivities || []
       });
+    } catch (error) {
+      console.error('Failed to fetch dashboard data:', error);
+      setError('Failed to load dashboard data. Please try again.');
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   const getStatusColor = (status) => {

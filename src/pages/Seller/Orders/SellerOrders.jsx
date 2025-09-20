@@ -11,7 +11,8 @@ import {
   Clock,
   AlertCircle,
   Download,
-  MessageCircle
+  MessageCircle,
+  RefreshCw
 } from 'lucide-react';
 import './SellerOrders.css';
 
@@ -22,6 +23,7 @@ const SellerOrders = () => {
   const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     fetchOrders();
@@ -32,43 +34,88 @@ const SellerOrders = () => {
     setError('');
 
     try {
-      const response = await ApiService.getSellerOrders();
+      const params = statusFilter !== 'all' ? { status: statusFilter } : {};
+      const response = await ApiService.getSellerOrders(params);
 
-      // Transform the backend response to match the component's expected format
-      const transformedOrders = response.purchases?.map(purchase => ({
-        id: `ORD-${purchase.order_id}`,
-        orderId: purchase.order_id,
-        customer: {
-          name: purchase.buyer?.name || 'Unknown Customer',
-          email: purchase.buyer?.email || '',
-          avatar: '/placeholder-avatar.jpg'
-        },
-        products: [{
-          id: purchase.product_id,
-          name: purchase.product?.name || 'Unknown Product',
-          quantity: purchase.quantity,
-          price: parseFloat(purchase.unit_price),
-          image: purchase.product?.image_url || '/placeholder-product.jpg'
-        }],
-        total: parseFloat(purchase.line_total),
-        status: 'pending', // Default status since backend doesn't provide order status in purchases
-        orderDate: purchase.sold_at,
-        shippingAddress: {
-          street: 'N/A',
-          city: 'N/A',
-          state: 'N/A',
-          zipCode: 'N/A'
-        }
-      })) || [];
+      // Check if response has the expected structure
+      if (response.success && response.orders) {
+        // Use the proper orders data structure from seller orders API
+        const transformedOrders = response.orders.map(order => ({
+          id: order.id,
+          orderId: order.id,
+          customer: {
+            name: order.buyer?.name || order.customer?.name || 'Unknown Customer',
+            email: order.buyer?.email || order.customer?.email || '',
+            avatar: '/placeholder-avatar.jpg'
+          },
+          products: order.orderItems?.map(item => ({
+            id: item.product_id,
+            name: item.product?.name || 'Unknown Product',
+            quantity: item.quantity,
+            price: parseFloat(item.unit_price || item.price || 0),
+            image: item.product?.image_url || item.product?.image_path || '/placeholder-product.jpg',
+            stock: item.product?.stock_quantity || 0 // Add stock information
+          })) || [],
+          total: parseFloat(order.total || 0),
+          status: order.status || 'pending',
+          orderDate: order.created_at,
+          shippingAddress: order.shipping_address || {
+            street: 'N/A',
+            city: 'N/A',
+            state: 'N/A',
+            zipCode: 'N/A'
+          }
+        }));
 
-      setOrders(transformedOrders);
+        setOrders(transformedOrders);
+      } else if (response.data) {
+        // Handle alternative response structure
+        const transformedOrders = response.data.map(order => ({
+          id: order.id,
+          orderId: order.id,
+          customer: {
+            name: order.buyer?.name || order.customer?.name || 'Unknown Customer',
+            email: order.buyer?.email || order.customer?.email || '',
+            avatar: '/placeholder-avatar.jpg'
+          },
+          products: order.order_items?.map(item => ({
+            id: item.product_id,
+            name: item.product?.name || 'Unknown Product',
+            quantity: item.quantity,
+            price: parseFloat(item.unit_price || item.price || 0),
+            image: item.product?.image_url || item.product?.image_path || '/placeholder-product.jpg',
+            stock: item.product?.stock_quantity || 0
+          })) || [],
+          total: parseFloat(order.total || 0),
+          status: order.status || 'pending',
+          orderDate: order.created_at,
+          shippingAddress: order.shipping_address || {
+            street: 'N/A',
+            city: 'N/A',
+            state: 'N/A',
+            zipCode: 'N/A'
+          }
+        }));
+
+        setOrders(transformedOrders);
+      } else {
+        // Fallback for empty or unexpected response
+        setOrders([]);
+        setError('No orders found or unexpected response format.');
+      }
     } catch (error) {
       console.error('Failed to fetch orders:', error);
-      setError('Failed to load orders. Please try again.');
+      setError(`Failed to load orders: ${error.message}`);
       setOrders([]);
     } finally {
       setLoading(false);
     }
+  };
+
+  const refreshOrders = async () => {
+    setRefreshing(true);
+    await fetchOrders();
+    setRefreshing(false);
   };
 
   const getStatusIcon = (status) => {
@@ -101,7 +148,7 @@ const SellerOrders = () => {
   };
 
   const filteredOrders = orders.filter(order =>
-    order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    String(order.id).toLowerCase().includes(searchQuery.toLowerCase()) ||
     order.customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     order.customer.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -152,6 +199,11 @@ const SellerOrders = () => {
               </button>
             ))}
           </div>
+
+          <button className="btn btn-refresh" onClick={refreshOrders} disabled={refreshing}>
+            {refreshing ? <RefreshCw className="icon-spin" size={16} /> : <RefreshCw size={16} />}
+            Refresh
+          </button>
         </div>
 
         {/* Orders List */}

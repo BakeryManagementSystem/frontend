@@ -20,7 +20,9 @@ import {
   Phone,
   Info,
   Plus,
-  Bell
+  Bell,
+  BarChart3,
+  Store
 } from 'lucide-react';
 import './Header.css';
 
@@ -295,6 +297,22 @@ const Header = () => {
                               <Grid3X3 size={16} />
                               My Products
                             </Link>
+                            <Link
+                              to={`/${user?.user_type}/analytics`}
+                              className="dropdown-link"
+                              onClick={() => setIsUserMenuOpen(false)}
+                            >
+                              <BarChart3 size={16} />
+                              Analytics
+                            </Link>
+                            <Link
+                              to={`/${user?.user_type}/shop`}
+                              className="dropdown-link"
+                              onClick={() => setIsUserMenuOpen(false)}
+                            >
+                              <Store size={16} />
+                              Manage Shop
+                            </Link>
                           </>
                         )}
 
@@ -437,6 +455,22 @@ const Header = () => {
                           >
                             <Grid3X3 size={16} />
                             My Products
+                          </Link>
+                          <Link
+                            to={`/${user?.user_type}/analytics`}
+                            className="dropdown-link"
+                            onClick={closeAllMenus}
+                          >
+                            <BarChart3 size={16} />
+                            Analytics
+                          </Link>
+                          <Link
+                            to={`/${user?.user_type}/shop`}
+                            className="dropdown-link"
+                            onClick={closeAllMenus}
+                          >
+                            <Store size={16} />
+                            Manage Shop
                           </Link>
                         </>
                       )}

@@ -97,6 +97,19 @@ class ApiService {
     return this.request('/categories');
   }
 
+  // Bakery Shops API
+  async getBakeryShops(params = {}) {
+    const searchParams = new URLSearchParams();
+    Object.keys(params).forEach(key => {
+      if (params[key] !== undefined && params[key] !== null && params[key] !== '') {
+        searchParams.append(key, params[key]);
+      }
+    });
+    const queryString = searchParams.toString();
+    const endpoint = `/bakery-shops${queryString ? `?${queryString}` : ''}`;
+    return this.request(endpoint);
+  }
+
   // Shop/User profiles API
   async getShopProfile(ownerId) {
     return this.request(`/shops/${ownerId}`);
@@ -147,13 +160,174 @@ class ApiService {
     });
   }
 
+  // Buyer-specific APIs
+  async getBuyerDashboard() {
+    return this.request('/buyer/dashboard');
+  }
+
+  async getBuyerOrders(params = {}) {
+    const searchParams = new URLSearchParams();
+    Object.keys(params).forEach(key => {
+      if (params[key] !== undefined && params[key] !== null && params[key] !== '') {
+        searchParams.append(key, params[key]);
+      }
+    });
+    const queryString = searchParams.toString();
+    const endpoint = `/buyer/orders${queryString ? `?${queryString}` : ''}`;
+    return this.request(endpoint);
+  }
+
+  async getBuyerOrder(orderId) {
+    return this.request(`/buyer/orders/${orderId}`);
+  }
+
+  async cancelBuyerOrder(orderId) {
+    return this.request(`/buyer/orders/${orderId}/cancel`, {
+      method: 'PATCH',
+    });
+  }
+
+  async getBuyerOrderStats() {
+    return this.request('/buyer/orders/stats');
+  }
+
+  // User Profile APIs
+  async getUserProfile() {
+    return this.request('/user/profile');
+  }
+
+  async updateUserProfile(profileData) {
+    return this.request('/user/profile', {
+      method: 'PUT',
+      body: JSON.stringify(profileData),
+    });
+  }
+
+  async updateUserPassword(passwordData) {
+    return this.request('/user/password', {
+      method: 'PUT',
+      body: JSON.stringify(passwordData),
+    });
+  }
+
+  async getUserAddresses() {
+    return this.request('/user/addresses');
+  }
+
+  async updateUserAddress(addressId, addressData) {
+    return this.request(`/user/addresses/${addressId}`, {
+      method: 'PUT',
+      body: JSON.stringify(addressData),
+    });
+  }
+
   // Seller/Owner Orders API
-  async getSellerOrders() {
-    return this.request('/owner/purchases');
+  async getSellerOrders(params = {}) {
+    const searchParams = new URLSearchParams();
+    Object.keys(params).forEach(key => {
+      if (params[key] !== undefined && params[key] !== null && params[key] !== '') {
+        searchParams.append(key, params[key]);
+      }
+    });
+    const queryString = searchParams.toString();
+    const endpoint = `/seller/orders${queryString ? `?${queryString}` : ''}`;
+    return this.request(endpoint);
+  }
+
+  async updateSellerOrderStatus(orderId, status) {
+    return this.request(`/seller/orders/${orderId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status }),
+    });
   }
 
   async getSellerOrderStats() {
     return this.request('/seller/orders/stats');
+  }
+
+  // Seller Dashboard API
+  async getSellerDashboard() {
+    return this.request('/seller/dashboard');
+  }
+
+  async getSellerStats() {
+    return this.request('/seller/stats');
+  }
+
+  // Seller Products API
+  async getSellerProducts(params = {}) {
+    const searchParams = new URLSearchParams();
+    Object.keys(params).forEach(key => {
+      if (params[key] !== undefined && params[key] !== null && params[key] !== '') {
+        searchParams.append(key, params[key]);
+      }
+    });
+    const queryString = searchParams.toString();
+    const endpoint = `/seller/products${queryString ? `?${queryString}` : ''}`;
+    return this.request(endpoint);
+  }
+
+  async createSellerProduct(productData) {
+    // Handle FormData for file uploads
+    const headers = productData instanceof FormData ? {} : { 'Content-Type': 'application/json' };
+    const body = productData instanceof FormData ? productData : JSON.stringify(productData);
+
+    return this.request('/seller/products', {
+      method: 'POST',
+      headers,
+      body,
+    });
+  }
+
+  async getSellerProduct(id) {
+    return this.request(`/seller/products/${id}`);
+  }
+
+  async updateSellerProduct(id, productData) {
+    // Handle FormData for file uploads
+    const headers = productData instanceof FormData ? {} : { 'Content-Type': 'application/json' };
+    const body = productData instanceof FormData ? productData : JSON.stringify(productData);
+
+    return this.request(`/seller/products/${id}`, {
+      method: 'POST', // Laravel handles PUT with FormData via POST with _method
+      headers: {
+        ...headers,
+        ...(productData instanceof FormData && { 'X-HTTP-Method-Override': 'PUT' })
+      },
+      body,
+    });
+  }
+
+  async updateProduct(id, productData) {
+    // Generic product update method for EditProduct component
+    return this.updateSellerProduct(id, productData);
+  }
+
+  // Shop Management API
+  async getSellerShop() {
+    return this.request('/owner/shop');
+  }
+
+  async updateSellerShop(shopData) {
+    return this.request('/owner/shop', {
+      method: 'POST',
+      body: JSON.stringify(shopData),
+    });
+  }
+
+  async getSellerShopStats() {
+    return this.request('/owner/shop/stats');
+  }
+
+  async uploadShopImage(imageData) {
+    return this.request('/owner/shop/upload', {
+      method: 'POST',
+      body: imageData, // FormData for file upload
+      headers: {
+        // Remove Content-Type to let browser set it for FormData
+        'Accept': 'application/json',
+      },
+    });
   }
 
   // Notifications API
