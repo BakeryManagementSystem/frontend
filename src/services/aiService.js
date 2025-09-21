@@ -24,12 +24,28 @@ class AIService {
       'baking', 'fresh', 'oven', 'sweet', 'dessert', 'flour', 'sugar'
     ];
 
+    // Common conversational responses that should be allowed
+    const conversationalKeywords = [
+      'yes', 'no', 'okay', 'ok', 'sure', 'please', 'thanks', 'thank you',
+      'tell me more', 'more info', 'details', 'information', 'explain',
+      'how much', 'when', 'where', 'who', 'what time', 'available'
+    ];
+
     const prompt_lower = prompt.toLowerCase();
-    return bakeryKeywords.some(keyword => prompt_lower.includes(keyword)) ||
-           prompt_lower.includes('help') ||
-           prompt_lower.includes('what') ||
-           prompt_lower.includes('how') ||
-           prompt_lower.includes('can you');
+
+    // Check for bakery keywords
+    const hasBakeryKeyword = bakeryKeywords.some(keyword => prompt_lower.includes(keyword));
+
+    // Check for conversational keywords
+    const hasConversationalKeyword = conversationalKeywords.some(keyword => prompt_lower.includes(keyword));
+
+    // Check for general help keywords
+    const hasHelpKeyword = prompt_lower.includes('help') ||
+                          prompt_lower.includes('what') ||
+                          prompt_lower.includes('how') ||
+                          prompt_lower.includes('can you');
+
+    return hasBakeryKeyword || hasConversationalKeyword || hasHelpKeyword;
   }
 
   // Get context data from database
@@ -344,6 +360,36 @@ class AIService {
   // Handle simple queries with local data
   handleLocalQueries(message, contextData, isAuthenticated) {
     const message_lower = message.toLowerCase();
+
+    // Handle conversational responses about cakes
+    if ((message_lower.includes('yes') || message_lower.includes('sure') || message_lower.includes('okay') || message_lower.includes('ok')) &&
+        (message_lower.includes('cake') || message_lower.includes('order') || message_lower.includes('custom'))) {
+      return "Perfect! Here's how to order a custom cake:\n\n" +
+             "🎂 **Cake Ordering Process:**\n" +
+             "• Choose your flavor: Chocolate, Vanilla, Red Velvet, Strawberry, Lemon, or Carrot\n" +
+             "• Select size: 6-inch (serves 6-8), 8-inch (serves 12-15), or 10-inch (serves 20-25)\n" +
+             "• Custom decorations and messages available\n" +
+             "• Prices start at $25 for a 6-inch cake\n" +
+             "• We need 48-72 hours advance notice for custom orders\n\n" +
+             (isAuthenticated ?
+               "You can place your order through our website or call us directly. Would you like to see our cake gallery or start an order?" :
+               "To place an order, please create an account or call us at (555) 123-CAKE. Would you like to know more about our flavors or pricing?");
+    }
+
+    // Handle "yes" responses when context suggests cake interest
+    if ((message_lower === 'yes' || message_lower === 'sure' || message_lower === 'okay' || message_lower === 'ok') &&
+        !message_lower.includes('cake')) {
+      return "Great! Here's detailed information about ordering custom cakes:\n\n" +
+             "🎂 **Our Custom Cake Services:**\n" +
+             "• **Flavors Available:** Chocolate, Vanilla, Red Velvet, Strawberry, Lemon, Carrot Cake\n" +
+             "• **Sizes:** 6\" ($25-35), 8\" ($35-50), 10\" ($50-75)\n" +
+             "• **Special Features:** Custom decorations, fondant work, edible images, themed designs\n" +
+             "• **Occasions:** Birthdays, weddings, anniversaries, graduations, corporate events\n" +
+             "• **Lead Time:** 48-72 hours for custom orders, 1 week for elaborate designs\n\n" +
+             (isAuthenticated ?
+               "Ready to place an order? I can help you get started or you can browse our cake gallery!" :
+               "To place an order, please create an account or call us at (555) 123-CAKE. Would you like to see examples of our work?");
+    }
 
     // Product-related queries
     if (message_lower.includes('products') || message_lower.includes('what do you sell')) {
