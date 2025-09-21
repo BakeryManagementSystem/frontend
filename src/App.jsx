@@ -8,6 +8,9 @@ import { NotificationProvider } from './context/NotificationContext';
 import Header from './components/layout/Header/Header';
 import Footer from './components/layout/Footer/Footer';
 
+// AI Assistant Component
+import FloatingAIAssistant from './components/common/FloatingAIAssistant/FloatingAIAssistant';
+
 // Public Pages
 import Home from './pages/Home/Home';
 import Products from './pages/Products/Products';
@@ -197,6 +200,9 @@ function App() {
                 </Routes>
               </main>
               <Footer />
+
+              {/* Floating AI Assistant - Available on all pages */}
+              <FloatingAIAssistant />
             </div>
           </Router>
         </CartProvider>
