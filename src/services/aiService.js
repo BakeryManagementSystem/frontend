@@ -72,18 +72,35 @@ class AIService {
           console.warn('Could not fetch orders:', error);
         }
 
-        // Calculate balance info from available data
-        if (context.orders && context.orders.length > 0) {
-          context.balance = {
-            total_orders: context.orders.length,
-            total_spent: context.orders.reduce((sum, order) => sum + (parseFloat(order.total_amount) || 0), 0),
-            last_order_date: context.orders[0]?.created_at || null
-          };
+
+        // Calculate balance info from available data - different for buyers vs sellers
+        const orders = Array.isArray(context.orders) ? context.orders : [];
+        if (orders.length > 0) {
+          if (context.user?.user_type === 'buyer') {
+            // Buyer stats: total orders placed and money spent
+            context.balance = {
+              total_orders: orders.length,
+              total_spent: orders.reduce((sum, order) => sum + (parseFloat(order.total_amount) || 0), 0),
+              last_order_date: orders[0]?.created_at || null
+            };
+          } else if (context.user?.user_type === 'seller' || context.user?.user_type === 'owner') {
+            // Seller/Owner stats: total sales and revenue
+            context.balance = {
+              total_sales: orders.length,
+              total_revenue: orders.reduce((sum, order) => sum + (parseFloat(order.total_amount) || 0), 0),
+              last_sale_date: orders[0]?.created_at || null,
+              pending_orders: orders.filter(order => order.status === 'pending').length
+            };
+          }
         } else {
           context.balance = {
             total_orders: 0,
             total_spent: 0,
-            last_order_date: null
+            total_sales: 0,
+            total_revenue: 0,
+            last_order_date: null,
+            last_sale_date: null,
+            pending_orders: 0
           };
         }
       }
@@ -106,27 +123,64 @@ class AIService {
     `;
 
     if (isAuthenticated && contextData.user) {
-      systemPrompt += `
-      The user is logged in. You can provide personalized information about their account.
-      User information: ${JSON.stringify(contextData.user)}
-      Recent orders: ${JSON.stringify(contextData.orders?.slice(0, 5) || [])}
-      Account balance: ${JSON.stringify(contextData.balance || {})}
-      
-      You can help with:
-      - Account information and order history
-      - Product recommendations based on past orders
-      - Order status and tracking
-      - Account balance and payment information
-      `;
+      // Ensure orders is always an array before using slice
+      const orders = Array.isArray(contextData.orders) ? contextData.orders : [];
+      const userType = contextData.user.user_type;
+
+      if (userType === 'buyer') {
+        systemPrompt += `
+        The user is logged in as a BUYER. Provide customer-focused assistance.
+        User information: ${JSON.stringify(contextData.user)}
+        Recent orders: ${JSON.stringify(orders.slice(0, 5))}
+        Account stats: ${JSON.stringify(contextData.balance || {})}
+        
+        As a buyer, you can help with:
+        - Browsing and purchasing products
+        - Order history and tracking
+        - Account balance and spending summary
+        - Product recommendations based on past purchases
+        - Delivery and pickup information
+        - Customer support and complaints
+        - Account management (profile, password, etc.)
+        
+        Focus on shopping experience, order management, and customer service.
+        `;
+      } else if (userType === 'seller' || userType === 'owner') {
+        const roleTitle = userType === 'owner' ? 'OWNER' : 'SELLER';
+        systemPrompt += `
+        The user is logged in as a ${roleTitle}. Provide business management assistance.
+        User information: ${JSON.stringify(contextData.user)}
+        Recent sales: ${JSON.stringify(orders.slice(0, 5))}
+        Business stats: ${JSON.stringify(contextData.balance || {})}
+        
+        As a ${roleTitle.toLowerCase()}, you can help with:
+        - Sales analytics and revenue tracking
+        - Order management and fulfillment
+        - Product inventory and stock levels
+        - Customer order history and patterns
+        - Business performance metrics
+        - Pending orders that need attention
+        ${userType === 'owner' ? '- Overall business management and strategy' : '- Daily sales operations'}
+        
+        Focus on business operations, sales management, and performance analytics.
+        `;
+      }
     } else {
       systemPrompt += `
-      The user is not logged in. You can only provide general information about:
-      - Available products and their details
-      - Shop information and services
-      - General bakery information
-      - How to place orders or create an account
+      The user is NOT logged in (GUEST). Provide general information only.
       
-      For account-specific questions, ask them to log in first.
+      You can help with:
+      - Viewing available products and their details
+      - Browse product categories
+      - General bakery information and services
+      - How to create an account or place orders
+      - Store hours, location, and contact information
+      - General inquiries about the bakery
+      
+      For account-specific features like order history, account balance, or personalized recommendations, 
+      politely ask them to log in or create an account first.
+      
+      Do NOT provide any personal account information or order details.
       `;
     }
 
@@ -184,6 +238,16 @@ class AIService {
       const products = contextData.products || [];
       if (products.length > 0) {
         const productList = products.slice(0, 5).map(p => `${p.name} - $${p.price}`).join(', ');
+
+        if (isAuthenticated && contextData.user) {
+          const userType = contextData.user.user_type;
+          if (userType === 'buyer') {
+            return `We have ${products.length} delicious products available including: ${productList}. Based on your order history, I can recommend products you might enjoy. Would you like personalized recommendations?`;
+          } else if (userType === 'seller' || userType === 'owner') {
+            return `Your bakery currently offers ${products.length} products including: ${productList}. Would you like to see inventory levels, sales performance, or add new products?`;
+          }
+        }
+
         return `We have ${products.length} products available including: ${productList}. Would you like to know more about any specific product?`;
       }
     }
@@ -193,29 +257,84 @@ class AIService {
       const categories = contextData.categories || [];
       if (categories.length > 0) {
         const categoryList = categories.map(c => c.name).join(', ');
+
+        if (isAuthenticated && contextData.user) {
+          const userType = contextData.user.user_type;
+          if (userType === 'buyer') {
+            return `Our bakery offers products in these categories: ${categoryList}. Which category would you like to explore for your next order?`;
+          } else if (userType === 'seller' || userType === 'owner') {
+            return `Your bakery has products organized in these categories: ${categoryList}. Would you like to see sales performance by category or manage category inventory?`;
+          }
+        }
+
         return `Our bakery offers products in these categories: ${categoryList}. What category interests you?`;
       }
     }
 
     // Account-specific queries (only for authenticated users)
-    if (isAuthenticated) {
-      if (message_lower.includes('my orders') || message_lower.includes('order history')) {
-        const orders = contextData.orders || [];
-        if (orders.length > 0) {
-          const recentOrder = orders[0];
-          return `Your most recent order was #${recentOrder.id} for $${recentOrder.total}. You have ${orders.length} total orders. Would you like more details about any specific order?`;
-        } else {
-          return "You haven't placed any orders yet. Browse our delicious products and place your first order!";
+    if (isAuthenticated && contextData.user) {
+      const userType = contextData.user.user_type;
+      const user = contextData.user;
+
+      // Order/Sales history queries
+      if (message_lower.includes('my orders') || message_lower.includes('order history') ||
+          message_lower.includes('sales') || message_lower.includes('revenue')) {
+
+        const orders = Array.isArray(contextData.orders) ? contextData.orders : [];
+
+        if (userType === 'buyer') {
+          if (orders.length > 0) {
+            const recentOrder = orders[0];
+            const totalSpent = contextData.balance?.total_spent || 0;
+            return `Your most recent order was #${recentOrder.id} for $${recentOrder.total_amount}. You have ${orders.length} total orders with a total spending of $${totalSpent.toFixed(2)}. Would you like details about any specific order?`;
+          } else {
+            return "You haven't placed any orders yet. Browse our delicious products and place your first order to start enjoying our fresh bakery items!";
+          }
+        } else if (userType === 'seller' || userType === 'owner') {
+          if (orders.length > 0) {
+            const totalRevenue = contextData.balance?.total_revenue || 0;
+            const pendingOrders = contextData.balance?.pending_orders || 0;
+            return `You have ${orders.length} total sales generating $${totalRevenue.toFixed(2)} in revenue. Currently, ${pendingOrders} orders are pending fulfillment. Would you like to see detailed sales analytics or manage pending orders?`;
+          } else {
+            return "No sales recorded yet. Once customers start placing orders, you'll be able to track sales performance and revenue here.";
+          }
         }
       }
 
-      if (message_lower.includes('balance') || message_lower.includes('account')) {
-        const user = contextData.user || {};
-        return `Hello ${user.name || 'there'}! Your account is active. How can I help you with your bakery needs today?`;
+      // Balance/Account queries
+      if (message_lower.includes('balance') || message_lower.includes('account') || message_lower.includes('profile')) {
+        if (userType === 'buyer') {
+          const totalSpent = contextData.balance?.total_spent || 0;
+          const totalOrders = contextData.balance?.total_orders || 0;
+          return `Hello ${user.name}! Your buyer account shows ${totalOrders} orders with total spending of $${totalSpent.toFixed(2)}. How can I help you with your shopping today?`;
+        } else if (userType === 'seller') {
+          const totalRevenue = contextData.balance?.total_revenue || 0;
+          const totalSales = contextData.balance?.total_sales || 0;
+          return `Hello ${user.name}! Your seller account shows ${totalSales} sales generating $${totalRevenue.toFixed(2)} in revenue. How can I assist with your bakery operations?`;
+        } else if (userType === 'owner') {
+          const totalRevenue = contextData.balance?.total_revenue || 0;
+          const totalSales = contextData.balance?.total_sales || 0;
+          const pendingOrders = contextData.balance?.pending_orders || 0;
+          return `Hello ${user.name}! As the owner, your bakery has ${totalSales} total sales with $${totalRevenue.toFixed(2)} revenue. ${pendingOrders} orders need attention. How can I help with business management?`;
+        }
+      }
+
+      // Business-specific queries for sellers/owners
+      if ((userType === 'seller' || userType === 'owner') &&
+          (message_lower.includes('business') || message_lower.includes('management') ||
+           message_lower.includes('analytics') || message_lower.includes('performance'))) {
+        const totalRevenue = contextData.balance?.total_revenue || 0;
+        const totalSales = contextData.balance?.total_sales || 0;
+        const pendingOrders = contextData.balance?.pending_orders || 0;
+
+        return `Business Overview: ${totalSales} total sales, $${totalRevenue.toFixed(2)} revenue, ${pendingOrders} pending orders. I can help with sales analytics, inventory management, order fulfillment, and business insights. What would you like to focus on?`;
       }
     } else {
-      if (message_lower.includes('my orders') || message_lower.includes('account') || message_lower.includes('balance')) {
-        return "To view your account information and order history, please log in to your account first. If you don't have an account, you can easily create one!";
+      // Guest user trying to access account features
+      if (message_lower.includes('my orders') || message_lower.includes('account') ||
+          message_lower.includes('balance') || message_lower.includes('profile') ||
+          message_lower.includes('history')) {
+        return "To view your account information, order history, and personalized features, please log in to your account first. If you don't have an account, you can easily create one to start enjoying our bakery services!";
       }
     }
 
