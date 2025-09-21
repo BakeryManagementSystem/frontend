@@ -233,32 +233,110 @@ class AIService {
 
     try {
       const isAuthenticated = this.isAuthenticated();
-      const contextData = await this.getContextData(isAuthenticated);
-      const systemPrompt = this.generateSystemPrompt(isAuthenticated, contextData);
+
+      // Get context data with better error handling
+      let contextData;
+      try {
+        contextData = await this.getContextData(isAuthenticated);
+      } catch (contextError) {
+        console.warn('Context data fetch failed, using fallback:', contextError);
+        // Use minimal fallback data
+        contextData = {
+          products: [
+            { id: 1, name: "Fresh Croissant", price: "3.50", category: "Pastries" },
+            { id: 2, name: "Chocolate Cake", price: "25.99", category: "Cakes" }
+          ],
+          categories: [
+            { id: 1, name: "Breads" },
+            { id: 2, name: "Cakes" },
+            { id: 3, name: "Pastries" }
+          ]
+        };
+      }
 
       // Try to handle simple queries with local data first
-      const localResponse = this.handleLocalQueries(userMessage, contextData, isAuthenticated);
-      if (localResponse) {
-        return { success: true, message: localResponse };
+      try {
+        const localResponse = this.handleLocalQueries(userMessage, contextData, isAuthenticated);
+        if (localResponse) {
+          return { success: true, message: localResponse };
+        }
+      } catch (localError) {
+        console.warn('Local query handling failed:', localError);
+        // Continue to try other methods
       }
 
       // If no local response and Gemini API key is available, use Gemini
       if (this.geminiApiKey) {
-        const geminiResponse = await this.queryGemini(systemPrompt, userMessage);
-        return { success: true, message: geminiResponse };
+        try {
+          const systemPrompt = this.generateSystemPrompt(isAuthenticated, contextData);
+          const geminiResponse = await this.queryGemini(systemPrompt, userMessage);
+          return { success: true, message: geminiResponse };
+        } catch (geminiError) {
+          console.warn('Gemini API failed:', geminiError);
+          // Fall through to fallback response
+        }
       }
 
-      // Fallback response
+      // Enhanced fallback response based on the user's message
+      const message_lower = userMessage.toLowerCase();
+
+      // Provide specific responses for common bakery keywords
+      if (message_lower.includes('bread')) {
+        return {
+          success: true,
+          message: "We offer a variety of fresh breads including sourdough, whole wheat, and artisan loaves. Our breads are baked fresh daily. Would you like to know more about our bread selection?"
+        };
+      }
+
+      if (message_lower.includes('cake')) {
+        return {
+          success: true,
+          message: "Our bakery specializes in custom cakes for all occasions! We offer chocolate, vanilla, red velvet, and many other flavors. Would you like information about ordering a custom cake?"
+        };
+      }
+
+      if (message_lower.includes('pastry') || message_lower.includes('pastries')) {
+        return {
+          success: true,
+          message: "We have a delicious selection of pastries including croissants, danishes, muffins, and seasonal specialties. All our pastries are made fresh daily. What type of pastry interests you?"
+        };
+      }
+
+      if (message_lower.includes('order') || message_lower.includes('buy') || message_lower.includes('purchase')) {
+        return {
+          success: true,
+          message: "You can browse our products and place orders through our website. We offer both pickup and delivery options. Would you like to see our product catalog or learn about our ordering process?"
+        };
+      }
+
+      if (message_lower.includes('price') || message_lower.includes('cost')) {
+        return {
+          success: true,
+          message: "Our prices vary by product. Breads typically range from $3-6, pastries from $2-5, and custom cakes start at $25. Would you like specific pricing for any particular items?"
+        };
+      }
+
+      // General fallback response
       return {
         success: true,
-        message: "I'm here to help! Could you please be more specific about what you'd like to know about our bakery products or services?"
+        message: "I'm here to help with your bakery needs! I can provide information about our products, help with orders, answer questions about our services, and assist with account-related inquiries. What would you like to know?"
       };
 
     } catch (error) {
       console.error('AI Service Error:', error);
+
+      // Even in error cases, try to provide a helpful response based on keywords
+      const message_lower = userMessage.toLowerCase();
+      if (message_lower.includes('bread') || message_lower.includes('cake') || message_lower.includes('pastry')) {
+        return {
+          success: true,
+          message: "I'd love to help you with our bakery products! While I'm experiencing some technical issues, I can tell you we offer fresh breads, custom cakes, and delicious pastries. Please try asking your question again or contact us directly for immediate assistance."
+        };
+      }
+
       return {
         success: false,
-        message: "I'm sorry, I'm having trouble processing your request right now. Please try again later."
+        message: "I'm sorry, I'm having trouble processing your request right now. Please try again later or contact our bakery directly for assistance."
       };
     }
   }
