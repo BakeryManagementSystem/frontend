@@ -4,9 +4,120 @@ const API_BASE_URL = 'http://localhost:8000/api';
 class ApiService {
   constructor() {
     this.baseURL = API_BASE_URL;
+    this.isOnline = true;
+    this.mockData = this.initializeMockData();
+  }
+
+  // Initialize mock data for offline mode
+  initializeMockData() {
+    return {
+      products: [
+        {
+          id: 1,
+          name: "Fresh Croissant",
+          price: "3.50",
+          image: "/images/croissant.jpg",
+          category: "Pastries",
+          description: "Buttery, flaky croissant baked fresh daily",
+          availability: true,
+          ingredients: ["Flour", "Butter", "Yeast", "Salt"]
+        },
+        {
+          id: 2,
+          name: "Chocolate Cake",
+          price: "25.99",
+          image: "/images/chocolate-cake.jpg",
+          category: "Cakes",
+          description: "Rich chocolate cake with dark chocolate frosting",
+          availability: true,
+          ingredients: ["Chocolate", "Flour", "Sugar", "Eggs", "Butter"]
+        },
+        {
+          id: 3,
+          name: "Sourdough Bread",
+          price: "4.75",
+          image: "/images/sourdough.jpg",
+          category: "Breads",
+          description: "Artisan sourdough bread with crispy crust",
+          availability: true,
+          ingredients: ["Flour", "Water", "Salt", "Sourdough starter"]
+        },
+        {
+          id: 4,
+          name: "Blueberry Muffin",
+          price: "2.25",
+          image: "/images/blueberry-muffin.jpg",
+          category: "Pastries",
+          description: "Fluffy muffin loaded with fresh blueberries",
+          availability: true,
+          ingredients: ["Flour", "Blueberries", "Sugar", "Eggs", "Milk"]
+        }
+      ],
+      categories: [
+        { id: 1, name: "Breads", description: "Fresh baked breads" },
+        { id: 2, name: "Cakes", description: "Custom and ready-made cakes" },
+        { id: 3, name: "Pastries", description: "Delicious pastries and croissants" },
+        { id: 4, name: "Cookies", description: "Homemade cookies" }
+      ],
+      user: {
+        id: 1,
+        name: "Demo User",
+        email: "demo@bakery.com",
+        user_type: "buyer"
+      },
+      orders: [
+        {
+          id: 1,
+          total_amount: "15.75",
+          status: "completed",
+          created_at: "2024-01-15T10:30:00Z",
+          items: [
+            { product_name: "Croissant", quantity: 2, price: "3.50" },
+            { product_name: "Coffee", quantity: 1, price: "8.75" }
+          ]
+        }
+      ]
+    };
+  }
+
+  // Check if backend is available
+  async checkConnection() {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+
+      const response = await fetch(`${this.baseURL}/health`, {
+        method: 'GET',
+        signal: controller.signal,
+        headers: { 'Accept': 'application/json' }
+      });
+
+      clearTimeout(timeoutId);
+      this.isOnline = response.ok;
+      return this.isOnline;
+    } catch (error) {
+      this.isOnline = false;
+      return false;
+    }
   }
 
   async request(endpoint, options = {}) {
+    // Check connection first
+    if (!this.isOnline) {
+      await this.checkConnection();
+    }
+
+    // If still offline, return mock data for GET requests
+    if (!this.isOnline && (!options.method || options.method === 'GET')) {
+      console.warn('Backend offline, using mock data for:', endpoint);
+      return this.getMockResponse(endpoint);
+    }
+
+    // If offline and trying to POST/PUT/DELETE, throw meaningful error
+    if (!this.isOnline) {
+      throw new Error('Unable to connect to server. Please check your connection and try again.');
+    }
+
     const url = `${this.baseURL}${endpoint}`;
     const config = {
       headers: {
@@ -43,8 +154,47 @@ class ApiService {
       return await response.json();
     } catch (error) {
       console.error('API request failed:', error);
+
+      // If network error, switch to offline mode
+      if (error.name === 'TypeError' || error.message.includes('fetch')) {
+        this.isOnline = false;
+        if (!options.method || options.method === 'GET') {
+          console.warn('Network error, falling back to mock data for:', endpoint);
+          return this.getMockResponse(endpoint);
+        }
+      }
+
       throw error;
     }
+  }
+
+  // Get mock response based on endpoint
+  getMockResponse(endpoint) {
+    if (endpoint.includes('/products')) {
+      if (endpoint.includes('/products/') && !endpoint.includes('?')) {
+        // Single product request
+        const id = parseInt(endpoint.split('/products/')[1]);
+        const product = this.mockData.products.find(p => p.id === id);
+        return product ? { data: product } : { error: 'Product not found' };
+      }
+      // Products list
+      return { data: this.mockData.products };
+    }
+
+    if (endpoint.includes('/categories')) {
+      return { data: this.mockData.categories };
+    }
+
+    if (endpoint.includes('/user')) {
+      return { user: this.mockData.user };
+    }
+
+    if (endpoint.includes('/orders')) {
+      return { data: this.mockData.orders };
+    }
+
+    // Default empty response
+    return { data: [], message: 'Offline mode - limited functionality' };
   }
 
   // Authentication API

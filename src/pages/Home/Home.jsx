@@ -49,7 +49,6 @@ const Home = () => {
 
         // Fetch categories with better error handling
         const categoriesResponse = await apiService.getCategories();
-        console.log('Categories response:', categoriesResponse); // Debug log
 
         setFeaturedProducts(featuredResponse.data || []);
         setTrendingProducts(trendingResponse.data || []);
@@ -75,9 +74,30 @@ const Home = () => {
         }
       } catch (err) {
         console.error('Error fetching data:', err);
-        setError('Failed to load data. Please try again later.');
 
-        // Set fallback categories even on error
+        // Check if it's a network error (offline mode)
+        if (err.message.includes('Unable to connect') ||
+            err.message.includes('fetch') ||
+            err.name === 'TypeError') {
+
+          // In offline mode, still show fallback data but don't set as error
+          setFeaturedProducts([
+            { id: 1, name: "Fresh Croissant", price: "3.50", image: "/images/croissant.jpg", category: "Pastries" },
+            { id: 2, name: "Chocolate Cake", price: "25.99", image: "/images/chocolate-cake.jpg", category: "Cakes" },
+            { id: 3, name: "Sourdough Bread", price: "4.75", image: "/images/sourdough.jpg", category: "Breads" },
+            { id: 4, name: "Blueberry Muffin", price: "2.25", image: "/images/blueberry-muffin.jpg", category: "Pastries" }
+          ]);
+
+          setTrendingProducts([
+            { id: 1, name: "Fresh Croissant", price: "3.50", image: "/images/croissant.jpg", category: "Pastries" },
+            { id: 2, name: "Chocolate Cake", price: "25.99", image: "/images/chocolate-cake.jpg", category: "Cakes" }
+          ]);
+        } else {
+          // Other errors - show error message
+          setError('Failed to load data. Please try again later.');
+        }
+
+        // Set fallback categories
         setCategories([
           { id: 1, name: 'Bread', products_count: 15 },
           { id: 2, name: 'Pastries', products_count: 12 },

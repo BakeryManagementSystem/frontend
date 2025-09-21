@@ -15,6 +15,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(localStorage.getItem('auth_token'));
+  const [isOffline, setIsOffline] = useState(false);
 
   useEffect(() => {
     if (token) {
@@ -29,10 +30,29 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await ApiService.getUser();
       setUser(response.user || response);
+      setIsOffline(false);
     } catch (error) {
       console.error('Failed to fetch user:', error);
-      // Token is invalid
-      logout();
+
+      // Check if it's a network/connection error
+      if (error.message.includes('Unable to connect') ||
+          error.message.includes('fetch') ||
+          error.name === 'TypeError') {
+        // Network error - keep user logged in but mark as offline
+        setIsOffline(true);
+        // Try to get cached user data from localStorage
+        const cachedUser = localStorage.getItem('cached_user');
+        if (cachedUser) {
+          try {
+            setUser(JSON.parse(cachedUser));
+          } catch (e) {
+            console.error('Failed to parse cached user:', e);
+          }
+        }
+      } else {
+        // Authentication error - token is invalid
+        logout();
+      }
     } finally {
       setLoading(false);
     }
@@ -45,11 +65,23 @@ export const AuthProvider = ({ children }) => {
 
       setToken(token);
       setUser(user);
+      setIsOffline(false);
       localStorage.setItem('auth_token', token);
+      localStorage.setItem('cached_user', JSON.stringify(user));
 
       return { success: true, user };
     } catch (error) {
       console.error('Login error:', error);
+
+      // Check if offline
+      if (error.message.includes('Unable to connect')) {
+        setIsOffline(true);
+        return {
+          success: false,
+          error: 'Unable to connect to server. Please check your internet connection and try again.'
+        };
+      }
+
       return {
         success: false,
         error: error.message || 'Login failed'
@@ -64,11 +96,23 @@ export const AuthProvider = ({ children }) => {
 
       setToken(token);
       setUser(user);
+      setIsOffline(false);
       localStorage.setItem('auth_token', token);
+      localStorage.setItem('cached_user', JSON.stringify(user));
 
       return { success: true, user };
     } catch (error) {
       console.error('Registration error:', error);
+
+      // Check if offline
+      if (error.message.includes('Unable to connect')) {
+        setIsOffline(true);
+        return {
+          success: false,
+          error: 'Unable to connect to server. Please check your internet connection and try again.'
+        };
+      }
+
       return {
         success: false,
         error: error.message || 'Registration failed'
@@ -78,7 +122,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      if (token) {
+      if (token && !isOffline) {
         await ApiService.logout();
       }
     } catch (error) {
@@ -86,7 +130,9 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setUser(null);
       setToken(null);
+      setIsOffline(false);
       localStorage.removeItem('auth_token');
+      localStorage.removeItem('cached_user');
     }
   };
 
@@ -97,9 +143,10 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     loading,
+    isOffline,
     isAuthenticated: !!user,
     isBuyer: user?.user_type === 'buyer',
-    isSeller: user?.user_type === 'seller' || user?.user_type === 'owner',
+    isSeller: user?.user_type === 'seller',
     isOwner: user?.user_type === 'owner',
   };
 

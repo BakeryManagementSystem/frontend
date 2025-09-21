@@ -11,6 +11,9 @@ import Footer from './components/layout/Footer/Footer';
 // AI Assistant Component
 import FloatingAIAssistant from './components/common/FloatingAIAssistant/FloatingAIAssistant';
 
+// Offline Indicator Component
+import OfflineIndicator from './components/common/OfflineIndicator/OfflineIndicator';
+
 // Public Pages
 import Home from './pages/Home/Home';
 import Products from './pages/Products/Products';
@@ -203,6 +206,7 @@ function App() {
 
               {/* Floating AI Assistant - Available on all pages */}
               <FloatingAIAssistant />
+              <OfflineIndicator />
             </div>
           </Router>
         </CartProvider>
