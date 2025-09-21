@@ -58,6 +58,8 @@ function App() {
         <CartProvider>
           <Router>
             <div className="App">
+              {/* Offline Indicator - positioned at the very top */}
+              <OfflineIndicator />
               <Header />
               <main className="main-content">
                 <Routes>
@@ -206,7 +208,6 @@ function App() {
 
               {/* Floating AI Assistant - Available on all pages */}
               <FloatingAIAssistant />
-              <OfflineIndicator />
             </div>
           </Router>
         </CartProvider>
