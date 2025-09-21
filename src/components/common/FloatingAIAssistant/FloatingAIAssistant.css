@@ -1,38 +1,39 @@
-/* Floating AI Assistant Styles */
+/* Floating AI Assistant Styles - Updated to match bakery theme */
 .floating-ai-trigger {
   position: fixed;
   bottom: 20px;
   right: 20px;
   width: 60px;
   height: 60px;
-  background: linear-gradient(135deg, #ff6b6b, #feca57);
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 4px 20px rgba(255, 107, 107, 0.4);
+  box-shadow: 0 4px 20px rgba(102, 57, 166, 0.4);
   transition: all 0.3s ease;
   z-index: 1000;
-  color: white;
+  color: var(--text-inverse);
 }
 
 .floating-ai-trigger:hover {
   transform: scale(1.1);
-  box-shadow: 0 6px 25px rgba(255, 107, 107, 0.6);
+  background: linear-gradient(135deg, var(--primary-hover), var(--primary-color));
+  box-shadow: 0 6px 25px rgba(102, 57, 166, 0.6);
 }
 
 .ai-notification-badge {
   position: absolute;
   top: -8px;
   right: -8px;
-  background: #ff4757;
-  color: white;
+  background: var(--warning-color);
+  color: var(--text-inverse);
   border-radius: 12px;
   padding: 2px 6px;
   font-size: 10px;
   font-weight: bold;
-  border: 2px solid white;
+  border: 2px solid var(--bg-primary);
 }
 
 .floating-ai-container {
@@ -41,15 +42,15 @@
   right: 20px;
   width: 380px;
   height: 500px;
-  background: white;
+  background: var(--bg-card);
   border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 8px 32px rgba(30, 41, 59, 0.12);
   display: flex;
   flex-direction: column;
   z-index: 1000;
   overflow: hidden;
   transition: all 0.3s ease;
-  border: 1px solid #e1e5e9;
+  border: 1px solid var(--border-light);
 }
 
 .floating-ai-container.minimized {
@@ -61,8 +62,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 16px 20px;
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: white;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: var(--text-inverse);
   border-bottom: none;
 }
 
@@ -73,7 +74,7 @@
 }
 
 .ai-icon {
-  color: #feca57;
+  color: var(--warning-color);
 }
 
 .ai-title {
@@ -101,7 +102,7 @@
   border: none;
   border-radius: 6px;
   padding: 6px;
-  color: white;
+  color: var(--text-inverse);
   cursor: pointer;
   transition: background 0.2s ease;
   display: flex;
@@ -120,7 +121,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  background: #f8f9fa;
+  background: var(--bg-secondary);
 }
 
 .ai-messages::-webkit-scrollbar {
@@ -132,7 +133,7 @@
 }
 
 .ai-messages::-webkit-scrollbar-thumb {
-  background: #ddd;
+  background: var(--border-medium);
   border-radius: 2px;
 }
 
@@ -158,13 +159,13 @@
 }
 
 .ai-message.bot .message-avatar {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: white;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: var(--text-inverse);
 }
 
 .ai-message.user .message-avatar {
-  background: linear-gradient(135deg, #ff6b6b, #feca57);
-  color: white;
+  background: linear-gradient(135deg, var(--accent-color), var(--secondary-color));
+  color: var(--text-inverse);
 }
 
 .message-content {
@@ -179,28 +180,29 @@
 }
 
 .message-text {
-  background: white;
+  background: var(--bg-card);
   padding: 12px 16px;
   border-radius: 18px;
   font-size: 14px;
   line-height: 1.4;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 2px rgba(30, 41, 59, 0.1);
   word-wrap: break-word;
+  color: var(--text-primary);
 }
 
 .ai-message.user .message-text {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: white;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: var(--text-inverse);
 }
 
 .ai-message.bot .message-text {
-  background: white;
-  border: 1px solid #e1e5e9;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
 }
 
 .message-time {
   font-size: 11px;
-  color: #6c757d;
+  color: var(--text-muted);
   padding: 0 4px;
 }
 
@@ -209,16 +211,16 @@
   display: flex;
   gap: 4px;
   padding: 12px 16px;
-  background: white;
+  background: var(--bg-card);
   border-radius: 18px;
-  border: 1px solid #e1e5e9;
+  border: 1px solid var(--border-light);
 }
 
 .typing-indicator span {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #6c757d;
+  background: var(--text-secondary);
   animation: typing 1.4s infinite ease-in-out;
 }
 
@@ -246,8 +248,8 @@
 }
 
 .ai-input-container {
-  background: white;
-  border-top: 1px solid #e1e5e9;
+  background: var(--bg-card);
+  border-top: 1px solid var(--border-light);
   padding: 16px 20px 12px;
 }
 
@@ -255,16 +257,16 @@
   display: flex;
   gap: 10px;
   align-items: flex-end;
-  background: #f8f9fa;
+  background: var(--bg-secondary);
   border-radius: 20px;
   padding: 8px 12px;
-  border: 1px solid #e1e5e9;
+  border: 1px solid var(--border-light);
   transition: border-color 0.2s ease;
 }
 
 .ai-input-wrapper:focus-within {
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px var(--primary-bg);
 }
 
 .ai-input {
@@ -279,14 +281,15 @@
   max-height: 80px;
   min-height: 20px;
   font-family: inherit;
+  color: var(--text-primary);
 }
 
 .ai-input::placeholder {
-  color: #6c757d;
+  color: var(--text-muted);
 }
 
 .ai-send-btn {
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
   border: none;
   border-radius: 50%;
   width: 32px;
@@ -296,13 +299,14 @@
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  color: white;
+  color: var(--text-inverse);
   flex-shrink: 0;
 }
 
 .ai-send-btn:hover:not(:disabled) {
   transform: scale(1.05);
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  background: linear-gradient(135deg, var(--primary-hover), var(--primary-color));
+  box-shadow: 0 2px 8px rgba(102, 57, 166, 0.3);
 }
 
 .ai-send-btn:disabled {
@@ -313,7 +317,7 @@
 .ai-footer-text {
   text-align: center;
   font-size: 11px;
-  color: #6c757d;
+  color: var(--text-muted);
   margin-top: 8px;
   opacity: 0.7;
 }

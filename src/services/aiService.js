@@ -43,40 +43,48 @@ class AIService {
 
       // Get basic shop information and products (always available)
       try {
-        const productsResponse = await this.apiService.request('/products');
+        const productsResponse = await this.apiService.getProducts();
         context.products = productsResponse.data || [];
       } catch (error) {
         console.warn('Could not fetch products:', error);
       }
 
       try {
-        const categoriesResponse = await this.apiService.request('/categories');
+        const categoriesResponse = await this.apiService.getCategories();
         context.categories = categoriesResponse.data || [];
       } catch (error) {
         console.warn('Could not fetch categories:', error);
       }
 
-      // If authenticated, get user-specific data
+      // If authenticated, get user-specific data using existing endpoints
       if (isAuthenticated) {
         try {
-          const userResponse = await this.apiService.request('/user/profile');
-          context.user = userResponse.data || {};
+          const userResponse = await this.apiService.getUser();
+          context.user = userResponse.user || userResponse;
         } catch (error) {
           console.warn('Could not fetch user data:', error);
         }
 
         try {
-          const ordersResponse = await this.apiService.request('/user/orders');
-          context.orders = ordersResponse.data || [];
+          const ordersResponse = await this.apiService.getOrders();
+          context.orders = ordersResponse.data || ordersResponse || [];
         } catch (error) {
           console.warn('Could not fetch orders:', error);
         }
 
-        try {
-          const balanceResponse = await this.apiService.request('/user/balance');
-          context.balance = balanceResponse.data || {};
-        } catch (error) {
-          console.warn('Could not fetch balance:', error);
+        // Calculate balance info from available data
+        if (context.orders && context.orders.length > 0) {
+          context.balance = {
+            total_orders: context.orders.length,
+            total_spent: context.orders.reduce((sum, order) => sum + (parseFloat(order.total_amount) || 0), 0),
+            last_order_date: context.orders[0]?.created_at || null
+          };
+        } else {
+          context.balance = {
+            total_orders: 0,
+            total_spent: 0,
+            last_order_date: null
+          };
         }
       }
 
