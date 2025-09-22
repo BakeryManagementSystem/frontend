@@ -117,37 +117,27 @@ const SellerAnalytics = () => {
     } catch (error) {
       console.error('Failed to fetch analytics data:', error);
       addNotification('Failed to load analytics data. Please try again.', 'error');
-
-      // Set empty data structure on error
-      setAnalyticsData({
-        overview: {
-          totalRevenue: 0,
-          totalOrders: 0,
-          totalViews: 0,
-          conversionRate: 0,
-          averageOrderValue: 0,
-          totalProducts: 0,
-          activeProducts: 0,
-          lowStockProducts: 0
-        },
-        sales: {
-          daily: [],
-          monthly: [],
-          byCategory: []
-        },
-        products: {
-          topSelling: [],
-          lowStock: []
-        },
-        customers: {
-          newCustomers: 0,
-          returningCustomers: 0,
-          topCustomers: [],
-          geography: []
-        }
-      });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleExportReport = async (reportType = 'overview') => {
+    try {
+      await ApiService.exportAnalytics(timeRange, reportType);
+      addNotification('Analytics report downloaded successfully!', 'success');
+    } catch (error) {
+      console.error('Failed to export analytics:', error);
+      addNotification('Failed to export analytics report. Please try again.', 'error');
+    }
+  };
+
+  const handlePreviewReport = async (reportType = 'overview') => {
+    try {
+      await ApiService.previewAnalytics(timeRange, reportType);
+    } catch (error) {
+      console.error('Failed to preview analytics:', error);
+      addNotification('Failed to preview analytics report. Please try again.', 'error');
     }
   };
 
@@ -186,10 +176,20 @@ const SellerAnalytics = () => {
                 </option>
               ))}
             </select>
-            <button className="btn btn-outline">
-              <Download size={16} />
-              Export Report
-            </button>
+            <div className="export-dropdown">
+              <button className="btn btn-outline" onClick={() => handleExportReport('overview')}>
+                <Download size={16} />
+                Export Overview
+              </button>
+              <button className="btn btn-primary" onClick={() => handleExportReport('detailed')}>
+                <Download size={16} />
+                Export Detailed
+              </button>
+              <button className="btn btn-ghost" onClick={() => handlePreviewReport('overview')}>
+                <Eye size={16} />
+                Preview
+              </button>
+            </div>
           </div>
         </div>
 

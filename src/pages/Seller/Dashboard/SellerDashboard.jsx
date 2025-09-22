@@ -13,7 +13,8 @@ import {
   Eye,
   Plus,
   Edit,
-  BarChart3
+  BarChart3,
+  PieChart
 } from 'lucide-react';
 import './SellerDashboard.css';
 
@@ -30,6 +31,20 @@ const SellerDashboard = () => {
 
   useEffect(() => {
     fetchDashboardData();
+
+    // Listen for order delivery events to refresh dashboard data
+    const handleOrderDelivered = (event) => {
+      console.log('Order delivered event received:', event.detail);
+      // Refresh dashboard data to update revenue
+      fetchDashboardData();
+    };
+
+    window.addEventListener('orderDelivered', handleOrderDelivered);
+
+    // Cleanup event listener on component unmount
+    return () => {
+      window.removeEventListener('orderDelivered', handleOrderDelivered);
+    };
   }, []);
 
   const fetchDashboardData = async () => {
@@ -133,17 +148,15 @@ const SellerDashboard = () => {
             <Link to="/seller/analytics" className="stat-link">Analytics</Link>
           </div>
 
-          <div className="stat-card rating">
+          <div className="stat-card investment">
             <div className="stat-icon">
-              <Star />
+              <PieChart />
             </div>
             <div className="stat-content">
-              <div className="stat-value">{dashboardData.stats.averageRating}</div>
-              <div className="stat-label">Average Rating</div>
+              <div className="stat-value">${dashboardData.stats.totalIngredientInvestment || 0}</div>
+              <div className="stat-label">Total Investment</div>
             </div>
-            <div className="stat-extra">
-              <Star size={14} fill="currentColor" />
-            </div>
+            <Link to="/seller/ingredients" className="stat-link">Manage</Link>
           </div>
         </div>
 
@@ -288,6 +301,10 @@ const SellerDashboard = () => {
                 <Link to="/seller/products/new" className="quick-action-btn primary">
                   <Plus size={18} />
                   Add New Product
+                </Link>
+                <Link to="/seller/ingredients" className="quick-action-btn">
+                  <PieChart size={18} />
+                  Manage Ingredients
                 </Link>
                 <Link to="/seller/orders" className="quick-action-btn">
                   <Package size={18} />

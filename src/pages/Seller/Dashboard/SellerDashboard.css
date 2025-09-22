@@ -81,6 +81,10 @@
   background-color: var(--warning-color);
 }
 
+.stat-card.investment .stat-icon {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+}
+
 .stat-icon {
   width: 60px;
   height: 60px;

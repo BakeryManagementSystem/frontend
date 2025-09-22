@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
-import { X, Upload, Link as LinkIcon } from 'lucide-react';
+import ApiService from '../../../services/api';
+import { X, Upload, Link as LinkIcon, Plus, Trash2, Calculator } from 'lucide-react';
 import './AddProduct.css';
 
 const AddProduct = () => {
@@ -12,6 +13,13 @@ const AddProduct = () => {
   const [imageUrl, setImageUrl] = useState('');
   const [imagePreview, setImagePreview] = useState([]);
   const [addUrlLoading, setAddUrlLoading] = useState(false); // loading state for Add URL button
+
+  // Ingredient management state
+  const [availableIngredients, setAvailableIngredients] = useState([]);
+  const [selectedIngredients, setSelectedIngredients] = useState([]);
+  const [totalIngredientCost, setTotalIngredientCost] = useState(0);
+  const [loadingIngredients, setLoadingIngredients] = useState(false);
+
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -40,6 +48,23 @@ const AddProduct = () => {
     { id: 5, name: 'Muffins & Cupcakes' },
     { id: 6, name: 'Specialty & Dietary' }
   ];
+
+  // Fetch ingredients on component mount
+  useEffect(() => {
+    fetchIngredients();
+  }, []);
+
+  // Calculate total ingredient cost whenever selected ingredients change
+  useEffect(() => {
+    const total = selectedIngredients.reduce((sum, ingredient) => {
+      const ingredientData = availableIngredients.find(ing => ing.id === parseInt(ingredient.id));
+      if (ingredientData) {
+        return sum + (parseFloat(ingredientData.current_unit_price) * ingredient.quantity);
+      }
+      return sum;
+    }, 0);
+    setTotalIngredientCost(total);
+  }, [selectedIngredients, availableIngredients]);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -218,6 +243,12 @@ const AddProduct = () => {
         formDataToSend.append(`image_urls[${index}]`, url);
       });
 
+      // Add selected ingredients data
+      if (selectedIngredients.length > 0) {
+        formDataToSend.append('selected_ingredients', JSON.stringify(selectedIngredients));
+        formDataToSend.append('ingredient_cost', totalIngredientCost.toFixed(2));
+      }
+
       console.log('Submitting to:', getApiUrl('/products'));
       console.log('User:', user);
       console.log('Token:', token);
@@ -280,6 +311,44 @@ const AddProduct = () => {
 
   const handleCancel = () => {
     navigate(user?.user_type === 'owner' ? '/owner/products' : '/seller/products');
+  };
+
+  const fetchIngredients = async () => {
+    setLoadingIngredients(true);
+    try {
+      const response = await ApiService.getIngredients();
+      setAvailableIngredients(response.data || []);
+    } catch (error) {
+      console.error('Failed to fetch ingredients:', error);
+      alert('Failed to load ingredients. Please try again.');
+    } finally {
+      setLoadingIngredients(false);
+    }
+  };
+
+  const addIngredient = (ingredientId) => {
+    const ingredient = availableIngredients.find(ing => ing.id === parseInt(ingredientId));
+    if (ingredient && !selectedIngredients.find(ing => ing.id === ingredientId)) {
+      setSelectedIngredients(prev => [...prev, {
+        id: ingredientId,
+        name: ingredient.name,
+        unit: ingredient.unit,
+        price: parseFloat(ingredient.current_unit_price),
+        quantity: 1
+      }]);
+    }
+  };
+
+  const removeIngredient = (index) => {
+    setSelectedIngredients(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const updateIngredientQuantity = (index, quantity) => {
+    if (quantity > 0) {
+      setSelectedIngredients(prev =>
+        prev.map((ing, i) => i === index ? { ...ing, quantity: parseFloat(quantity) } : ing)
+      );
+    }
   };
 
   return (
@@ -439,20 +508,121 @@ const AddProduct = () => {
 
             {/* Ingredients & Allergens */}
             <div className="form-section">
-              <h3>Ingredients & Allergens</h3>
+              <h3>Ingredients Management</h3>
 
-              <div className="form-group">
-                <label htmlFor="ingredients">Ingredients (comma-separated)</label>
-                <textarea
-                  id="ingredients"
-                  name="ingredients"
-                  value={formData.ingredients}
-                  onChange={handleInputChange}
-                  rows="3"
-                  placeholder="flour, sugar, eggs, butter, etc."
-                />
-              </div>
+              {loadingIngredients ? (
+                <div className="loading-ingredients">
+                  <p>Loading ingredients...</p>
+                </div>
+              ) : (
+                <>
+                  {/* Add Ingredient Dropdown */}
+                  <div className="form-group">
+                    <label>Add Ingredients to Product</label>
+                    <div className="add-ingredient-row">
+                      <select
+                        onChange={(e) => {
+                          if (e.target.value) {
+                            addIngredient(e.target.value);
+                            e.target.value = '';
+                          }
+                        }}
+                        className="ingredient-select"
+                      >
+                        <option value="">Select an ingredient to add...</option>
+                        {availableIngredients
+                          .filter(ing => !selectedIngredients.find(sel => sel.id === ing.id.toString()))
+                          .map(ingredient => (
+                            <option key={ingredient.id} value={ingredient.id}>
+                              {ingredient.name} - ${parseFloat(ingredient.current_unit_price).toFixed(2)}/{ingredient.unit}
+                            </option>
+                          ))}
+                      </select>
+                      <button
+                        type="button"
+                        className="btn btn-outline"
+                        onClick={() => navigate('/seller/ingredients')}
+                      >
+                        <Plus size={16} />
+                        Manage Ingredients
+                      </button>
+                    </div>
+                  </div>
 
+                  {/* Selected Ingredients List */}
+                  {selectedIngredients.length > 0 && (
+                    <div className="form-group">
+                      <label>Selected Ingredients</label>
+                      <div className="selected-ingredients-list">
+                        {selectedIngredients.map((ingredient, index) => (
+                          <div key={index} className="selected-ingredient-item">
+                            <div className="ingredient-info">
+                              <span className="ingredient-name">{ingredient.name}</span>
+                              <span className="ingredient-price">${ingredient.price.toFixed(2)}/{ingredient.unit}</span>
+                            </div>
+                            <div className="ingredient-controls">
+                              <input
+                                type="number"
+                                min="0.1"
+                                step="0.1"
+                                value={ingredient.quantity}
+                                onChange={(e) => updateIngredientQuantity(index, parseFloat(e.target.value))}
+                                className="ingredient-quantity-input"
+                                placeholder="Qty"
+                              />
+                              <span className="ingredient-unit">{ingredient.unit}</span>
+                              <span className="ingredient-line-cost">
+                                ${(ingredient.price * ingredient.quantity).toFixed(2)}
+                              </span>
+                              <button
+                                type="button"
+                                className="remove-ingredient-btn"
+                                onClick={() => removeIngredient(index)}
+                                title="Remove ingredient"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Cost Summary */}
+                  {selectedIngredients.length > 0 && (
+                    <div className="form-group">
+                      <div className="ingredient-cost-summary">
+                        <div className="cost-row">
+                          <span className="cost-label">Total Ingredient Cost:</span>
+                          <span className="cost-value">${totalIngredientCost.toFixed(2)}</span>
+                        </div>
+                        {formData.price && (
+                          <div className="cost-row">
+                            <span className="cost-label">Product Price:</span>
+                            <span className="cost-value">${parseFloat(formData.price || 0).toFixed(2)}</span>
+                          </div>
+                        )}
+                        {formData.price && totalIngredientCost > 0 && (
+                          <div className="cost-row profit-margin">
+                            <span className="cost-label">Estimated Profit:</span>
+                            <span className="cost-value">
+                              ${(parseFloat(formData.price || 0) - totalIngredientCost).toFixed(2)}
+                              {formData.price && (
+                                <small className="profit-percentage">
+                                  ({(((parseFloat(formData.price) - totalIngredientCost) / parseFloat(formData.price)) * 100).toFixed(1)}%)
+                                </small>
+                              )}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* Traditional Text Fields for Additional Info */}
               <div className="form-group">
                 <label htmlFor="allergens">Allergens (comma-separated)</label>
                 <textarea

@@ -138,11 +138,11 @@ const SellerProducts = () => {
             <div className="stat-label">Active Products</div>
           </div>
           <div className="stat-card">
-            <div className="stat-value">{products.filter(p => (p.stock || 0) < 5).length}</div>
+            <div className="stat-value">{products.filter(p => (p.stock_quantity || 0) < 5).length}</div>
             <div className="stat-label">Low Stock</div>
           </div>
           <div className="stat-card">
-            <div className="stat-value">{products.filter(p => (p.stock || 0) === 0).length}</div>
+            <div className="stat-value">{products.filter(p => (p.stock_quantity || 0) === 0).length}</div>
             <div className="stat-label">Out of Stock</div>
           </div>
           <div className="stat-card">
@@ -234,7 +234,7 @@ const SellerProducts = () => {
               </div>
 
               {filteredProducts.map(product => {
-                const statusBadge = getStatusBadge(product.status, product.stock);
+                const statusBadge = getStatusBadge(product.status, product.stock_quantity);
                 return (
                   <div key={product.id} className="table-row">
                     <div className="table-cell checkbox-cell">
@@ -265,8 +265,8 @@ const SellerProducts = () => {
                     </div>
 
                     <div className="table-cell stock-cell">
-                      <span className={`stock-value ${(product.stock || 0) < 5 ? 'low' : ''}`}>
-                        {product.stock || 0}
+                      <span className={`stock-value ${(product.stock_quantity || 0) < 5 ? 'low' : ''}`}>
+                        {product.stock_quantity || 0}
                       </span>
                     </div>
 

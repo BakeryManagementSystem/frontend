@@ -129,6 +129,11 @@ class ApiService {
       ...options,
     };
 
+    // Remove Content-Type header if explicitly set to undefined (for FormData)
+    if (config.headers['Content-Type'] === undefined) {
+      delete config.headers['Content-Type'];
+    }
+
     // Add auth token if available
     const token = localStorage.getItem('auth_token');
     if (token) {
@@ -437,6 +442,9 @@ class ApiService {
   async updateSellerOrderStatus(orderId, status) {
     return this.request(`/seller/orders/${orderId}`, {
       method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({ status }),
     });
   }
@@ -485,17 +493,29 @@ class ApiService {
 
   async updateSellerProduct(id, productData) {
     // Handle FormData for file uploads
-    const headers = productData instanceof FormData ? {} : { 'Content-Type': 'application/json' };
-    const body = productData instanceof FormData ? productData : JSON.stringify(productData);
+    if (productData instanceof FormData) {
+      // For FormData with file uploads, use POST with _method=PUT due to Laravel limitations
+      productData.append('_method', 'PUT');
 
-    return this.request(`/seller/products/${id}`, {
-      method: 'POST', // Laravel handles PUT with FormData via POST with _method
-      headers: {
-        ...headers,
-        ...(productData instanceof FormData && { 'X-HTTP-Method-Override': 'PUT' })
-      },
-      body,
-    });
+      return this.request(`/seller/products/${id}`, {
+        method: 'POST',
+        body: productData,
+        headers: {
+          // Explicitly remove Content-Type to let browser set multipart/form-data with boundary
+          'Content-Type': undefined,
+          'Accept': 'application/json'
+        }
+      });
+    } else {
+      // For regular JSON data, use PUT directly
+      return this.request(`/seller/products/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(productData),
+      });
+    }
   }
 
   async updateProduct(id, productData) {
@@ -566,6 +586,151 @@ class ApiService {
       method: 'POST',
       body: JSON.stringify(paymentData),
     });
+  }
+
+  // Ingredients API
+  async getIngredients() {
+    return this.request('/ingredients');
+  }
+
+  async createIngredient(ingredientData) {
+    return this.request('/ingredients', {
+      method: 'POST',
+      body: JSON.stringify(ingredientData),
+    });
+  }
+
+  async updateIngredient(id, ingredientData) {
+    return this.request(`/ingredients/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(ingredientData),
+    });
+  }
+
+  async deleteIngredient(id) {
+    return this.request(`/ingredients/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Ingredient Batches API
+  async getIngredientBatches() {
+    return this.request('/owner/ingredient-batches');
+  }
+
+  async createIngredientBatch(batchData) {
+    return this.request('/owner/ingredient-batches', {
+      method: 'POST',
+      body: JSON.stringify(batchData),
+    });
+  }
+
+  async deleteIngredientBatch(id) {
+    return this.request(`/owner/ingredient-batches/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Enhanced dashboard for sellers with investment tracking
+  async getSellerDashboard() {
+    return this.request('/seller/dashboard');
+  }
+
+  // PDF Generation methods
+  async generateInvoice(orderId) {
+    const response = await fetch(`${this.baseURL}/orders/${orderId}/invoice`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to generate invoice');
+    }
+
+    // Create blob and download
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `invoice-${orderId}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  }
+
+  async previewInvoice(orderId) {
+    const response = await fetch(`${this.baseURL}/orders/${orderId}/invoice/preview`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to preview invoice');
+    }
+
+    // Open in new tab
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    window.open(url, '_blank');
+    window.URL.revokeObjectURL(url);
+  }
+
+  async exportAnalytics(timeRange = '30days', reportType = 'overview') {
+    const params = new URLSearchParams({
+      timeRange,
+      reportType
+    });
+
+    const response = await fetch(`${this.baseURL}/analytics/export?${params}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to export analytics');
+    }
+
+    // Create blob and download
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `analytics-report-${timeRange}-${new Date().toISOString().split('T')[0]}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  }
+
+  async previewAnalytics(timeRange = '30days', reportType = 'overview') {
+    const params = new URLSearchParams({
+      timeRange,
+      reportType
+    });
+
+    const response = await fetch(`${this.baseURL}/analytics/export/preview?${params}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to preview analytics');
+    }
+
+    // Open in new tab
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    window.open(url, '_blank');
+    window.URL.revokeObjectURL(url);
   }
 }
 

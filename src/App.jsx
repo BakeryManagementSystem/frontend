@@ -46,6 +46,7 @@ import SellerShop from './pages/Seller/Shop/SellerShop';
 import SellerAnalytics from './pages/Seller/Analytics/SellerAnalytics';
 import AddProduct from './pages/Seller/Products/AddProduct';
 import EditProduct from './pages/Seller/Products/EditProduct';
+import IngredientsManagement from './pages/Seller/Ingredients/IngredientsManagement';
 
 // Protected Route Component
 import ProtectedRoute from './components/common/ProtectedRoute/ProtectedRoute';
@@ -154,6 +155,11 @@ function App() {
                   <Route path="/seller/analytics" element={
                     <ProtectedRoute userType="seller">
                       <SellerAnalytics />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/seller/ingredients" element={
+                    <ProtectedRoute userType="seller">
+                      <IngredientsManagement />
                     </ProtectedRoute>
                   } />
 

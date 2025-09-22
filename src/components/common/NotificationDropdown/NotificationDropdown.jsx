@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNotifications } from '../../../context/NotificationContext.jsx';
-import { Bell, Check, Clock, Package, CreditCard } from 'lucide-react';
+import { Bell, Check, Clock, Package, CreditCard, Truck, CheckCircle, AlertCircle } from 'lucide-react';
 import './NotificationDropdown.css';
 
 const NotificationDropdown = () => {
@@ -15,14 +15,24 @@ const NotificationDropdown = () => {
 
   const getNotificationIcon = (type) => {
     switch (type) {
+      case 'new_order':
+        return <Package size={16} className="icon-new-order" />;
+      case 'order_status_update':
+        return <Truck size={16} className="icon-status-update" />;
       case 'order_created':
       case 'order_accepted':
+        return <Package size={16} className="icon-order" />;
       case 'order_shipped':
+        return <Truck size={16} className="icon-shipped" />;
       case 'order_delivered':
-        return <Package size={16} />;
+        return <CheckCircle size={16} className="icon-delivered" />;
+      case 'order_cancelled':
+        return <AlertCircle size={16} className="icon-cancelled" />;
       case 'payment_processed':
+      case 'payment_received':
+        return <CreditCard size={16} className="icon-payment" />;
       case 'payment_required':
-        return <CreditCard size={16} />;
+        return <CreditCard size={16} className="icon-payment-required" />;
       default:
         return <Bell size={16} />;
     }
@@ -33,10 +43,15 @@ const NotificationDropdown = () => {
       case 'order_accepted':
       case 'order_delivered':
       case 'payment_processed':
+      case 'payment_received':
         return 'success';
+      case 'new_order':
       case 'order_created':
       case 'order_shipped':
+      case 'order_status_update':
         return 'info';
+      case 'order_cancelled':
+        return 'error';
       case 'payment_required':
         return 'warning';
       default:
@@ -44,15 +59,27 @@ const NotificationDropdown = () => {
     }
   };
 
+  const formatTimeAgo = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now - date) / 1000);
+
+    if (diffInSeconds < 60) return 'Just now';
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+    return `${Math.floor(diffInSeconds / 86400)}d ago`;
+  };
+
   return (
     <div className="notification-dropdown">
       <button
         className="notification-trigger"
         onClick={() => setIsOpen(!isOpen)}
+        aria-label="Notifications"
       >
         <Bell size={20} />
         {unreadCount > 0 && (
-          <span className="notification-badge">{unreadCount}</span>
+          <span className="notification-badge">{unreadCount > 99 ? '99+' : unreadCount}</span>
         )}
       </button>
 
@@ -80,7 +107,7 @@ const NotificationDropdown = () => {
                   <p>No notifications yet</p>
                 </div>
               ) : (
-                notifications.slice(0, 10).map(notification => (
+                notifications.slice(0, 15).map(notification => (
                   <div
                     key={notification.id}
                     className={`notification-item ${!notification.read_at ? 'unread' : ''} ${getNotificationColor(notification.type)}`}
@@ -94,7 +121,7 @@ const NotificationDropdown = () => {
                       <p>{notification.message}</p>
                       <span className="notification-time">
                         <Clock size={12} />
-                        {new Date(notification.created_at).toLocaleDateString()}
+                        {formatTimeAgo(notification.created_at)}
                       </span>
                     </div>
                     {!notification.read_at && (
@@ -105,7 +132,7 @@ const NotificationDropdown = () => {
               )}
             </div>
 
-            {notifications.length > 10 && (
+            {notifications.length > 15 && (
               <div className="notification-footer">
                 <button className="view-all-btn">
                   View all notifications
