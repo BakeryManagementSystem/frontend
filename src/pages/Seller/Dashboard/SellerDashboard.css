@@ -38,6 +38,34 @@
   display: flex;
   gap: var(--spacing-md);
   flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+}
+
+.header-actions .btn {
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 1;
+  outline: none;
+  text-decoration: none;
+}
+
+.btn {
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  user-select: none;
+  outline: none;
+  border: none;
+  text-decoration: none;
+  position: relative;
+  z-index: 1;
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  pointer-events: none;
 }
 
 /* Stats Grid */
@@ -521,6 +549,27 @@
 
 .quick-action-btn.primary:hover {
   background-color: var(--primary-hover);
+}
+
+/* Ensure all interactive elements are clickable */
+.seller-dashboard button,
+.dashboard-cards button,
+.quick-actions button,
+.stat-card button {
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 1;
+}
+
+/* Fix for any overlay issues */
+.seller-dashboard * {
+  pointer-events: auto;
+}
+
+.seller-dashboard .btn {
+  pointer-events: auto !important;
+  cursor: pointer !important;
 }
 
 /* Responsive Design */

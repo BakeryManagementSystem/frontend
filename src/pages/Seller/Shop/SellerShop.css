@@ -38,6 +38,8 @@
   display: flex;
   gap: var(--spacing-md);
   align-items: center;
+  position: relative;
+  z-index: 10;
 }
 
 .edit-actions {
@@ -57,11 +59,18 @@
   cursor: pointer;
   text-decoration: none;
   font-size: var(--font-size-sm);
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  user-select: none;
+  outline: none;
+  position: relative;
+  z-index: 1;
 }
 
 .btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  pointer-events: none;
 }
 
 .btn-primary {
@@ -606,4 +615,60 @@
   .page-header {
     padding: var(--spacing-lg);
   }
+}
+
+/* Button fixes for clickability */
+.header-actions {
+  display: flex;
+  gap: var(--spacing-md);
+  align-items: center;
+  position: relative;
+  z-index: 10;
+}
+
+.header-actions .btn,
+.edit-actions .btn {
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 1;
+  outline: none;
+  text-decoration: none;
+}
+
+.btn {
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  user-select: none;
+  outline: none;
+  border: none;
+  text-decoration: none;
+  position: relative;
+  z-index: 1;
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Ensure all interactive elements are clickable */
+.seller-shop button,
+.shop-form button,
+.form-group button {
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 1;
+}
+
+/* Fix for any overlay issues */
+.seller-shop * {
+  pointer-events: auto;
+}
+
+.seller-shop .btn {
+  pointer-events: auto !important;
+  cursor: pointer !important;
 }

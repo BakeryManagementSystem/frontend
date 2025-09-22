@@ -37,6 +37,8 @@
   display: flex;
   gap: var(--spacing-md);
   align-items: center;
+  position: relative;
+  z-index: 2;
 }
 
 .time-range-select {
@@ -173,6 +175,8 @@
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: var(--font-size-sm);
+  position: relative;
+  z-index: 1;
 }
 
 .chart-tab:hover {
@@ -411,6 +415,85 @@
   font-size: var(--font-size-xl);
   font-weight: 700;
   color: var(--primary-color);
+}
+
+/* Export Dropdown */
+.export-dropdown {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+  position: relative;
+}
+
+.export-dropdown .btn {
+  cursor: pointer;
+  pointer-events: auto;
+  z-index: 1;
+  position: relative;
+}
+
+/* Button overrides to ensure clickability */
+.btn {
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  user-select: none;
+  outline: none;
+  border: none;
+  text-decoration: none;
+  position: relative;
+  z-index: 1;
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.btn-ghost {
+  background-color: transparent;
+  color: var(--text-secondary);
+  border: 1px solid transparent;
+}
+
+.btn-ghost:hover {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border-color: var(--border-medium);
+}
+
+/* Ensure header actions are properly positioned */
+.header-actions {
+  display: flex;
+  gap: var(--spacing-md);
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+/* Fix for chart tabs */
+.chart-tab {
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 1;
+}
+
+/* Fix for card header buttons */
+.card-header .btn {
+  cursor: pointer !important;
+  pointer-events: auto !important;
+}
+
+/* Ensure all interactive elements are clickable */
+.analytics-card button,
+.stock-item button,
+.chart-tab,
+.time-range-select {
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 1;
 }
 
 /* Responsive Design */

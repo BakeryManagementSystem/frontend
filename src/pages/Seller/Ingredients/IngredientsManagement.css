@@ -38,6 +38,8 @@
 .header-actions {
   display: flex;
   gap: 12px;
+  position: relative;
+  z-index: 10;
 }
 
 /* Stats Grid */
@@ -403,6 +405,62 @@
 .btn-outline:hover {
   background: #f9fafb;
   border-color: #9ca3af;
+}
+
+/* Button fixes for clickability */
+.header-actions {
+  display: flex;
+  gap: 12px;
+  position: relative;
+  z-index: 10;
+}
+
+.header-actions .btn {
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 1;
+  border: none;
+  outline: none;
+  text-decoration: none;
+}
+
+.btn {
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  user-select: none;
+  outline: none;
+  border: none;
+  text-decoration: none;
+  position: relative;
+  z-index: 1;
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Ensure all interactive elements are clickable */
+.ingredients-table button,
+.table-row button,
+.search-box input,
+.ingredients-controls button {
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 1;
+}
+
+/* Fix for any overlay issues */
+.ingredients-management * {
+  pointer-events: auto;
+}
+
+.ingredients-management .btn {
+  pointer-events: auto !important;
+  cursor: pointer !important;
 }
 
 /* Responsive Design */
