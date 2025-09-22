@@ -119,16 +119,6 @@ const SellerAnalytics = () => {
     }).format(amount);
   };
 
-  if (loading) {
-    return (
-      <div className="seller-analytics loading">
-        <div className="container">
-          <div className="loading-text">Loading analytics...</div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="seller-analytics">
       <div className="container">

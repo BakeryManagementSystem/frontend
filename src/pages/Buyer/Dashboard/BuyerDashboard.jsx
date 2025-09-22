@@ -108,19 +108,6 @@ const BuyerDashboard = () => {
     });
   };
 
-  if (loading) {
-    return (
-      <div className="buyer-dashboard">
-        <div className="container">
-          <div className="dashboard-loading">
-            <div className="loading-spinner"></div>
-            <p>Loading your dashboard...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   if (error) {
     return (
       <div className="buyer-dashboard">

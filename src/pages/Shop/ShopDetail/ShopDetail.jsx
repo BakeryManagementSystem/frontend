@@ -167,15 +167,6 @@ const ShopDetail = () => {
 
   const categories = [...new Set(products.map(p => p.category))];
 
-  if (loading) {
-    return (
-      <div className="shop-detail loading">
-        <div className="container">
-          <div className="loading-text">Loading shop...</div>
-        </div>
-      </div>
-    );
-  }
 
   if (!shopData) {
     return (

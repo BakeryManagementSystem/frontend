@@ -74,19 +74,6 @@ const Wishlist = () => {
     return matchesSearch && matchesFilter;
   });
 
-  if (loading) {
-    return (
-      <div className="wishlist-page">
-        <div className="container">
-          <div className="loading-state">
-            <div className="loading"></div>
-            <p>Loading your wishlist...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   if (error) {
     return (
       <div className="wishlist-page">

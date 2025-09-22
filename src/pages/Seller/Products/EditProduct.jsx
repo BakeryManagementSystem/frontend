@@ -183,20 +183,7 @@ const EditProduct = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="edit-product loading">
-        <div className="container">
-          <div className="loading-container">
-            <Loader2 className="loading-spinner" size={40} />
-            <p>Loading product...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error && !formData.name) {
+  if (!product && !loading) {
     return (
       <div className="edit-product error">
         <div className="container">

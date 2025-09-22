@@ -77,16 +77,6 @@ const SellerDashboard = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="seller-dashboard loading">
-        <div className="container">
-          <div className="loading-text">Loading dashboard...</div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="seller-dashboard">
       <div className="container">

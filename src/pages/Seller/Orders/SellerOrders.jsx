@@ -153,16 +153,6 @@ const SellerOrders = () => {
     order.customer.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  if (loading) {
-    return (
-      <div className="seller-orders loading">
-        <div className="container">
-          <div className="loading-text">Loading orders...</div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="seller-orders">
       <div className="container">

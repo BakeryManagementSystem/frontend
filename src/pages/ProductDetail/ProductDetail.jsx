@@ -95,18 +95,8 @@ const ProductDetail = () => {
     }
   };
 
-  const handleAddToCart = () => {
-    if (product) {
-      addToCart({
-        id: product.id,
-        name: product.name,
-        price: product.discount_price || product.price,
-        image: product.image_url || product.image_path,
-        category: product.category,
-        seller: product.owner?.name || 'Unknown Seller',
-        inStock: product.stock_quantity > 0
-      }, quantity);
-    }
+  const handleAddToCart = async (product) => {
+    await addToCart(product.id, 1);
   };
 
   const handleQuantityChange = (change) => {
@@ -144,20 +134,7 @@ const ProductDetail = () => {
     return stars;
   };
 
-  if (loading) {
-    return (
-      <div className="product-detail-page">
-        <div className="container">
-          <div className="loading-state">
-            <div className="loading"></div>
-            <p>Loading product details...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error || !product) {
+  if (!product) {
     return (
       <div className="product-detail-page">
         <div className="container">

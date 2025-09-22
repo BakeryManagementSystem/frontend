@@ -235,19 +235,6 @@ const Profile = () => {
     }));
   };
 
-  if (loading) {
-    return (
-      <div className="profile">
-        <div className="container">
-          <div className="loading">
-            <div className="loading-spinner"></div>
-            <p>Loading profile...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="profile">
       <div className="container">

@@ -116,16 +116,6 @@ const SellerProducts = () => {
     product.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  if (loading) {
-    return (
-      <div className="seller-products loading">
-        <div className="container">
-          <div className="loading-text">Loading your products...</div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="seller-products">
       <div className="container">
