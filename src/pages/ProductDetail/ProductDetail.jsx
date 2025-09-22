@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useCart } from '../../context/CartContext';
-import { useAuth } from '../../context/AuthContext';
-import ApiService from '../../services/api';
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useCart } from "../../context/CartContext";
+import { useAuth } from "../../context/AuthContext";
+import ApiService from "../../services/api";
 import {
   Star,
   Heart,
@@ -14,9 +14,9 @@ import {
   Truck,
   RotateCcw,
   Store,
-  MessageCircle
-} from 'lucide-react';
-import './ProductDetail.css';
+  MessageCircle,
+} from "lucide-react";
+import "./ProductDetail.css";
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -28,7 +28,7 @@ const ProductDetail = () => {
   const [error, setError] = useState(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
-  const [activeTab, setActiveTab] = useState('description');
+  const [activeTab, setActiveTab] = useState("description");
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [wishlistLoading, setWishlistLoading] = useState(false);
 
@@ -50,8 +50,8 @@ const ProductDetail = () => {
       const response = await ApiService.getProduct(id);
       setProduct(response);
     } catch (error) {
-      console.error('Failed to fetch product:', error);
-      setError('Failed to load product details. Please try again later.');
+      console.error("Failed to fetch product:", error);
+      setError("Failed to load product details. Please try again later.");
     } finally {
       setLoading(false);
     }
@@ -62,18 +62,18 @@ const ProductDetail = () => {
       const response = await ApiService.checkWishlist(id);
       setIsInWishlist(response.in_wishlist);
     } catch (error) {
-      console.error('Failed to check wishlist status:', error);
+      console.error("Failed to check wishlist status:", error);
     }
   };
 
   const handleWishlist = async () => {
     if (!isAuthenticated) {
-      alert('Please login to add items to your wishlist');
+      alert("Please login to add items to your wishlist");
       return;
     }
 
     if (!isBuyer) {
-      alert('Only buyers can add items to wishlist');
+      alert("Only buyers can add items to wishlist");
       return;
     }
 
@@ -88,15 +88,28 @@ const ProductDetail = () => {
         setIsInWishlist(true);
       }
     } catch (error) {
-      console.error('Failed to update wishlist:', error);
-      alert('Failed to update wishlist. Please try again.');
+      console.error("Failed to update wishlist:", error);
+      alert("Failed to update wishlist. Please try again.");
     } finally {
       setWishlistLoading(false);
     }
   };
 
-  const handleAddToCart = async (product) => {
-    await addToCart(product.id, 1);
+  const handleAddToCart = () => {
+    if (product) {
+      addToCart(
+        {
+          id: product.id,
+          name: product.name,
+          price: product.discount_price || product.price,
+          image: product.image_url || product.image_path,
+          category: product.category,
+          seller: product.owner?.name || "Unknown Seller",
+          inStock: product.stock_quantity > 0,
+        },
+        quantity
+      );
+    }
   };
 
   const handleQuantityChange = (change) => {
@@ -107,9 +120,9 @@ const ProductDetail = () => {
   };
 
   const formatPrice = (price) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
     }).format(price);
   };
 
@@ -123,7 +136,9 @@ const ProductDetail = () => {
     }
 
     if (hasHalfStar) {
-      stars.push(<Star key="half" size={16} fill="currentColor" opacity={0.5} />);
+      stars.push(
+        <Star key="half" size={16} fill="currentColor" opacity={0.5} />
+      );
     }
 
     const emptyStars = 5 - Math.ceil(rating);
@@ -140,8 +155,11 @@ const ProductDetail = () => {
         <div className="container">
           <div className="error-state">
             <h2>Product not found</h2>
-            <p>{error || 'The product you are looking for does not exist.'}</p>
-            <button onClick={() => navigate('/products')} className="btn btn-primary">
+            <p>{error || "The product you are looking for does not exist."}</p>
+            <button
+              onClick={() => navigate("/products")}
+              className="btn btn-primary"
+            >
               Back to Products
             </button>
           </div>
@@ -150,19 +168,32 @@ const ProductDetail = () => {
     );
   }
 
-  const discountPercentage = product.discount_price ?
-    Math.round(((product.price - product.discount_price) / product.price) * 100) : 0;
+  const discountPercentage = product.discount_price
+    ? Math.round(
+        ((product.price - product.discount_price) / product.price) * 100
+      )
+    : 0;
 
   return (
     <div className="product-detail-page">
       <div className="container">
         {/* Breadcrumb */}
         <nav className="breadcrumb">
-          <span onClick={() => navigate('/')} className="breadcrumb-link">Home</span>
+          <span onClick={() => navigate("/")} className="breadcrumb-link">
+            Home
+          </span>
           <span className="breadcrumb-separator">/</span>
-          <span onClick={() => navigate('/products')} className="breadcrumb-link">Products</span>
+          <span
+            onClick={() => navigate("/products")}
+            className="breadcrumb-link"
+          >
+            Products
+          </span>
           <span className="breadcrumb-separator">/</span>
-          <span onClick={() => navigate(`/products?category=${product.category}`)} className="breadcrumb-link">
+          <span
+            onClick={() => navigate(`/products?category=${product.category}`)}
+            className="breadcrumb-link"
+          >
             {product.category}
           </span>
           <span className="breadcrumb-separator">/</span>
@@ -174,7 +205,11 @@ const ProductDetail = () => {
           <div className="product-images">
             <div className="main-image">
               <img
-                src={product.image_url || product.image_path || 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&h=600&fit=crop&crop=center'}
+                src={
+                  product.image_url ||
+                  product.image_path ||
+                  "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&h=600&fit=crop&crop=center"
+                }
                 alt={product.name}
                 className="main-product-image"
               />
@@ -189,21 +224,24 @@ const ProductDetail = () => {
 
               <div className="product-rating">
                 <div className="stars">
-                  {renderStars(4.5)} {/* Default rating since no reviews in API */}
+                  {renderStars(4.5)}{" "}
+                  {/* Default rating since no reviews in API */}
                 </div>
                 <span className="rating-text">(4.5) • 0 reviews</span>
               </div>
 
               <div className="product-seller">
                 <Store size={16} />
-                <span>by {product.owner?.name || 'Unknown Seller'}</span>
+                <span>by {product.owner?.name || "Unknown Seller"}</span>
               </div>
             </div>
 
             <div className="product-pricing">
               <div className="price-section">
                 {product.discount_price && (
-                  <span className="original-price">{formatPrice(product.price)}</span>
+                  <span className="original-price">
+                    {formatPrice(product.price)}
+                  </span>
                 )}
                 <span className="current-price">
                   {formatPrice(product.discount_price || product.price)}
@@ -215,7 +253,9 @@ const ProductDetail = () => {
 
               <div className="stock-info">
                 {product.stock_quantity > 0 ? (
-                  <span className="in-stock">✓ In Stock ({product.stock_quantity} available)</span>
+                  <span className="in-stock">
+                    ✓ In Stock ({product.stock_quantity} available)
+                  </span>
                 ) : (
                   <span className="out-of-stock">✗ Out of Stock</span>
                 )}
@@ -261,12 +301,17 @@ const ProductDetail = () => {
 
                 {isAuthenticated && isBuyer && (
                   <button
-                    className={`btn btn-outline btn-lg wishlist-btn ${isInWishlist ? 'active' : ''}`}
+                    className={`btn btn-outline btn-lg wishlist-btn ${
+                      isInWishlist ? "active" : ""
+                    }`}
                     onClick={handleWishlist}
                     disabled={wishlistLoading}
                   >
-                    <Heart size={20} fill={isInWishlist ? "currentColor" : "none"} />
-                    {isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}
+                    <Heart
+                      size={20}
+                      fill={isInWishlist ? "currentColor" : "none"}
+                    />
+                    {isInWishlist ? "Remove from Wishlist" : "Add to Wishlist"}
                   </button>
                 )}
 
@@ -299,51 +344,65 @@ const ProductDetail = () => {
         <div className="product-tabs">
           <div className="tab-headers">
             <button
-              className={`tab-header ${activeTab === 'description' ? 'active' : ''}`}
-              onClick={() => setActiveTab('description')}
+              className={`tab-header ${
+                activeTab === "description" ? "active" : ""
+              }`}
+              onClick={() => setActiveTab("description")}
             >
               Description
             </button>
             <button
-              className={`tab-header ${activeTab === 'specifications' ? 'active' : ''}`}
-              onClick={() => setActiveTab('specifications')}
+              className={`tab-header ${
+                activeTab === "specifications" ? "active" : ""
+              }`}
+              onClick={() => setActiveTab("specifications")}
             >
               Specifications
             </button>
             <button
-              className={`tab-header ${activeTab === 'reviews' ? 'active' : ''}`}
-              onClick={() => setActiveTab('reviews')}
+              className={`tab-header ${
+                activeTab === "reviews" ? "active" : ""
+              }`}
+              onClick={() => setActiveTab("reviews")}
             >
               Reviews (0)
             </button>
           </div>
 
           <div className="tab-content">
-            {activeTab === 'description' && (
+            {activeTab === "description" && (
               <div className="description-content">
                 <p>{product.description}</p>
                 {product.ingredients && product.ingredients.length > 0 && (
                   <div className="ingredients-section">
                     <h4>Ingredients:</h4>
-                    <p>{Array.isArray(product.ingredients) ? product.ingredients.join(', ') : product.ingredients}</p>
+                    <p>
+                      {Array.isArray(product.ingredients)
+                        ? product.ingredients.join(", ")
+                        : product.ingredients}
+                    </p>
                   </div>
                 )}
                 {product.allergens && product.allergens.length > 0 && (
                   <div className="allergens-section">
                     <h4>Allergens:</h4>
-                    <p>{Array.isArray(product.allergens) ? product.allergens.join(', ') : product.allergens}</p>
+                    <p>
+                      {Array.isArray(product.allergens)
+                        ? product.allergens.join(", ")
+                        : product.allergens}
+                    </p>
                   </div>
                 )}
               </div>
             )}
 
-            {activeTab === 'specifications' && (
+            {activeTab === "specifications" && (
               <div className="specifications-content">
                 <table className="specifications-table">
                   <tbody>
                     <tr>
                       <td>SKU</td>
-                      <td>{product.sku || 'N/A'}</td>
+                      <td>{product.sku || "N/A"}</td>
                     </tr>
                     <tr>
                       <td>Category</td>
@@ -351,11 +410,11 @@ const ProductDetail = () => {
                     </tr>
                     <tr>
                       <td>Weight</td>
-                      <td>{product.weight ? `${product.weight} kg` : 'N/A'}</td>
+                      <td>{product.weight ? `${product.weight} kg` : "N/A"}</td>
                     </tr>
                     <tr>
                       <td>Dimensions</td>
-                      <td>{product.dimensions || 'N/A'}</td>
+                      <td>{product.dimensions || "N/A"}</td>
                     </tr>
                     <tr>
                       <td>Stock Quantity</td>
@@ -370,7 +429,7 @@ const ProductDetail = () => {
               </div>
             )}
 
-            {activeTab === 'reviews' && (
+            {activeTab === "reviews" && (
               <div className="reviews-content">
                 <div className="no-reviews">
                   <MessageCircle size={48} />

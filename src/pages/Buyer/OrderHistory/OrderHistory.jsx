@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../../context/AuthContext';
-import ApiService from '../../../services/api';
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../../../context/AuthContext";
+import ApiService from "../../../services/api";
 import {
   Package,
   Truck,
@@ -11,17 +11,17 @@ import {
   Filter,
   Download,
   AlertCircle,
-  X
-} from 'lucide-react';
-import './OrderHistory.css';
+  X,
+} from "lucide-react";
+import "./OrderHistory.css";
 
 const OrderHistory = () => {
   const { user } = useAuth();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [filter, setFilter] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [filter, setFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
@@ -36,10 +36,10 @@ const OrderHistory = () => {
     try {
       const params = {
         page: currentPage,
-        per_page: 10
+        per_page: 10,
       };
 
-      if (filter !== 'all') {
+      if (filter !== "all") {
         params.status = filter;
       }
 
@@ -51,41 +51,40 @@ const OrderHistory = () => {
 
       setOrders(response.data || []);
       setTotalPages(response.meta?.last_page || 1);
-
     } catch (error) {
-      console.error('Failed to fetch orders:', error);
-      setError('Failed to load orders. Please try again.');
+      console.error("Failed to fetch orders:", error);
+      setError("Failed to load orders. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   const handleCancelOrder = async (orderId) => {
-    if (!window.confirm('Are you sure you want to cancel this order?')) {
+    if (!window.confirm("Are you sure you want to cancel this order?")) {
       return;
     }
 
     try {
       await ApiService.cancelBuyerOrder(orderId);
       fetchOrders(); // Refresh orders list
-      alert('Order cancelled successfully');
+      alert("Order cancelled successfully");
     } catch (error) {
-      console.error('Failed to cancel order:', error);
-      alert('Failed to cancel order. Please try again.');
+      console.error("Failed to cancel order:", error);
+      alert("Failed to cancel order. Please try again.");
     }
   };
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case 'delivered':
+      case "delivered":
         return <CheckCircle className="status-icon delivered" size={16} />;
-      case 'shipped':
+      case "shipped":
         return <Truck className="status-icon shipped" size={16} />;
-      case 'processing':
+      case "processing":
         return <Clock className="status-icon processing" size={16} />;
-      case 'pending':
+      case "pending":
         return <Clock className="status-icon pending" size={16} />;
-      case 'cancelled':
+      case "cancelled":
         return <X className="status-icon cancelled" size={16} />;
       default:
         return <Package className="status-icon" size={16} />;
@@ -94,34 +93,34 @@ const OrderHistory = () => {
 
   const getStatusText = (status) => {
     switch (status) {
-      case 'delivered':
-        return 'Delivered';
-      case 'shipped':
-        return 'Shipped';
-      case 'processing':
-        return 'Processing';
-      case 'pending':
-        return 'Pending';
-      case 'cancelled':
-        return 'Cancelled';
+      case "delivered":
+        return "Delivered";
+      case "shipped":
+        return "Shipped";
+      case "processing":
+        return "Processing";
+      case "pending":
+        return "Pending";
+      case "cancelled":
+        return "Cancelled";
       default:
         return status.charAt(0).toUpperCase() + status.slice(1);
     }
   };
 
   const formatPrice = (price) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
     }).format(price);
   };
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
@@ -153,48 +152,51 @@ const OrderHistory = () => {
         {/* Filters and Search */}
         <div className="filters-section">
           <div className="search-box">
-            <Search size={20} />
+            <Search size={20} className="search-icon" />
             <input
               type="text"
               placeholder="Search orders..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              className="search-input"
             />
           </div>
           <div className="filter-tabs">
             <button
-              className={`filter-tab ${filter === 'all' ? 'active' : ''}`}
-              onClick={() => setFilter('all')}
+              className={`filter-tab ${filter === "all" ? "active" : ""}`}
+              onClick={() => setFilter("all")}
             >
               All Orders
             </button>
             <button
-              className={`filter-tab ${filter === 'pending' ? 'active' : ''}`}
-              onClick={() => setFilter('pending')}
+              className={`filter-tab ${filter === "pending" ? "active" : ""}`}
+              onClick={() => setFilter("pending")}
             >
               Pending
             </button>
             <button
-              className={`filter-tab ${filter === 'processing' ? 'active' : ''}`}
-              onClick={() => setFilter('processing')}
+              className={`filter-tab ${
+                filter === "processing" ? "active" : ""
+              }`}
+              onClick={() => setFilter("processing")}
             >
               Processing
             </button>
             <button
-              className={`filter-tab ${filter === 'shipped' ? 'active' : ''}`}
-              onClick={() => setFilter('shipped')}
+              className={`filter-tab ${filter === "shipped" ? "active" : ""}`}
+              onClick={() => setFilter("shipped")}
             >
               Shipped
             </button>
             <button
-              className={`filter-tab ${filter === 'delivered' ? 'active' : ''}`}
-              onClick={() => setFilter('delivered')}
+              className={`filter-tab ${filter === "delivered" ? "active" : ""}`}
+              onClick={() => setFilter("delivered")}
             >
               Delivered
             </button>
             <button
-              className={`filter-tab ${filter === 'cancelled' ? 'active' : ''}`}
-              onClick={() => setFilter('cancelled')}
+              className={`filter-tab ${filter === "cancelled" ? "active" : ""}`}
+              onClick={() => setFilter("cancelled")}
             >
               Cancelled
             </button>
@@ -209,7 +211,9 @@ const OrderHistory = () => {
                 <div className="order-header">
                   <div className="order-info">
                     <h3>Order #{order.id}</h3>
-                    <p className="order-date">Placed on {formatDate(order.created_at)}</p>
+                    <p className="order-date">
+                      Placed on {formatDate(order.created_at)}
+                    </p>
                   </div>
                   <div className="order-status">
                     {getStatusIcon(order.status)}
@@ -221,46 +225,68 @@ const OrderHistory = () => {
                   {order.items && order.items.length > 0 ? (
                     order.items.slice(0, 3).map((item, index) => (
                       <div key={index} className="order-item">
-                        <img
-                          src={item.product_image || '/placeholder-product.jpg'}
-                          alt={item.product_name}
-                          className="item-image"
-                        />
+                        <div className="item-image-container">
+                          <img
+                            src={
+                              item.product_image || "/placeholder-product.jpg"
+                            }
+                            alt={item.product_name}
+                            className="item-image"
+                          />
+                        </div>
                         <div className="item-details">
                           <h4>{item.product_name}</h4>
-                          <p>Quantity: {item.quantity}</p>
-                          <p className="item-price">{formatPrice(item.unit_price)}</p>
+                          <div className="item-meta">
+                            <span className="item-quantity">
+                              Qty: {item.quantity}
+                            </span>
+                            <span className="item-price">
+                              {formatPrice(item.unit_price)}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     ))
                   ) : (
-                    <p>No items found</p>
+                    <div className="no-items">
+                      <Package size={24} />
+                      <p>No items found</p>
+                    </div>
                   )}
                   {order.items && order.items.length > 3 && (
-                    <p className="more-items">
-                      +{order.items.length - 3} more item{order.items.length - 3 !== 1 ? 's' : ''}
-                    </p>
+                    <div className="more-items">
+                      <span>
+                        +{order.items.length - 3} more item
+                        {order.items.length - 3 !== 1 ? "s" : ""}
+                      </span>
+                    </div>
                   )}
                 </div>
 
                 <div className="order-footer">
                   <div className="order-total">
-                    <strong>Total: {formatPrice(order.total_amount)}</strong>
+                    <span className="total-label">Total:</span>
+                    <span className="total-amount">
+                      {formatPrice(order.total_amount)}
+                    </span>
                   </div>
                   <div className="order-actions">
-                    {order.status === 'pending' && (
+                    {order.status === "pending" && (
                       <button
                         onClick={() => handleCancelOrder(order.id)}
-                        className="btn btn-outline btn-sm"
+                        className="btn btn-outline btn-sm cancel-btn"
                       >
+                        <X size={14} />
                         Cancel Order
                       </button>
                     )}
                     <button
-                      onClick={() => window.location.href = `/buyer/orders/${order.id}`}
+                      onClick={() =>
+                        (window.location.href = `/buyer/orders/${order.id}`)
+                      }
                       className="btn btn-primary btn-sm"
                     >
-                      <Eye size={16} />
+                      <Eye size={14} />
                       View Details
                     </button>
                   </div>
@@ -269,15 +295,17 @@ const OrderHistory = () => {
             ))
           ) : (
             <div className="empty-state">
-              <Package size={64} />
+              <div className="empty-icon">
+                <Package size={64} />
+              </div>
               <h2>No orders found</h2>
               <p>
-                {filter === 'all'
+                {filter === "all"
                   ? "You haven't placed any orders yet"
                   : `No ${filter} orders found`}
               </p>
               <button
-                onClick={() => window.location.href = '/products'}
+                onClick={() => (window.location.href = "/products")}
                 className="btn btn-primary"
               >
                 Start Shopping
@@ -290,9 +318,9 @@ const OrderHistory = () => {
         {totalPages > 1 && (
           <div className="pagination">
             <button
-              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
               disabled={currentPage === 1}
-              className="btn btn-outline"
+              className="btn btn-outline pagination-btn"
             >
               Previous
             </button>
@@ -300,9 +328,11 @@ const OrderHistory = () => {
               Page {currentPage} of {totalPages}
             </span>
             <button
-              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+              }
               disabled={currentPage === totalPages}
-              className="btn btn-outline"
+              className="btn btn-outline pagination-btn"
             >
               Next
             </button>

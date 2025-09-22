@@ -1,15 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { useSearchParams, useParams } from 'react-router-dom';
-import ProductCard from '../../components/common/ProductCard/ProductCard';
-import Pagination from '../../components/common/Pagination/Pagination';
-import ApiService from '../../services/api';
-import {
-  Filter,
-  Grid,
-  List,
-  Star
-} from 'lucide-react';
-import './Products.css';
+import React, { useState, useEffect } from "react";
+import { useSearchParams, useParams } from "react-router-dom";
+import ProductCard from "../../components/common/ProductCard/ProductCard";
+import Pagination from "../../components/common/Pagination/Pagination";
+import ApiService from "../../services/api";
+import { Filter, Grid, List, Star } from "lucide-react";
+import "./Products.css";
 
 const Products = () => {
   const [searchParams] = useSearchParams();
@@ -17,22 +12,22 @@ const Products = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [viewMode, setViewMode] = useState('grid');
+  const [viewMode, setViewMode] = useState("grid");
   const [showFilters, setShowFilters] = useState(false);
-  const [sortBy, setSortBy] = useState('featured');
+  const [sortBy, setSortBy] = useState("featured");
   const [totalProducts, setTotalProducts] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [categories, setCategories] = useState([]);
   const [filters, setFilters] = useState({
-    category: category || '',
+    category: category || "",
     priceRange: [0, 1000],
     rating: 0,
     inStock: false,
-    freeShipping: false
+    freeShipping: false,
   });
 
   // Get search query from URL
-  const searchQuery = searchParams.get('search') || '';
+  const searchQuery = searchParams.get("search") || "";
 
   useEffect(() => {
     fetchProducts();
@@ -43,20 +38,20 @@ const Products = () => {
     try {
       const response = await ApiService.getCategories();
       if (response && response.data) {
-        setCategories(response.data.map(cat => cat.name || cat.category));
+        setCategories(response.data.map((cat) => cat.name || cat.category));
       }
     } catch (error) {
-      console.error('Failed to fetch categories:', error);
+      console.error("Failed to fetch categories:", error);
       // Fallback to default categories
       setCategories([
-        'Breads',
-        'Pastries',
-        'Cakes',
-        'Muffins',
-        'Donuts',
-        'Bagels',
-        'Cookies',
-        'Specialty'
+        "Breads",
+        "Pastries",
+        "Cakes",
+        "Muffins",
+        "Donuts",
+        "Bagels",
+        "Cookies",
+        "Specialty",
       ]);
     }
   };
@@ -69,7 +64,7 @@ const Products = () => {
       // Build API parameters
       const apiParams = {
         per_page: 12,
-        page: currentPage
+        page: currentPage,
       };
 
       // Add search query
@@ -86,19 +81,33 @@ const Products = () => {
       const response = await ApiService.getProducts(apiParams);
 
       if (response && response.data) {
-        let fetchedProducts = response.data.map(product => ({
+        let fetchedProducts = response.data.map((product) => ({
           id: product.id,
           name: product.name,
           price: parseFloat(product.price),
-          originalPrice: product.discount_price ? parseFloat(product.price) : null,
-          discountPrice: product.discount_price ? parseFloat(product.discount_price) : null,
-          image: product.image_url || product.image_path || '/placeholder-product.jpg',
-          category: product.category || 'General',
+          originalPrice: product.discount_price
+            ? parseFloat(product.price)
+            : null,
+          discountPrice: product.discount_price
+            ? parseFloat(product.discount_price)
+            : null,
+          image:
+            product.image_url ||
+            product.image_path ||
+            "/placeholder-product.jpg",
+          category: product.category || "General",
           rating: calculateAverageRating(product.reviews || []),
           reviewCount: (product.reviews || []).length,
-          seller: product.owner?.shop_name || product.owner?.name || 'Unknown Seller',
-          discount: product.discount_price ?
-            Math.round(((parseFloat(product.price) - parseFloat(product.discount_price)) / parseFloat(product.price)) * 100) : 0,
+          seller:
+            product.owner?.shop_name || product.owner?.name || "Unknown Seller",
+          discount: product.discount_price
+            ? Math.round(
+                ((parseFloat(product.price) -
+                  parseFloat(product.discount_price)) /
+                  parseFloat(product.price)) *
+                  100
+              )
+            : 0,
           inStock: product.stock_quantity > 0,
           freeShipping: product.price >= 25, // Free shipping for orders over $25
           description: product.description,
@@ -108,7 +117,7 @@ const Products = () => {
           ingredients: product.ingredients || [],
           allergens: product.allergens || [],
           isFeatured: product.is_featured || false,
-          status: product.status
+          status: product.status,
         }));
 
         // Apply client-side filters (since backend doesn't support all filters yet)
@@ -124,8 +133,8 @@ const Products = () => {
         setTotalProducts(0);
       }
     } catch (error) {
-      console.error('Failed to fetch products:', error);
-      setError('Failed to load products. Please try again later.');
+      console.error("Failed to fetch products:", error);
+      setError("Failed to load products. Please try again later.");
       setProducts([]);
       setTotalProducts(0);
     } finally {
@@ -144,7 +153,7 @@ const Products = () => {
 
     // Price range filter
     if (filters.priceRange) {
-      filtered = filtered.filter(product => {
+      filtered = filtered.filter((product) => {
         const price = product.discountPrice || product.price;
         return price >= filters.priceRange[0] && price <= filters.priceRange[1];
       });
@@ -152,17 +161,17 @@ const Products = () => {
 
     // Rating filter
     if (filters.rating > 0) {
-      filtered = filtered.filter(product => product.rating >= filters.rating);
+      filtered = filtered.filter((product) => product.rating >= filters.rating);
     }
 
     // In stock filter
     if (filters.inStock) {
-      filtered = filtered.filter(product => product.inStock);
+      filtered = filtered.filter((product) => product.inStock);
     }
 
     // Free shipping filter
     if (filters.freeShipping) {
-      filtered = filtered.filter(product => product.freeShipping);
+      filtered = filtered.filter((product) => product.freeShipping);
     }
 
     return filtered;
@@ -172,15 +181,19 @@ const Products = () => {
     const sorted = [...products];
 
     switch (sortBy) {
-      case 'price-low':
-        return sorted.sort((a, b) => (a.discountPrice || a.price) - (b.discountPrice || b.price));
-      case 'price-high':
-        return sorted.sort((a, b) => (b.discountPrice || b.price) - (a.discountPrice || a.price));
-      case 'rating':
+      case "price-low":
+        return sorted.sort(
+          (a, b) => (a.discountPrice || a.price) - (b.discountPrice || b.price)
+        );
+      case "price-high":
+        return sorted.sort(
+          (a, b) => (b.discountPrice || b.price) - (a.discountPrice || a.price)
+        );
+      case "rating":
         return sorted.sort((a, b) => b.rating - a.rating);
-      case 'newest':
+      case "newest":
         return sorted.sort((a, b) => b.id - a.id); // Assuming higher ID means newer
-      case 'featured':
+      case "featured":
       default:
         return sorted.sort((a, b) => {
           // Featured products first, then by rating
@@ -194,18 +207,18 @@ const Products = () => {
   const handleFilterChange = (filterName, value) => {
     setFilters({
       ...filters,
-      [filterName]: value
+      [filterName]: value,
     });
     setCurrentPage(1); // Reset to first page when filters change
   };
 
   const clearFilters = () => {
     setFilters({
-      category: category || '',
+      category: category || "",
       priceRange: [0, 1000],
       rating: 0,
       inStock: false,
-      freeShipping: false
+      freeShipping: false,
     });
     setCurrentPage(1);
   };
@@ -217,7 +230,7 @@ const Products = () => {
     if (searchQuery) {
       return `Search Results for "${searchQuery}"`;
     }
-    return 'All Products';
+    return "All Products";
   };
 
   // Show error state
@@ -250,14 +263,14 @@ const Products = () => {
           <div className="products-controls">
             <div className="view-controls">
               <button
-                className={`view-btn ${viewMode === 'grid' ? 'active' : ''}`}
-                onClick={() => setViewMode('grid')}
+                className={`view-btn ${viewMode === "grid" ? "active" : ""}`}
+                onClick={() => setViewMode("grid")}
               >
                 <Grid size={20} />
               </button>
               <button
-                className={`view-btn ${viewMode === 'list' ? 'active' : ''}`}
-                onClick={() => setViewMode('list')}
+                className={`view-btn ${viewMode === "list" ? "active" : ""}`}
+                onClick={() => setViewMode("list")}
               >
                 <List size={20} />
               </button>
@@ -289,7 +302,7 @@ const Products = () => {
 
         <div className="products-content">
           {/* Filters Sidebar */}
-          <aside className={`filters-sidebar ${showFilters ? 'show' : ''}`}>
+          <aside className={`filters-sidebar ${showFilters ? "show" : ""}`}>
             <div className="filters-header">
               <h3>Filters</h3>
               <button className="clear-filters" onClick={clearFilters}>
@@ -300,14 +313,16 @@ const Products = () => {
             <div className="filter-group">
               <h4>Category</h4>
               <div className="filter-options">
-                {categories.map(cat => (
+                {categories.map((cat) => (
                   <label key={cat} className="filter-option">
                     <input
                       type="radio"
                       name="category"
                       value={cat}
                       checked={filters.category === cat}
-                      onChange={(e) => handleFilterChange('category', e.target.value)}
+                      onChange={(e) =>
+                        handleFilterChange("category", e.target.value)
+                      }
                     />
                     <span>{cat}</span>
                   </label>
@@ -318,14 +333,16 @@ const Products = () => {
             <div className="filter-group">
               <h4>Rating</h4>
               <div className="filter-options">
-                {[4, 3, 2, 1].map(rating => (
+                {[4, 3, 2, 1].map((rating) => (
                   <label key={rating} className="filter-option">
                     <input
                       type="radio"
                       name="rating"
                       value={rating}
                       checked={filters.rating === rating}
-                      onChange={(e) => handleFilterChange('rating', parseInt(e.target.value))}
+                      onChange={(e) =>
+                        handleFilterChange("rating", parseInt(e.target.value))
+                      }
                     />
                     <span className="rating-filter">
                       {[...Array(rating)].map((_, i) => (
@@ -344,7 +361,9 @@ const Products = () => {
                 <input
                   type="checkbox"
                   checked={filters.inStock}
-                  onChange={(e) => handleFilterChange('inStock', e.target.checked)}
+                  onChange={(e) =>
+                    handleFilterChange("inStock", e.target.checked)
+                  }
                 />
                 <span>In Stock</span>
               </label>
@@ -352,7 +371,9 @@ const Products = () => {
                 <input
                   type="checkbox"
                   checked={filters.freeShipping}
-                  onChange={(e) => handleFilterChange('freeShipping', e.target.checked)}
+                  onChange={(e) =>
+                    handleFilterChange("freeShipping", e.target.checked)
+                  }
                 />
                 <span>Free Shipping</span>
               </label>
@@ -376,7 +397,7 @@ const Products = () => {
               </div>
             ) : products.length > 0 ? (
               <div className={`products-grid ${viewMode}`}>
-                {products.map(product => (
+                {products.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>
@@ -397,7 +418,7 @@ const Products = () => {
                 totalPages={Math.ceil(totalProducts / 12)}
                 totalItems={totalProducts}
                 itemsPerPage={12}
-                onPageChange={page => setCurrentPage(page)}
+                onPageChange={(page) => setCurrentPage(page)}
               />
             )}
           </main>
@@ -405,8 +426,10 @@ const Products = () => {
 
         {/* Filter Overlay for Mobile */}
         {showFilters && (
-          <div className="filter-overlay" onClick={() => setShowFilters(false)}>
-          </div>
+          <div
+            className="filter-overlay"
+            onClick={() => setShowFilters(false)}
+          ></div>
         )}
       </div>
     </div>

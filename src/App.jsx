@@ -1,41 +1,42 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
-import { CartProvider } from './context/CartContext';
-import { NotificationProvider } from './context/NotificationContext';
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import { CartProvider } from "./context/CartContext";
+import { NotificationProvider } from "./context/NotificationContext";
 
 // Layout Components
-import Header from './components/layout/Header/Header';
-import Footer from './components/layout/Footer/Footer';
+import Header from "./components/layout/Header/Header";
+import Footer from "./components/layout/Footer/Footer";
 
 // AI Assistant Component
-import FloatingAIAssistant from './components/common/FloatingAIAssistant/FloatingAIAssistant';
+import FloatingAIAssistant from "./components/common/FloatingAIAssistant/FloatingAIAssistant";
 
 // Offline Indicator Component
-import OfflineIndicator from './components/common/OfflineIndicator/OfflineIndicator';
+import OfflineIndicator from "./components/common/OfflineIndicator/OfflineIndicator";
 
 // Scroll to Top Component
 import ScrollToTop from './components/common/ScrollToTop/ScrollToTop';
 
 // Public Pages
-import Home from './pages/Home/Home';
-import Products from './pages/Products/Products';
-import ProductDetail from './pages/ProductDetail/ProductDetail';
-import Categories from './pages/Categories/Categories';
-import About from './pages/About/About';
-import Contact from './pages/Contact/Contact';
-import Cart from './pages/Cart/Cart';
+import Home from "./pages/Home/Home";
+import Products from "./pages/Products/Products";
+import ProductDetail from "./pages/ProductDetail/ProductDetail";
+import Categories from "./pages/Categories/Categories";
+import About from "./pages/About/About";
+import Contact from "./pages/Contact/Contact";
+import Cart from "./pages/Cart/Cart";
 
 // Auth Pages
-import Login from './pages/Auth/Login/Login';
-import Register from './pages/Auth/Register/Register';
+import Login from "./pages/Auth/Login/Login";
+import Register from "./pages/Auth/Register/Register";
 
 // Buyer Pages (Customer Pages for Bakery)
-import BuyerDashboard from './pages/Buyer/Dashboard/BuyerDashboard';
-import OrderHistory from './pages/Buyer/OrderHistory/OrderHistory';
-import Wishlist from './pages/Buyer/Wishlist/Wishlist';
-import Profile from './pages/Buyer/Profile/Profile';
-import Checkout from './pages/Buyer/Checkout/Checkout';
+import BuyerDashboard from "./pages/Buyer/Dashboard/BuyerDashboard";
+import OrderHistory from "./pages/Buyer/OrderHistory/OrderHistory";
+import OrderDetail from "./pages/Buyer/OrderDetail/OrderDetail";
+import Wishlist from "./pages/Buyer/Wishlist/Wishlist";
+import Profile from "./pages/Buyer/Profile/Profile";
+import Checkout from "./pages/Buyer/Checkout/Checkout";
 
 // Seller Pages (Baker/Shop Manager Pages)
 import SellerDashboard from './pages/Seller/Dashboard/SellerDashboard';
@@ -49,11 +50,11 @@ import EditProduct from './pages/Seller/Products/EditProduct';
 import IngredientsManagement from './pages/Seller/Ingredients/IngredientsManagement';
 
 // Protected Route Component
-import ProtectedRoute from './components/common/ProtectedRoute/ProtectedRoute';
+import ProtectedRoute from "./components/common/ProtectedRoute/ProtectedRoute";
 
 // Shop Pages (Bakery Shop Pages)
-import ShopDetail from './pages/Shop/ShopDetail/ShopDetail';
-import BakeryShops from './pages/Categories/BakeryShops';
+import ShopDetail from "./pages/Shop/ShopDetail/ShopDetail";
+import BakeryShops from "./pages/Categories/BakeryShops";
 
 function App() {
   return (
@@ -74,7 +75,10 @@ function App() {
                   <Route path="/products/:id" element={<ProductDetail />} />
                   <Route path="/categories" element={<Categories />} />
                   <Route path="/categories/:category" element={<Products />} />
-                  <Route path="/categories/bakery-shops" element={<BakeryShops />} />
+                  <Route
+                    path="/categories/bakery-shops"
+                    element={<BakeryShops />}
+                  />
                   <Route path="/bakery/:shopId" element={<ShopDetail />} />
                   <Route path="/about" element={<About />} />
                   <Route path="/contact" element={<Contact />} />
@@ -85,38 +89,65 @@ function App() {
                   <Route path="/register" element={<Register />} />
 
                   {/* Buyer Protected Routes */}
-                  <Route path="/buyer" element={
-                    <ProtectedRoute userType="buyer">
-                      <BuyerDashboard />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/buyer/orders" element={
-                    <ProtectedRoute userType="buyer">
-                      <OrderHistory />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/buyer/favorites" element={
-                    <ProtectedRoute userType="buyer">
-                      <Wishlist />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/buyer/wishlist" element={
-                    <ProtectedRoute userType="buyer">
-                      <Wishlist />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/buyer/profile" element={
-                    <ProtectedRoute userType="buyer">
-                      <Profile />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/checkout" element={
-                    <ProtectedRoute userType="buyer">
-                      <Checkout />
-                    </ProtectedRoute>
-                  } />
+                  <Route
+                    path="/buyer"
+                    element={
+                      <ProtectedRoute userType="buyer">
+                        <BuyerDashboard />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/buyer/orders"
+                    element={
+                      <ProtectedRoute userType="buyer">
+                        <OrderHistory />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/buyer/orders/:orderId"
+                    element={
+                      <ProtectedRoute userType="buyer">
+                        <OrderDetail />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/buyer/favorites"
+                    element={
+                      <ProtectedRoute userType="buyer">
+                        <Wishlist />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/buyer/wishlist"
+                    element={
+                      <ProtectedRoute userType="buyer">
+                        <Wishlist />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/buyer/profile"
+                    element={
+                      <ProtectedRoute userType="buyer">
+                        <Profile />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/checkout"
+                    element={
+                      <ProtectedRoute userType="buyer">
+                        <Checkout />
+                      </ProtectedRoute>
+                    }
+                  />
 
                   {/* Seller Protected Routes */}
+
                   <Route path="/seller" element={
                     <ProtectedRoute userType="seller">
                       <SellerDashboard />
@@ -164,54 +195,84 @@ function App() {
                   } />
 
                   {/* Owner Protected Routes (same as seller routes) */}
-                  <Route path="/owner" element={
-                    <ProtectedRoute userType="owner">
-                      <SellerDashboard />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/owner/products" element={
-                    <ProtectedRoute userType="owner">
-                      <SellerProducts />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/owner/products/new" element={
-                    <ProtectedRoute userType="owner">
-                      <AddProduct />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/owner/products/:id/edit" element={
-                    <ProtectedRoute userType="owner">
-                      <EditProduct />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/owner/orders" element={
-                    <ProtectedRoute userType="owner">
-                      <SellerOrders />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/owner/profile" element={
-                    <ProtectedRoute userType="owner">
-                      <SellerProfile />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/owner/shop" element={
-                    <ProtectedRoute userType="owner">
-                      <SellerShop />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/owner/analytics" element={
-                    <ProtectedRoute userType="owner">
-                      <SellerAnalytics />
-                    </ProtectedRoute>
-                  } />
+                  <Route
+                    path="/owner"
+                    element={
+                      <ProtectedRoute userType="owner">
+                        <SellerDashboard />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/owner/products"
+                    element={
+                      <ProtectedRoute userType="owner">
+                        <SellerProducts />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/owner/products/new"
+                    element={
+                      <ProtectedRoute userType="owner">
+                        <AddProduct />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/owner/products/:id/edit"
+                    element={
+                      <ProtectedRoute userType="owner">
+                        <EditProduct />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/owner/orders"
+                    element={
+                      <ProtectedRoute userType="owner">
+                        <SellerOrders />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/owner/profile"
+                    element={
+                      <ProtectedRoute userType="owner">
+                        <SellerProfile />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/owner/shop"
+                    element={
+                      <ProtectedRoute userType="owner">
+                        <SellerShop />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/owner/analytics"
+                    element={
+                      <ProtectedRoute userType="owner">
+                        <SellerAnalytics />
+                      </ProtectedRoute>
+                    }
+                  />
 
                   {/* 404 Page */}
-                  <Route path="*" element={
-                    <div className="container text-center" style={{ padding: '4rem 0' }}>
-                      <h1>404 - Page Not Found</h1>
-                      <p>The page you are looking for does not exist.</p>
-                    </div>
-                  } />
+                  <Route
+                    path="*"
+                    element={
+                      <div
+                        className="container text-center"
+                        style={{ padding: "4rem 0" }}
+                      >
+                        <h1>404 - Page Not Found</h1>
+                        <p>The page you are looking for does not exist.</p>
+                      </div>
+                    }
+                  />
                 </Routes>
               </main>
               <Footer />
