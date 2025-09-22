@@ -5,6 +5,11 @@ import { useAuth } from '../../../context/AuthContext';
 const ProtectedRoute = ({ children, userType }) => {
   const { isAuthenticated, user, loading } = useAuth();
 
+  // Show loading while authentication is being initialized
+  if (loading) {
+    return <div>Loading...</div>; // or your loading component
+  }
+
   // Redirect to login if not authenticated
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;

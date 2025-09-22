@@ -183,7 +183,7 @@ const EditProduct = () => {
     }
   };
 
-  if (!product && !loading) {
+  if (!formData.name && !loading) {
     return (
       <div className="edit-product error">
         <div className="container">

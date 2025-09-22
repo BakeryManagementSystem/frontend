@@ -138,15 +138,15 @@ const SellerProducts = () => {
             <div className="stat-label">Active Products</div>
           </div>
           <div className="stat-card">
-            <div className="stat-value">{products.filter(p => p.stock < 5).length}</div>
+            <div className="stat-value">{products.filter(p => (p.stock || 0) < 5).length}</div>
             <div className="stat-label">Low Stock</div>
           </div>
           <div className="stat-card">
-            <div className="stat-value">{products.filter(p => p.stock === 0).length}</div>
+            <div className="stat-value">{products.filter(p => (p.stock || 0) === 0).length}</div>
             <div className="stat-label">Out of Stock</div>
           </div>
           <div className="stat-card">
-            <div className="stat-value">{products.reduce((sum, p) => sum + p.sales, 0)}</div>
+            <div className="stat-value">{products.reduce((sum, p) => sum + (p.sales || 0), 0)}</div>
             <div className="stat-label">Total Sales</div>
           </div>
         </div>
@@ -261,12 +261,12 @@ const SellerProducts = () => {
                     </div>
 
                     <div className="table-cell price-cell">
-                      ${product.price}
+                      ${product.price || 0}
                     </div>
 
                     <div className="table-cell stock-cell">
-                      <span className={`stock-value ${product.stock < 5 ? 'low' : ''}`}>
-                        {product.stock}
+                      <span className={`stock-value ${(product.stock || 0) < 5 ? 'low' : ''}`}>
+                        {product.stock || 0}
                       </span>
                     </div>
 
@@ -280,11 +280,11 @@ const SellerProducts = () => {
                       <div className="performance-stats">
                         <div className="rating">
                           <div className="stars">
-                            {renderStars(product.rating)}
+                            {renderStars(product.rating || 0)}
                           </div>
-                          <span>({product.reviewCount})</span>
+                          <span>({product.reviewCount || 0})</span>
                         </div>
-                        <div className="sales">{product.sales} sold</div>
+                        <div className="sales">{product.sales || 0} sold</div>
                       </div>
                     </div>
 
