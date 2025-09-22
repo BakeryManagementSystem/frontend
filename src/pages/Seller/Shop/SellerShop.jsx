@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext';
+import { useNotifications } from '../../../context/NotificationContext';
+import ApiService from '../../../services/api';
 import {
   Store,
   Edit,
@@ -19,6 +21,7 @@ import './SellerShop.css';
 
 const SellerShop = () => {
   const { user } = useAuth();
+  const { addNotification } = useNotifications();
   const [shopData, setShopData] = useState({
     name: '',
     description: '',
@@ -55,12 +58,17 @@ const SellerShop = () => {
   const [errors, setErrors] = useState({});
 
   const [shopStats, setShopStats] = useState({
-    totalProducts: 32,
-    totalViews: 8750,
-    totalFollowers: 892,
-    averageRating: 4.8,
-    totalSales: 1245,
-    monthlyRevenue: 18650.00
+    totalProducts: 0,
+    totalViews: 0,
+    totalFollowers: 0,
+    averageRating: 0,
+    totalSales: 0,
+    monthlyRevenue: 0
+  });
+
+  const [imageUploading, setImageUploading] = useState({
+    logo: false,
+    banner: false
   });
 
   useEffect(() => {
@@ -68,37 +76,65 @@ const SellerShop = () => {
   }, []);
 
   const fetchShopData = async () => {
-    // Simulate API call with mock data
-    setTimeout(() => {
-      setShopData({
-        name: 'Sweet Dreams Bakery',
-        description: 'Artisan bakery specializing in fresh-baked breads, pastries, and custom cakes. We use only the finest ingredients and traditional baking methods to create delicious treats for every occasion.',
-        logo: '/placeholder-bakery-logo.jpg',
-        banner: '/placeholder-bakery-banner.jpg',
-        theme: {
-          primaryColor: '#6639a6',
-          secondaryColor: '#7f4fc3',
-          accentColor: '#9b75d0'
-        },
-        policies: {
-          shipping: 'Free delivery for orders over $30 within 5 miles. Fresh items delivered same day. Custom cakes require 48-hour advance notice.',
-          returns: 'Fresh bakery items must be returned within 24 hours if unsatisfactory. Custom orders are non-refundable unless there is a quality issue.',
-          exchange: 'We accept exchanges for packaged goods within 3 days. Fresh items can only be exchanged if there is a quality concern.'
-        },
-        social: {
-          website: 'https://sweetdreamsbakery.com',
-          facebook: 'sweetdreamsbakery',
-          twitter: '@sweetdreams_bakery',
-          instagram: 'sweetdreamsbakery'
-        },
-        settings: {
-          showContactInfo: true,
-          showReviews: true,
-          allowMessages: true,
-          featuredProducts: [1, 2, 3]
-        }
-      });
-    }, 500);
+    try {
+      setLoading(true);
+
+      // Fetch real shop data and stats from API
+      const [shopResponse, statsResponse] = await Promise.all([
+        ApiService.getSellerShop(),
+        ApiService.getSellerShopStats()
+      ]);
+
+      if (shopResponse.success && shopResponse.data) {
+        const shop = shopResponse.data;
+
+        setShopData({
+          name: shop.name || '',
+          description: shop.description || '',
+          logo: shop.logo || '',
+          banner: shop.banner || '',
+          theme: {
+            primaryColor: shop.primary_color || '#2563eb',
+            secondaryColor: shop.secondary_color || '#64748b',
+            accentColor: shop.accent_color || '#f59e0b'
+          },
+          policies: {
+            shipping: shop.shipping_policy || '',
+            returns: shop.return_policy || '',
+            exchange: shop.exchange_policy || ''
+          },
+          social: {
+            website: shop.website || '',
+            facebook: shop.facebook || '',
+            twitter: shop.twitter || '',
+            instagram: shop.instagram || ''
+          },
+          settings: {
+            showContactInfo: shop.show_contact_info !== undefined ? shop.show_contact_info : true,
+            showReviews: shop.show_reviews !== undefined ? shop.show_reviews : true,
+            allowMessages: shop.allow_messages !== undefined ? shop.allow_messages : true,
+            featuredProducts: shop.featured_products || []
+          }
+        });
+      }
+
+      if (statsResponse.success && statsResponse.data) {
+        const stats = statsResponse.data;
+        setShopStats({
+          totalProducts: stats.total_products || 0,
+          totalViews: stats.total_views || 0,
+          totalFollowers: stats.total_followers || 0,
+          averageRating: stats.average_rating || 0,
+          totalSales: stats.total_sales || 0,
+          monthlyRevenue: stats.monthly_revenue || 0
+        });
+      }
+    } catch (error) {
+      console.error('Failed to fetch shop data:', error);
+      addNotification('Failed to load shop data. Please try again.', 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleInputChange = (section, field, value) => {
@@ -150,14 +186,47 @@ const SellerShop = () => {
     setErrors({});
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Prepare shop data for API
+      const shopDataToSend = {
+        name: shopData.name,
+        description: shopData.description,
+        logo: shopData.logo,
+        banner: shopData.banner,
+        primary_color: shopData.theme.primaryColor,
+        secondary_color: shopData.theme.secondaryColor,
+        accent_color: shopData.theme.accentColor,
+        shipping_policy: shopData.policies.shipping,
+        return_policy: shopData.policies.returns,
+        exchange_policy: shopData.policies.exchange,
+        website: shopData.social.website,
+        facebook: shopData.social.facebook,
+        twitter: shopData.social.twitter,
+        instagram: shopData.social.instagram,
+        show_contact_info: shopData.settings.showContactInfo,
+        show_reviews: shopData.settings.showReviews,
+        allow_messages: shopData.settings.allowMessages,
+        featured_products: shopData.settings.featuredProducts
+      };
 
-      setIsEditing(false);
-      setSuccess('Shop updated successfully!');
-      setTimeout(() => setSuccess(''), 3000);
+      // Send data to API
+      const response = await ApiService.updateSellerShop(shopDataToSend);
+
+      if (response.success) {
+        setIsEditing(false);
+        setSuccess('Shop updated successfully!');
+        addNotification('Shop updated successfully!', 'success');
+        setTimeout(() => setSuccess(''), 3000);
+
+        // Refresh shop data to get any server-side changes
+        await fetchShopData();
+      } else {
+        setErrors({ general: response.message || 'Failed to update shop. Please try again.' });
+        addNotification('Failed to update shop. Please try again.', 'error');
+      }
     } catch (error) {
+      console.error('Failed to update shop:', error);
       setErrors({ general: 'Failed to update shop. Please try again.' });
+      addNotification('Failed to update shop. Please try again.', 'error');
     } finally {
       setLoading(false);
     }
@@ -166,6 +235,65 @@ const SellerShop = () => {
   const handlePreview = () => {
     // Open shop preview in new tab
     window.open(`/shop/${user?.id}`, '_blank');
+  };
+
+  const handleImageUpload = async (imageType, file) => {
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      addNotification('Please upload a valid image file (JPG, PNG, or WebP)', 'error');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      addNotification('Image size must be less than 5MB', 'error');
+      return;
+    }
+
+    setImageUploading(prev => ({ ...prev, [imageType]: true }));
+
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      formData.append('type', imageType);
+
+      const response = await ApiService.uploadShopImage(formData);
+
+      if (response.success) {
+        // Update the shop data with the new image URL
+        setShopData(prev => ({
+          ...prev,
+          [imageType]: response.data.url
+        }));
+        addNotification(`${imageType === 'logo' ? 'Logo' : 'Banner'} uploaded successfully!`, 'success');
+      } else {
+        addNotification(response.message || 'Failed to upload image', 'error');
+      }
+    } catch (error) {
+      console.error('Image upload failed:', error);
+      addNotification('Failed to upload image. Please try again.', 'error');
+    } finally {
+      setImageUploading(prev => ({ ...prev, [imageType]: false }));
+    }
+  };
+
+  const handleImageClick = (imageType) => {
+    if (!isEditing) return;
+
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        handleImageUpload(imageType, file);
+      }
+    };
+    input.click();
   };
 
   return (
@@ -242,7 +370,7 @@ const SellerShop = () => {
               <Package />
             </div>
             <div className="stat-content">
-              <div className="stat-value">{shopStats.totalProducts}</div>
+              <div className="stat-value">{shopStats.totalProducts || 0}</div>
               <div className="stat-label">Products</div>
             </div>
           </div>
@@ -251,7 +379,7 @@ const SellerShop = () => {
               <Eye />
             </div>
             <div className="stat-content">
-              <div className="stat-value">{shopStats.totalViews.toLocaleString()}</div>
+              <div className="stat-value">{(shopStats.totalViews || 0).toLocaleString()}</div>
               <div className="stat-label">Shop Views</div>
             </div>
           </div>
@@ -260,7 +388,7 @@ const SellerShop = () => {
               <Users />
             </div>
             <div className="stat-content">
-              <div className="stat-value">{shopStats.totalFollowers.toLocaleString()}</div>
+              <div className="stat-value">{(shopStats.totalFollowers || 0).toLocaleString()}</div>
               <div className="stat-label">Followers</div>
             </div>
           </div>
@@ -269,7 +397,7 @@ const SellerShop = () => {
               <Star />
             </div>
             <div className="stat-content">
-              <div className="stat-value">{shopStats.averageRating}</div>
+              <div className="stat-value">{shopStats.averageRating || 0}</div>
               <div className="stat-label">Rating</div>
             </div>
           </div>
@@ -391,9 +519,9 @@ const SellerShop = () => {
                     <div className="image-upload">
                       <img src={shopData.logo || 'https://images.unsplash.com/photo-1555507036-ab794f4eed25?w=120&h=120&fit=crop&crop=center'} alt="Shop Logo" className="upload-preview logo" />
                       {isEditing && (
-                        <button className="upload-btn">
+                        <button className="upload-btn" onClick={() => handleImageClick('logo')}>
                           <Camera size={16} />
-                          Change Logo
+                          {imageUploading.logo ? 'Uploading...' : 'Change Logo'}
                         </button>
                       )}
                     </div>
@@ -405,9 +533,9 @@ const SellerShop = () => {
                     <div className="image-upload">
                       <img src={shopData.banner || 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1200&h=400&fit=crop&crop=center'} alt="Shop Banner" className="upload-preview banner" />
                       {isEditing && (
-                        <button className="upload-btn">
+                        <button className="upload-btn" onClick={() => handleImageClick('banner')}>
                           <Image size={16} />
-                          Change Banner
+                          {imageUploading.banner ? 'Uploading...' : 'Change Banner'}
                         </button>
                       )}
                     </div>

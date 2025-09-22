@@ -239,16 +239,6 @@ const SellerProfile = () => {
         )}
 
         <div className="profile-content">
-          {/* Profile Tabs */}
-          <div className="profile-tabs">
-            <button
-              className={`tab-btn ${isEditing ? 'active' : ''}`}
-              onClick={() => setIsEditing(!isEditing)}
-            >
-              <User size={16} />
-              Personal Info
-            </button>
-          </div>
 
           {/* Personal Information Tab */}
           <div className="tab-content">
