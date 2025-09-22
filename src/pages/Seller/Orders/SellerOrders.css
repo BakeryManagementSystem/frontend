@@ -385,6 +385,73 @@
   line-height: 1.6;
 }
 
+/* Loading and Error States */
+.loading-state,
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  color: #6b7280;
+}
+
+.loading-state svg {
+  margin-bottom: 16px;
+  color: #3b82f6;
+}
+
+.error-state svg {
+  margin-bottom: 16px;
+  color: #ef4444;
+}
+
+.loading-state p,
+.error-state p {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+}
+
+.icon-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Order Status Updates */
+.order-actions .btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.order-actions .btn:disabled:hover {
+  background-color: initial;
+}
+
+/* Processing status styling */
+.status-icon.processing {
+  color: #f59e0b;
+}
+
+.filter-tab[data-status="processing"] {
+  border-color: #f59e0b;
+  color: #f59e0b;
+}
+
+.filter-tab[data-status="processing"].active {
+  background-color: #fef3c7;
+  border-color: #f59e0b;
+  color: #92400e;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .seller-orders {

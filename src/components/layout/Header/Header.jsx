@@ -22,7 +22,8 @@ import {
   Plus,
   Bell,
   BarChart3,
-  Store
+  Store,
+  PieChart
 } from 'lucide-react';
 import './Header.css';
 
@@ -297,6 +298,14 @@ const Header = () => {
                               My Products
                             </Link>
                             <Link
+                              to={`/${user?.user_type}/ingredients`}
+                              className="dropdown-link"
+                              onClick={() => setIsUserMenuOpen(false)}
+                            >
+                              <PieChart size={16} />
+                              Ingredients
+                            </Link>
+                            <Link
                               to={`/${user?.user_type}/analytics`}
                               className="dropdown-link"
                               onClick={() => setIsUserMenuOpen(false)}
@@ -454,6 +463,14 @@ const Header = () => {
                           >
                             <Grid3X3 size={16} />
                             My Products
+                          </Link>
+                          <Link
+                            to={`/${user?.user_type}/ingredients`}
+                            className="dropdown-link"
+                            onClick={closeAllMenus}
+                          >
+                            <PieChart size={16} />
+                            Ingredients
                           </Link>
                           <Link
                             to={`/${user?.user_type}/analytics`}

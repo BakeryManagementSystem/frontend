@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext';
+import { useNotifications } from '../../../context/NotificationContext';
+import ApiService from '../../../services/api';
 import {
   TrendingUp,
   DollarSign,
@@ -19,6 +21,7 @@ import './SellerAnalytics.css';
 
 const SellerAnalytics = () => {
   const { user } = useAuth();
+  const { addNotification } = useNotifications();
   const [analyticsData, setAnalyticsData] = useState({
     overview: {},
     sales: {},
@@ -35,74 +38,107 @@ const SellerAnalytics = () => {
 
   const fetchAnalytics = async () => {
     setLoading(true);
-    // Simulate API call with mock data
-    setTimeout(() => {
-      setAnalyticsData({
-        overview: {
-          totalRevenue: 12450.75,
-          totalOrders: 89,
-          totalViews: 15420,
-          conversionRate: 5.8,
-          averageOrderValue: 139.90,
-          totalProducts: 24,
-          activeProducts: 20,
-          lowStockProducts: 3
-        },
-        sales: {
-          daily: [
-            { date: '2024-01-01', revenue: 450, orders: 3 },
-            { date: '2024-01-02', revenue: 680, orders: 5 },
-            { date: '2024-01-03', revenue: 320, orders: 2 },
-            { date: '2024-01-04', revenue: 890, orders: 6 },
-            { date: '2024-01-05', revenue: 1200, orders: 8 },
-            { date: '2024-01-06', revenue: 750, orders: 5 },
-            { date: '2024-01-07', revenue: 920, orders: 7 }
-          ],
-          monthly: [
-            { month: 'Jan', revenue: 8450, orders: 65 },
-            { month: 'Feb', revenue: 9200, orders: 72 },
-            { month: 'Mar', revenue: 11800, orders: 89 },
-            { month: 'Apr', revenue: 12450, orders: 89 }
-          ],
-          byCategory: [
-            { category: 'Electronics', revenue: 7800, percentage: 62.6 },
-            { category: 'Accessories', revenue: 2900, percentage: 23.3 },
-            { category: 'Audio', revenue: 1750, percentage: 14.1 }
-          ]
-        },
-        products: {
-          topSelling: [
-            { id: 1, name: 'Premium Wireless Headphones', sales: 45, revenue: 8999.55 },
-            { id: 2, name: 'Smart Home Camera', sales: 32, revenue: 2879.68 },
-            { id: 3, name: 'Coffee Maker Pro', sales: 28, revenue: 4199.72 },
-            { id: 4, name: 'Bluetooth Earbuds', sales: 15, revenue: 1199.85 },
-            { id: 5, name: 'Wireless Charger', sales: 12, revenue: 359.88 }
-          ],
-          lowStock: [
-            { id: 3, name: 'Coffee Maker Pro', stock: 2 },
-            { id: 7, name: 'Phone Case Set', stock: 1 },
-            { id: 12, name: 'Tablet Stand', stock: 3 }
-          ]
-        },
-        customers: {
-          newCustomers: 45,
-          returningCustomers: 28,
-          topCustomers: [
-            { name: 'John Smith', orders: 8, spent: 1250.00 },
-            { name: 'Sarah Johnson', orders: 6, spent: 890.50 },
-            { name: 'Mike Wilson', orders: 5, spent: 750.25 }
-          ],
-          geography: [
-            { location: 'California', customers: 23, percentage: 31.5 },
-            { location: 'New York', customers: 18, percentage: 24.7 },
-            { location: 'Texas', customers: 12, percentage: 16.4 },
-            { location: 'Florida', customers: 10, percentage: 13.7 },
-            { location: 'Others', customers: 10, percentage: 13.7 }
-          ]
-        }
-      });
+    try {
+      // Fetch real analytics data from multiple endpoints with time range parameter
+      const [dashboardData, orderStats, shopStats] = await Promise.all([
+        ApiService.getSellerDashboard({ timeRange }),
+        ApiService.getSellerOrderStats({ timeRange }),
+        ApiService.getSellerShopStats({ timeRange })
+      ]);
+
+      // Transform the real data into the expected format
+      if (dashboardData.success && orderStats.success && shopStats.success) {
+        const dashboard = dashboardData.data || {};
+        const orders = orderStats.data || {};
+        const shop = shopStats.data || {};
+
+        setAnalyticsData({
+          overview: {
+            totalRevenue: dashboard.total_revenue || orders.total_revenue || 0,
+            totalOrders: dashboard.total_orders || orders.total_orders || 0,
+            totalViews: shop.total_views || dashboard.total_views || 0,
+            conversionRate: dashboard.conversion_rate || ((orders.total_orders || 0) / (shop.total_views || 1) * 100) || 0,
+            averageOrderValue: dashboard.average_order_value || orders.average_order_value || 0,
+            totalProducts: dashboard.total_products || 0,
+            activeProducts: dashboard.active_products || 0,
+            lowStockProducts: dashboard.low_stock_products || 0,
+            // Add percentage changes from API data
+            revenueChange: dashboard.revenue_change || orders.revenue_change || 0,
+            ordersChange: dashboard.orders_change || orders.orders_change || 0,
+            viewsChange: shop.views_change || dashboard.views_change || 0,
+            conversionRateChange: dashboard.conversion_rate_change || 0
+          },
+          sales: {
+            daily: orders.daily_sales || [],
+            monthly: orders.monthly_sales || [],
+            byCategory: orders.sales_by_category || []
+          },
+          products: {
+            topSelling: dashboard.top_selling_products || [],
+            lowStock: dashboard.low_stock_products || []
+          },
+          customers: {
+            newCustomers: dashboard.new_customers || 0,
+            returningCustomers: dashboard.returning_customers || 0,
+            topCustomers: dashboard.top_customers || [],
+            geography: dashboard.customer_geography || []
+          }
+        });
+      } else {
+        // Fallback to empty data structure
+        setAnalyticsData({
+          overview: {
+            totalRevenue: 0,
+            totalOrders: 0,
+            totalViews: 0,
+            conversionRate: 0,
+            averageOrderValue: 0,
+            totalProducts: 0,
+            activeProducts: 0,
+            lowStockProducts: 0
+          },
+          sales: {
+            daily: [],
+            monthly: [],
+            byCategory: []
+          },
+          products: {
+            topSelling: [],
+            lowStock: []
+          },
+          customers: {
+            newCustomers: 0,
+            returningCustomers: 0,
+            topCustomers: [],
+            geography: []
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Failed to fetch analytics data:', error);
+      addNotification('Failed to load analytics data. Please try again.', 'error');
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
+  };
+
+  const handleExportReport = async (reportType = 'overview') => {
+    try {
+      await ApiService.exportAnalytics(timeRange, reportType);
+      addNotification('Analytics report downloaded successfully!', 'success');
+    } catch (error) {
+      console.error('Failed to export analytics:', error);
+      addNotification('Failed to export analytics report. Please try again.', 'error');
+    }
+  };
+
+  const handlePreviewReport = async (reportType = 'overview') => {
+    try {
+      await ApiService.previewAnalytics(timeRange, reportType);
+    } catch (error) {
+      console.error('Failed to preview analytics:', error);
+      addNotification('Failed to preview analytics report. Please try again.', 'error');
+    }
   };
 
   const timeRanges = [
@@ -118,16 +154,6 @@ const SellerAnalytics = () => {
       currency: 'USD'
     }).format(amount);
   };
-
-  if (loading) {
-    return (
-      <div className="seller-analytics loading">
-        <div className="container">
-          <div className="loading-text">Loading analytics...</div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="seller-analytics">
@@ -150,10 +176,20 @@ const SellerAnalytics = () => {
                 </option>
               ))}
             </select>
-            <button className="btn btn-outline">
-              <Download size={16} />
-              Export Report
-            </button>
+            <div className="export-dropdown">
+              <button className="btn btn-outline" onClick={() => handleExportReport('overview')}>
+                <Download size={16} />
+                Export Overview
+              </button>
+              <button className="btn btn-primary" onClick={() => handleExportReport('detailed')}>
+                <Download size={16} />
+                Export Detailed
+              </button>
+              <button className="btn btn-ghost" onClick={() => handlePreviewReport('overview')}>
+                <Eye size={16} />
+                Preview
+              </button>
+            </div>
           </div>
         </div>
 
@@ -164,9 +200,11 @@ const SellerAnalytics = () => {
               <DollarSign />
             </div>
             <div className="stat-content">
-              <div className="stat-value">{formatCurrency(analyticsData.overview.totalRevenue)}</div>
+              <div className="stat-value">{formatCurrency(analyticsData.overview?.totalRevenue || 0)}</div>
               <div className="stat-label">Total Revenue</div>
-              <div className="stat-change positive">+12.5% vs last period</div>
+              <div className={`stat-change ${(analyticsData.overview?.revenueChange || 0) >= 0 ? 'positive' : 'negative'}`}>
+                {(analyticsData.overview?.revenueChange || 0) >= 0 ? '+' : ''}{(analyticsData.overview?.revenueChange || 0).toFixed(1)}% vs last period
+              </div>
             </div>
           </div>
 
@@ -175,9 +213,11 @@ const SellerAnalytics = () => {
               <ShoppingCart />
             </div>
             <div className="stat-content">
-              <div className="stat-value">{analyticsData.overview.totalOrders}</div>
+              <div className="stat-value">{analyticsData.overview?.totalOrders || 0}</div>
               <div className="stat-label">Total Orders</div>
-              <div className="stat-change positive">+8.3% vs last period</div>
+              <div className={`stat-change ${(analyticsData.overview?.ordersChange || 0) >= 0 ? 'positive' : 'negative'}`}>
+                {(analyticsData.overview?.ordersChange || 0) >= 0 ? '+' : ''}{(analyticsData.overview?.ordersChange || 0).toFixed(1)}% vs last period
+              </div>
             </div>
           </div>
 
@@ -186,9 +226,11 @@ const SellerAnalytics = () => {
               <Eye />
             </div>
             <div className="stat-content">
-              <div className="stat-value">{analyticsData.overview.totalViews.toLocaleString()}</div>
+              <div className="stat-value">{(analyticsData.overview?.totalViews || 0).toLocaleString()}</div>
               <div className="stat-label">Shop Views</div>
-              <div className="stat-change positive">+15.7% vs last period</div>
+              <div className={`stat-change ${(analyticsData.overview?.viewsChange || 0) >= 0 ? 'positive' : 'negative'}`}>
+                {(analyticsData.overview?.viewsChange || 0) >= 0 ? '+' : ''}{(analyticsData.overview?.viewsChange || 0).toFixed(1)}% vs last period
+              </div>
             </div>
           </div>
 
@@ -197,9 +239,11 @@ const SellerAnalytics = () => {
               <TrendingUp />
             </div>
             <div className="stat-content">
-              <div className="stat-value">{analyticsData.overview.conversionRate}%</div>
+              <div className="stat-value">{(analyticsData.overview?.conversionRate || 0).toFixed(1)}%</div>
               <div className="stat-label">Conversion Rate</div>
-              <div className="stat-change negative">-2.1% vs last period</div>
+              <div className={`stat-change ${(analyticsData.overview?.conversionRateChange || 0) >= 0 ? 'positive' : 'negative'}`}>
+                {(analyticsData.overview?.conversionRateChange || 0) >= 0 ? '+' : ''}{(analyticsData.overview?.conversionRateChange || 0).toFixed(1)}% vs last period
+              </div>
             </div>
           </div>
         </div>
@@ -241,7 +285,7 @@ const SellerAnalytics = () => {
                 <div className="chart-data">
                   <h4>Recent Sales Data:</h4>
                   <div className="data-points">
-                    {analyticsData.sales.daily.slice(-7).map((day, index) => (
+                    {(analyticsData.sales?.daily || []).slice(-7).map((day, index) => (
                       <div key={index} className="data-point">
                         <span className="date">{new Date(day.date).toLocaleDateString()}</span>
                         <span className="revenue">{formatCurrency(day.revenue)}</span>
@@ -260,7 +304,7 @@ const SellerAnalytics = () => {
                 <div className="chart-data">
                   <h4>Sales by Category:</h4>
                   <div className="category-breakdown">
-                    {analyticsData.sales.byCategory.map((category, index) => (
+                    {(analyticsData.sales?.byCategory || []).map((category, index) => (
                       <div key={index} className="category-item">
                         <span className="category-name">{category.category}</span>
                         <span className="category-revenue">{formatCurrency(category.revenue)}</span>
@@ -279,7 +323,7 @@ const SellerAnalytics = () => {
                 <div className="chart-data">
                   <h4>Customers by Location:</h4>
                   <div className="geography-breakdown">
-                    {analyticsData.customers.geography.map((location, index) => (
+                    {(analyticsData.customers?.geography || []).map((location, index) => (
                       <div key={index} className="location-item">
                         <span className="location-name">{location.location}</span>
                         <span className="location-customers">{location.customers} customers</span>
@@ -302,7 +346,7 @@ const SellerAnalytics = () => {
               <button className="btn btn-outline btn-sm">View All</button>
             </div>
             <div className="products-list">
-              {analyticsData.products.topSelling.map((product, index) => (
+              {(analyticsData.products?.topSelling || []).map((product, index) => (
                 <div key={product.id} className="product-item">
                   <div className="product-rank">#{index + 1}</div>
                   <div className="product-info">
@@ -320,10 +364,10 @@ const SellerAnalytics = () => {
           <div className="analytics-card">
             <div className="card-header">
               <h3>Low Stock Alert</h3>
-              <span className="alert-badge">{analyticsData.products.lowStock.length}</span>
+              <span className="alert-badge">{(analyticsData.products?.lowStock || []).length}</span>
             </div>
             <div className="low-stock-list">
-              {analyticsData.products.lowStock.map(product => (
+              {(analyticsData.products?.lowStock || []).map(product => (
                 <div key={product.id} className="stock-item">
                   <div className="stock-info">
                     <div className="stock-name">{product.name}</div>
@@ -342,7 +386,7 @@ const SellerAnalytics = () => {
               <button className="btn btn-outline btn-sm">View All</button>
             </div>
             <div className="customers-list">
-              {analyticsData.customers.topCustomers.map((customer, index) => (
+              {(analyticsData.customers?.topCustomers || []).map((customer, index) => (
                 <div key={index} className="customer-item">
                   <div className="customer-rank">#{index + 1}</div>
                   <div className="customer-info">
@@ -364,19 +408,19 @@ const SellerAnalytics = () => {
             <div className="metrics-grid">
               <div className="metric-item">
                 <div className="metric-label">Average Order Value</div>
-                <div className="metric-value">{formatCurrency(analyticsData.overview.averageOrderValue)}</div>
+                <div className="metric-value">{formatCurrency(analyticsData.overview?.averageOrderValue || 0)}</div>
               </div>
               <div className="metric-item">
                 <div className="metric-label">New Customers</div>
-                <div className="metric-value">{analyticsData.customers.newCustomers}</div>
+                <div className="metric-value">{analyticsData.customers?.newCustomers || 0}</div>
               </div>
               <div className="metric-item">
                 <div className="metric-label">Returning Customers</div>
-                <div className="metric-value">{analyticsData.customers.returningCustomers}</div>
+                <div className="metric-value">{analyticsData.customers?.returningCustomers || 0}</div>
               </div>
               <div className="metric-item">
                 <div className="metric-label">Active Products</div>
-                <div className="metric-value">{analyticsData.overview.activeProducts}</div>
+                <div className="metric-value">{analyticsData.overview?.activeProducts || 0}</div>
               </div>
             </div>
           </div>

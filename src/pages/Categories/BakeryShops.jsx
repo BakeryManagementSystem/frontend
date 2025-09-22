@@ -185,19 +185,6 @@ const BakeryShops = () => {
     return stars;
   };
 
-  if (loading) {
-    return (
-      <div className="bakery-shops loading">
-        <div className="container">
-          <div className="loading-container">
-            <ChefHat className="loading-icon" size={48} />
-            <p>Loading bakery shops...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="bakery-shops">
       <div className="container">

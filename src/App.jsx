@@ -14,6 +14,9 @@ import FloatingAIAssistant from "./components/common/FloatingAIAssistant/Floatin
 // Offline Indicator Component
 import OfflineIndicator from "./components/common/OfflineIndicator/OfflineIndicator";
 
+// Scroll to Top Component
+import ScrollToTop from './components/common/ScrollToTop/ScrollToTop';
+
 // Public Pages
 import Home from "./pages/Home/Home";
 import Products from "./pages/Products/Products";
@@ -36,14 +39,15 @@ import Profile from "./pages/Buyer/Profile/Profile";
 import Checkout from "./pages/Buyer/Checkout/Checkout";
 
 // Seller Pages (Baker/Shop Manager Pages)
-import SellerDashboard from "./pages/Seller/Dashboard/SellerDashboard";
-import SellerProducts from "./pages/Seller/Products/SellerProducts";
-import SellerOrders from "./pages/Seller/Orders/SellerOrders";
-import SellerProfile from "./pages/Seller/Profile/SellerProfile";
-import SellerShop from "./pages/Seller/Shop/SellerShop";
-import SellerAnalytics from "./pages/Seller/Analytics/SellerAnalytics";
-import AddProduct from "./pages/Seller/Products/AddProduct";
-import EditProduct from "./pages/Seller/Products/EditProduct";
+import SellerDashboard from './pages/Seller/Dashboard/SellerDashboard';
+import SellerProducts from './pages/Seller/Products/SellerProducts';
+import SellerOrders from './pages/Seller/Orders/SellerOrders';
+import SellerProfile from './pages/Seller/Profile/SellerProfile';
+import SellerShop from './pages/Seller/Shop/SellerShop';
+import SellerAnalytics from './pages/Seller/Analytics/SellerAnalytics';
+import AddProduct from './pages/Seller/Products/AddProduct';
+import EditProduct from './pages/Seller/Products/EditProduct';
+import IngredientsManagement from './pages/Seller/Ingredients/IngredientsManagement';
 
 // Protected Route Component
 import ProtectedRoute from "./components/common/ProtectedRoute/ProtectedRoute";
@@ -63,6 +67,7 @@ function App() {
               <OfflineIndicator />
               <Header />
               <main className="main-content">
+                <ScrollToTop />
                 <Routes>
                   {/* Public Routes */}
                   <Route path="/" element={<Home />} />
@@ -142,70 +147,52 @@ function App() {
                   />
 
                   {/* Seller Protected Routes */}
-                  <Route
-                    path="/seller"
-                    element={
-                      <ProtectedRoute userType="seller">
-                        <SellerDashboard />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/seller/products"
-                    element={
-                      <ProtectedRoute userType="seller">
-                        <SellerProducts />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/seller/products/new"
-                    element={
-                      <ProtectedRoute userType="seller">
-                        <AddProduct />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/seller/products/:id/edit"
-                    element={
-                      <ProtectedRoute userType="seller">
-                        <EditProduct />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/seller/orders"
-                    element={
-                      <ProtectedRoute userType="seller">
-                        <SellerOrders />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/seller/profile"
-                    element={
-                      <ProtectedRoute userType="seller">
-                        <SellerProfile />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/seller/shop"
-                    element={
-                      <ProtectedRoute userType="seller">
-                        <SellerShop />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/seller/analytics"
-                    element={
-                      <ProtectedRoute userType="seller">
-                        <SellerAnalytics />
-                      </ProtectedRoute>
-                    }
-                  />
+
+                  <Route path="/seller" element={
+                    <ProtectedRoute userType="seller">
+                      <SellerDashboard />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/seller/products" element={
+                    <ProtectedRoute userType="seller">
+                      <SellerProducts />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/seller/products/new" element={
+                    <ProtectedRoute userType="seller">
+                      <AddProduct />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/seller/products/:id/edit" element={
+                    <ProtectedRoute userType="seller">
+                      <EditProduct />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/seller/orders" element={
+                    <ProtectedRoute userType="seller">
+                      <SellerOrders />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/seller/profile" element={
+                    <ProtectedRoute userType="seller">
+                      <SellerProfile />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/seller/shop" element={
+                    <ProtectedRoute userType="seller">
+                      <SellerShop />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/seller/analytics" element={
+                    <ProtectedRoute userType="seller">
+                      <SellerAnalytics />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/seller/ingredients" element={
+                    <ProtectedRoute userType="seller">
+                      <IngredientsManagement />
+                    </ProtectedRoute>
+                  } />
 
                   {/* Owner Protected Routes (same as seller routes) */}
                   <Route

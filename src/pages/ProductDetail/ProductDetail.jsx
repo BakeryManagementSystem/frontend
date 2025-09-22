@@ -149,20 +149,7 @@ const ProductDetail = () => {
     return stars;
   };
 
-  if (loading) {
-    return (
-      <div className="product-detail-page">
-        <div className="container">
-          <div className="loading-state">
-            <div className="loading"></div>
-            <p>Loading product details...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error || !product) {
+  if (!product) {
     return (
       <div className="product-detail-page">
         <div className="container">

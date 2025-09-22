@@ -62,7 +62,7 @@ const EditProduct = () => {
       setLoading(true);
       setError('');
 
-      const response = await ApiService.getProduct(id);
+      const response = await ApiService.getSellerProduct(id);
 
       if (response.success && response.product) {
         const product = response.product;
@@ -152,13 +152,20 @@ const EditProduct = () => {
     try {
       const formDataToSend = new FormData();
 
-      // Add form fields
+      // Add form fields with proper validation
       Object.keys(formData).forEach(key => {
         if (key === 'images') {
           // Handle existing images separately
           formDataToSend.append('existing_images', JSON.stringify(formData.images));
+        } else if (key === 'is_featured') {
+          // Convert boolean to string that Laravel expects
+          formDataToSend.append(key, formData[key] ? '1' : '0');
         } else {
-          formDataToSend.append(key, formData[key]);
+          // Ensure we don't send undefined or null values
+          const value = formData[key];
+          if (value !== undefined && value !== null) {
+            formDataToSend.append(key, String(value));
+          }
         }
       });
 
@@ -166,6 +173,12 @@ const EditProduct = () => {
       imageFiles.forEach((file, index) => {
         formDataToSend.append(`images[${index}]`, file);
       });
+
+      // Debug: Log what we're sending
+      console.log('FormData contents:');
+      for (let [key, value] of formDataToSend.entries()) {
+        console.log(key + ':', value);
+      }
 
       const response = await ApiService.updateProduct(id, formDataToSend);
 
@@ -183,20 +196,7 @@ const EditProduct = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="edit-product loading">
-        <div className="container">
-          <div className="loading-container">
-            <Loader2 className="loading-spinner" size={40} />
-            <p>Loading product...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error && !formData.name) {
+  if (!formData.name && !loading) {
     return (
       <div className="edit-product error">
         <div className="container">

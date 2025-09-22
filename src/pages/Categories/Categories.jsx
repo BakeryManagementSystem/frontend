@@ -123,26 +123,6 @@ const Categories = () => {
     navigate(`/products?category=${categorySlug}&subcategory=${encodeURIComponent(subcategory)}`);
   };
 
-  if (loading) {
-    return (
-      <div className="categories-page loading">
-        <div className="container">
-          <div className="loading-grid">
-            {[...Array(8)].map((_, index) => (
-              <div key={index} className="category-skeleton">
-                <div className="skeleton-image"></div>
-                <div className="skeleton-content">
-                  <div className="skeleton-line"></div>
-                  <div className="skeleton-line short"></div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="categories-page">
       <div className="container">

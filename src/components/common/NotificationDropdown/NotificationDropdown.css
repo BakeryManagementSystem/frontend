@@ -99,7 +99,6 @@
 
 .mark-all-read:hover {
   background-color: #eef2ff;
-  color: #4f46e5;
 }
 
 .notification-list {
@@ -108,30 +107,14 @@
   max-height: 300px;
 }
 
-.empty-notifications {
-  padding: 40px 20px;
-  text-align: center;
-  color: #9ca3af;
-}
-
-.empty-notifications svg {
-  margin: 0 auto 12px;
-  opacity: 0.5;
-}
-
-.empty-notifications p {
-  margin: 0;
-  font-size: 14px;
-}
-
 .notification-item {
   padding: 12px 16px;
-  border-bottom: 1px solid #f9fafb;
+  border-bottom: 1px solid #f3f4f6;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
-  gap: 12px;
   align-items: flex-start;
+  gap: 12px;
   position: relative;
 }
 
@@ -144,62 +127,54 @@
 }
 
 .notification-item.unread {
-  background-color: #fef7ff;
-  border-left: 3px solid #6366f1;
+  background-color: #f0f9ff;
 }
 
 .notification-item.unread:hover {
-  background-color: #faf5ff;
-}
-
-.notification-item.success {
-  border-left-color: #10b981;
-}
-
-.notification-item.success.unread {
-  background-color: #f0fdf4;
-}
-
-.notification-item.info {
-  border-left-color: #3b82f6;
-}
-
-.notification-item.info.unread {
-  background-color: #eff6ff;
-}
-
-.notification-item.warning {
-  border-left-color: #f59e0b;
-}
-
-.notification-item.warning.unread {
-  background-color: #fffbeb;
+  background-color: #e0f2fe;
 }
 
 .notification-icon {
+  flex-shrink: 0;
   width: 32px;
   height: 32px;
   border-radius: 8px;
-  background-color: #f3f4f6;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #6b7280;
-  flex-shrink: 0;
+  background-color: #f3f4f6;
 }
 
-.notification-item.success .notification-icon {
-  background-color: #d1fae5;
+/* Order Status Notification Icon Colors */
+.icon-new-order {
   color: #10b981;
 }
 
-.notification-item.info .notification-icon {
-  background-color: #dbeafe;
+.icon-status-update {
   color: #3b82f6;
 }
 
-.notification-item.warning .notification-icon {
-  background-color: #fef3c7;
+.icon-order {
+  color: #6366f1;
+}
+
+.icon-shipped {
+  color: #f59e0b;
+}
+
+.icon-delivered {
+  color: #059669;
+}
+
+.icon-cancelled {
+  color: #ef4444;
+}
+
+.icon-payment {
+  color: #059669;
+}
+
+.icon-payment-required {
   color: #f59e0b;
 }
 
@@ -210,7 +185,7 @@
 
 .notification-content h4 {
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
   color: #111827;
   margin: 0 0 4px 0;
   line-height: 1.3;
@@ -221,27 +196,47 @@
   color: #6b7280;
   margin: 0 0 6px 0;
   line-height: 1.4;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  word-wrap: break-word;
 }
 
 .notification-time {
-  font-size: 11px;
-  color: #9ca3af;
   display: flex;
   align-items: center;
   gap: 4px;
+  font-size: 11px;
+  color: #9ca3af;
+  font-weight: 400;
 }
 
 .unread-indicator {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
   width: 8px;
   height: 8px;
-  background-color: #6366f1;
+  background-color: #3b82f6;
   border-radius: 50%;
-  flex-shrink: 0;
-  margin-top: 6px;
+}
+
+.empty-notifications {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  color: #6b7280;
+  text-align: center;
+}
+
+.empty-notifications svg {
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+.empty-notifications p {
+  margin: 0;
+  font-size: 14px;
 }
 
 .notification-footer {
@@ -253,41 +248,49 @@
 .view-all-btn {
   width: 100%;
   background: none;
-  border: 1px solid #d1d5db;
-  color: #374151;
-  font-size: 13px;
+  border: none;
+  color: #6366f1;
+  font-size: 14px;
   font-weight: 500;
+  cursor: pointer;
   padding: 8px;
   border-radius: 6px;
-  cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .view-all-btn:hover {
-  background-color: #f9fafb;
-  border-color: #9ca3af;
+  background-color: #eef2ff;
 }
 
-/* Mobile Responsiveness */
-@media (max-width: 768px) {
+/* Color variants for different notification types */
+.notification-item.success .notification-icon {
+  background-color: #dcfce7;
+}
+
+.notification-item.info .notification-icon {
+  background-color: #dbeafe;
+}
+
+.notification-item.warning .notification-icon {
+  background-color: #fef3c7;
+}
+
+.notification-item.error .notification-icon {
+  background-color: #fee2e2;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
   .notification-panel {
     width: 280px;
     right: -20px;
-  }
-
-  .notification-header {
-    padding: 12px 16px 8px;
   }
 
   .notification-item {
     padding: 10px 12px;
   }
 
-  .notification-content h4 {
-    font-size: 13px;
-  }
-
-  .notification-content p {
-    font-size: 12px;
+  .notification-header {
+    padding: 12px 16px 8px;
   }
 }
