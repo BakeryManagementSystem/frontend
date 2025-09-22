@@ -78,6 +78,11 @@ const SellerShop = () => {
   const fetchShopData = async () => {
     try {
       setLoading(true);
+      console.log('Fetching shop data...');
+
+      // Check if we have authentication token
+      const token = localStorage.getItem('auth_token');
+      console.log('Auth token present:', !!token);
 
       // Fetch real shop data and stats from API
       const [shopResponse, statsResponse] = await Promise.all([
@@ -85,53 +90,64 @@ const SellerShop = () => {
         ApiService.getSellerShopStats()
       ]);
 
-      if (shopResponse.success && shopResponse.data) {
-        const shop = shopResponse.data;
+      console.log('Shop response:', shopResponse);
+      console.log('Stats response:', statsResponse);
+
+      if (shopResponse && (shopResponse.success || shopResponse.data)) {
+        const shop = shopResponse.data || shopResponse;
 
         setShopData({
           name: shop.name || '',
           description: shop.description || '',
           logo: shop.logo || '',
           banner: shop.banner || '',
-          theme: {
-            primaryColor: shop.primary_color || '#2563eb',
-            secondaryColor: shop.secondary_color || '#64748b',
-            accentColor: shop.accent_color || '#f59e0b'
+          theme: shop.theme || {
+            primaryColor: '#2563eb',
+            secondaryColor: '#64748b',
+            accentColor: '#f59e0b'
           },
-          policies: {
-            shipping: shop.shipping_policy || '',
-            returns: shop.return_policy || '',
-            exchange: shop.exchange_policy || ''
+          policies: shop.policies || {
+            shipping: '',
+            returns: '',
+            exchange: ''
           },
-          social: {
-            website: shop.website || '',
-            facebook: shop.facebook || '',
-            twitter: shop.twitter || '',
-            instagram: shop.instagram || ''
+          social: shop.social || {
+            website: '',
+            facebook: '',
+            twitter: '',
+            instagram: ''
           },
-          settings: {
-            showContactInfo: shop.show_contact_info !== undefined ? shop.show_contact_info : true,
-            showReviews: shop.show_reviews !== undefined ? shop.show_reviews : true,
-            allowMessages: shop.allow_messages !== undefined ? shop.allow_messages : true,
-            featuredProducts: shop.featured_products || []
+          settings: shop.settings || {
+            showContactInfo: true,
+            showReviews: true,
+            allowMessages: true,
+            featuredProducts: []
           }
         });
+
+        // Show success message if data was loaded from backend
+        if (!shopResponse.message?.includes('Offline mode')) {
+          console.log('Shop data loaded successfully from backend');
+        } else {
+          console.warn('Using fallback/mock data');
+          addNotification('Using offline data. Some features may be limited.', 'warning');
+        }
       }
 
-      if (statsResponse.success && statsResponse.data) {
-        const stats = statsResponse.data;
+      if (statsResponse && (statsResponse.success || statsResponse.data)) {
+        const stats = statsResponse.data || statsResponse;
         setShopStats({
-          totalProducts: stats.total_products || 0,
-          totalViews: stats.total_views || 0,
-          totalFollowers: stats.total_followers || 0,
-          averageRating: stats.average_rating || 0,
-          totalSales: stats.total_sales || 0,
-          monthlyRevenue: stats.monthly_revenue || 0
+          totalProducts: stats.total_products || stats.totalProducts || 0,
+          totalViews: stats.total_views || stats.totalViews || 0,
+          totalFollowers: stats.total_followers || stats.totalFollowers || 0,
+          averageRating: stats.average_rating || stats.averageRating || 0,
+          totalSales: stats.total_sales || stats.totalSales || 0,
+          monthlyRevenue: stats.monthly_revenue || stats.monthlyRevenue || 0
         });
       }
     } catch (error) {
       console.error('Failed to fetch shop data:', error);
-      addNotification('Failed to load shop data. Please try again.', 'error');
+      addNotification('Failed to load shop data. Please check your connection and try again.', 'error');
     } finally {
       setLoading(false);
     }
@@ -294,6 +310,35 @@ const SellerShop = () => {
       }
     };
     input.click();
+  };
+
+  const handleImageRemove = async (imageType) => {
+    if (!isEditing || !shopData[imageType]) return;
+
+    if (window.confirm('Are you sure you want to remove this image?')) {
+      setLoading(true);
+
+      try {
+        // Call API to remove image
+        const response = await ApiService.removeShopImage(imageType);
+
+        if (response.success) {
+          // Update shop data to remove image
+          setShopData(prev => ({
+            ...prev,
+            [imageType]: ''
+          }));
+          addNotification(`${imageType === 'logo' ? 'Logo' : 'Banner'} removed successfully!`, 'success');
+        } else {
+          addNotification(response.message || 'Failed to remove image', 'error');
+        }
+      } catch (error) {
+        console.error('Image remove failed:', error);
+        addNotification('Failed to remove image. Please try again.', 'error');
+      } finally {
+        setLoading(false);
+      }
+    }
   };
 
   return (
@@ -517,29 +562,61 @@ const SellerShop = () => {
                   <div className="upload-group">
                     <h3>Shop Logo</h3>
                     <div className="image-upload">
-                      <img src={shopData.logo || 'https://images.unsplash.com/photo-1555507036-ab794f4eed25?w=120&h=120&fit=crop&crop=center'} alt="Shop Logo" className="upload-preview logo" />
-                      {isEditing && (
-                        <button className="upload-btn" onClick={() => handleImageClick('logo')}>
-                          <Camera size={16} />
-                          {imageUploading.logo ? 'Uploading...' : 'Change Logo'}
-                        </button>
-                      )}
+                      <div className="image-container">
+                        {shopData.logo ? (
+                            <img src={shopData.logo} alt="Shop Logo" className="upload-preview logo" />
+                        ) : (
+                            <div className="placeholder-image logo">
+                              <Image size={48} />
+                              <p>No logo uploaded</p>
+                            </div>
+                        )}
+                        {isEditing && (
+                          <div className="upload-overlay">
+                            <button className="upload-btn" onClick={() => handleImageClick('logo')} disabled={imageUploading.logo}>
+                              <Camera size={16} />
+                              {imageUploading.logo ? 'Uploading...' : (shopData.logo ? 'Change Logo' : 'Upload Logo')}
+                            </button>
+                            {shopData.logo && (
+                              <button className="remove-btn" onClick={() => handleImageRemove('logo')}>
+                                Remove
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <p className="upload-hint">Recommended: 200x200px, PNG or JPG</p>
+                    <p className="upload-hint">Recommended: 200x200px, PNG or JPG (Max 5MB)</p>
                   </div>
 
                   <div className="upload-group">
                     <h3>Shop Banner</h3>
                     <div className="image-upload">
-                      <img src={shopData.banner || 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1200&h=400&fit=crop&crop=center'} alt="Shop Banner" className="upload-preview banner" />
-                      {isEditing && (
-                        <button className="upload-btn" onClick={() => handleImageClick('banner')}>
-                          <Image size={16} />
-                          {imageUploading.banner ? 'Uploading...' : 'Change Banner'}
-                        </button>
-                      )}
+                      <div className="image-container">
+                        {shopData.banner ? (
+                          <img src={shopData.banner} alt="Shop Banner" className="upload-preview banner" />
+                        ) : (
+                          <div className="placeholder-image banner">
+                            <Image size={48} />
+                            <p>No banner uploaded</p>
+                          </div>
+                        )}
+                        {isEditing && (
+                          <div className="upload-overlay">
+                            <button className="upload-btn" onClick={() => handleImageClick('banner')} disabled={imageUploading.banner}>
+                              <Image size={16} />
+                              {imageUploading.banner ? 'Uploading...' : (shopData.banner ? 'Change Banner' : 'Upload Banner')}
+                            </button>
+                            {shopData.banner && (
+                              <button className="remove-btn" onClick={() => handleImageRemove('banner')}>
+                                Remove
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <p className="upload-hint">Recommended: 1200x400px, PNG or JPG</p>
+                    <p className="upload-hint">Recommended: 1200x400px, PNG or JPG (Max 5MB)</p>
                   </div>
                 </div>
 

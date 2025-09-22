@@ -6,6 +6,7 @@ class ApiService {
     this.baseURL = API_BASE_URL;
     this.isOnline = true;
     this.mockData = this.initializeMockData();
+    this.forceRealAPI = true; // Force real API calls for debugging
   }
 
   // Initialize mock data for offline mode
@@ -191,6 +192,55 @@ class ApiService {
 
     if (endpoint.includes('/orders')) {
       return { data: this.mockData.orders };
+    }
+
+    // Handle shop-related endpoints
+    if (endpoint.includes('/owner/shop/stats')) {
+      return {
+        success: true,
+        data: {
+          total_products: 5,
+          total_views: 1250,
+          total_followers: 45,
+          average_rating: 4.8,
+          total_sales: 23,
+          monthly_revenue: 485.75
+        }
+      };
+    }
+
+    if (endpoint.includes('/owner/shop')) {
+      return {
+        success: true,
+        data: {
+          name: "My Bakery Shop",
+          description: "Welcome to my artisan bakery where we create fresh, delicious baked goods daily using traditional methods and the finest ingredients.",
+          logo: null,
+          banner: null,
+          theme: {
+            primaryColor: '#2563eb',
+            secondaryColor: '#64748b',
+            accentColor: '#f59e0b'
+          },
+          policies: {
+            shipping: 'We offer local delivery within 10 miles for orders over $25.',
+            returns: 'Returns accepted within 24 hours for non-perishable items only.',
+            exchange: 'Exchanges available for damaged items with receipt.'
+          },
+          social: {
+            website: '',
+            facebook: '',
+            twitter: '',
+            instagram: ''
+          },
+          settings: {
+            showContactInfo: true,
+            showReviews: true,
+            allowMessages: true,
+            featuredProducts: []
+          }
+        }
+      };
     }
 
     // Default empty response
@@ -474,9 +524,16 @@ class ApiService {
       method: 'POST',
       body: imageData, // FormData for file upload
       headers: {
-        // Remove Content-Type to let browser set it for FormData
+        // Remove Content-Type to let browser set it for FormData with boundary
         'Accept': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
       },
+    });
+  }
+
+  async removeShopImage(imageType) {
+    return this.request(`/owner/shop/remove/${imageType}`, {
+      method: 'DELETE',
     });
   }
 

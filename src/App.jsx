@@ -14,6 +14,9 @@ import FloatingAIAssistant from './components/common/FloatingAIAssistant/Floatin
 // Offline Indicator Component
 import OfflineIndicator from './components/common/OfflineIndicator/OfflineIndicator';
 
+// Scroll to Top Component
+import ScrollToTop from './components/common/ScrollToTop/ScrollToTop';
+
 // Public Pages
 import Home from './pages/Home/Home';
 import Products from './pages/Products/Products';
@@ -62,6 +65,7 @@ function App() {
               <OfflineIndicator />
               <Header />
               <main className="main-content">
+                <ScrollToTop />
                 <Routes>
                   {/* Public Routes */}
                   <Route path="/" element={<Home />} />
