@@ -251,7 +251,7 @@
   position: absolute;
   top: 0.5rem;
   right: 0.5rem;
-  background: rgba(255, 255, 255, 0.9);
+  background: #ef4444 !important; /* red */
   border: none;
   border-radius: 50%;
   width: 28px;
@@ -261,11 +261,12 @@
   justify-content: center;
   cursor: pointer;
   transition: all 0.3s ease;
+  color: #ffffff !important; /* ensure icon is white */
 }
 
 .remove-image-btn:hover {
-  background: var(--error-color);
-  color: white;
+  background: #dc2626 !important;
+  color: #ffffff !important;
 }
 
 .existing-image-badge {

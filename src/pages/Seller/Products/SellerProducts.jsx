@@ -141,6 +141,26 @@ const SellerProducts = () => {
           </Link>
         </div>
 
+        {/* Quick Stats */}
+        <div className="quick-stats">
+          <div className="stat-card">
+            <div className="stat-value">{products.filter(p => p.status === 'active').length}</div>
+            <div className="stat-label">Active Products</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-value">{products.filter(p => p.stock < 5).length}</div>
+            <div className="stat-label">Low Stock</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-value">{products.filter(p => p.stock === 0).length}</div>
+            <div className="stat-label">Out of Stock</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-value">{products.reduce((sum, p) => sum + p.sales, 0)}</div>
+            <div className="stat-label">Total Sales</div>
+          </div>
+        </div>
+
         {/* Controls */}
         <div className="products-controls">
           <div className="search-filter-group">
@@ -283,7 +303,7 @@ const SellerProducts = () => {
                         <Link to={`/products/${product.id}`} className="action-btn" title="View">
                           <Eye size={16} />
                         </Link>
-                        <Link to={`/seller/products/edit/${product.id}`} className="action-btn" title="Edit">
+                        <Link to={`/seller/products/${product.id}/edit`} className="action-btn" title="Edit">
                           <Edit size={16} />
                         </Link>
                         <button
@@ -318,26 +338,6 @@ const SellerProducts = () => {
               </Link>
             </div>
           )}
-        </div>
-
-        {/* Quick Stats */}
-        <div className="quick-stats">
-          <div className="stat-card">
-            <div className="stat-value">{products.filter(p => p.status === 'active').length}</div>
-            <div className="stat-label">Active Products</div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-value">{products.filter(p => p.stock < 5).length}</div>
-            <div className="stat-label">Low Stock</div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-value">{products.filter(p => p.stock === 0).length}</div>
-            <div className="stat-label">Out of Stock</div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-value">{products.reduce((sum, p) => sum + p.sales, 0)}</div>
-            <div className="stat-label">Total Sales</div>
-          </div>
         </div>
       </div>
     </div>

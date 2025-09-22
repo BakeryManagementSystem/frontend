@@ -1,12 +1,17 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
+import { X, Upload, Link as LinkIcon } from 'lucide-react';
 import './AddProduct.css';
 
 const AddProduct = () => {
   const navigate = useNavigate();
   const { user, token } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [imageInputType, setImageInputType] = useState('file'); // 'file' or 'url'
+  const [imageUrl, setImageUrl] = useState('');
+  const [imagePreview, setImagePreview] = useState([]);
+  const [addUrlLoading, setAddUrlLoading] = useState(false); // loading state for Add URL button
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -23,7 +28,8 @@ const AddProduct = () => {
     is_featured: false,
     meta_title: '',
     meta_description: '',
-    images: []
+    images: [],
+    image_urls: []
   });
 
   const categoryOptions = [
@@ -45,10 +51,126 @@ const AddProduct = () => {
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
+    const validFiles = files.filter(file => {
+      // Check file size (max 5MB per file)
+      if (file.size > 5 * 1024 * 1024) {
+        alert(`File ${file.name} is too large. Maximum size is 5MB.`);
+        return false;
+      }
+      return true;
+    });
+
+    const totalImages = formData.images.length + formData.image_urls.length + validFiles.length;
+    if (totalImages > 5) {
+      alert('Maximum 5 images allowed. Please remove some images first.');
+      return;
+    }
+
+    const newImages = [...formData.images, ...validFiles.slice(0, 5 - formData.images.length - formData.image_urls.length)];
+
     setFormData(prev => ({
       ...prev,
-      images: files.slice(0, 5) // Limit to 5 images
+      images: newImages
     }));
+
+    // Update previews to match the new state
+    const newPreviews = [];
+
+    // Add existing URL previews
+    formData.image_urls.forEach(url => {
+      newPreviews.push({ type: 'url', url, name: 'Image URL' });
+    });
+
+    // Add existing file previews
+    formData.images.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(prev => {
+          const updated = [...prev];
+          const fileIndex = newPreviews.length + updated.filter(p => p.type === 'file').length;
+          if (fileIndex < newImages.length + formData.image_urls.length) {
+            updated.push({ type: 'file', url: e.target.result, name: file.name });
+          }
+          return updated;
+        });
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // Add new file previews
+    validFiles.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(prev => [...prev, { type: 'file', url: e.target.result, name: file.name }]);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleImageUrlAdd = () => {
+    if (!imageUrl.trim()) {
+      alert('Please enter a valid image URL');
+      return;
+    }
+
+    const totalImages = formData.images.length + formData.image_urls.length;
+    if (totalImages >= 5) {
+      alert('Maximum 5 images allowed. Please remove some images first.');
+      return;
+    }
+
+    // Validate URL format
+    try {
+      new URL(imageUrl);
+    } catch {
+      alert('Please enter a valid URL');
+      return;
+    }
+
+    // Show loading spinner on the Add URL button until image is verified/loaded
+    setAddUrlLoading(true);
+
+    // Preload the image to ensure the URL is valid and reachable (avoids submitting broken links)
+    const img = new Image();
+    const urlToTest = imageUrl.trim();
+    img.onload = () => {
+      setFormData(prev => ({
+        ...prev,
+        image_urls: [...prev.image_urls, urlToTest]
+      }));
+
+      setImagePreview(prev => [...prev, { type: 'url', url: urlToTest, name: 'Image URL' }]);
+      setImageUrl('');
+      setAddUrlLoading(false);
+    };
+    img.onerror = () => {
+      alert('Failed to load image from the provided URL. Please check the link and try again.');
+      setAddUrlLoading(false);
+    };
+    // Trigger load
+    img.src = urlToTest;
+  };
+
+  const removeImage = (index) => {
+    const imageToRemove = imagePreview[index];
+
+    if (imageToRemove.type === 'file') {
+      // Find the file index in the images array
+      const filePreviewsBeforeThis = imagePreview.slice(0, index).filter(p => p.type === 'file').length;
+      setFormData(prev => ({
+        ...prev,
+        images: prev.images.filter((_, i) => i !== filePreviewsBeforeThis)
+      }));
+    } else {
+      // Find the URL index in the image_urls array
+      const urlPreviewsBeforeThis = imagePreview.slice(0, index).filter(p => p.type === 'url').length;
+      setFormData(prev => ({
+        ...prev,
+        image_urls: prev.image_urls.filter((_, i) => i !== urlPreviewsBeforeThis)
+      }));
+    }
+
+    setImagePreview(prev => prev.filter((_, i) => i !== index));
   };
 
   const getApiUrl = (endpoint) => {
@@ -86,15 +208,23 @@ const AddProduct = () => {
       if (formData.meta_title) formDataToSend.append('meta_title', formData.meta_title);
       if (formData.meta_description) formDataToSend.append('meta_description', formData.meta_description);
 
-      // Add images
+      // Add uploaded images
       formData.images.forEach((image, index) => {
         formDataToSend.append(`images[${index}]`, image);
+      });
+
+      // Add image URLs
+      formData.image_urls.forEach((url, index) => {
+        formDataToSend.append(`image_urls[${index}]`, url);
       });
 
       console.log('Submitting to:', getApiUrl('/products'));
       console.log('User:', user);
       console.log('Token:', token);
-      console.log('Form data being sent:', Object.fromEntries(formDataToSend));
+
+      // Create an AbortController for timeout handling
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 seconds timeout
 
       const response = await fetch(getApiUrl('/products'), {
         method: 'POST',
@@ -102,33 +232,47 @@ const AddProduct = () => {
           'Authorization': `Bearer ${token}`,
         },
         body: formDataToSend,
+        signal: controller.signal
       });
 
+      clearTimeout(timeoutId);
+
       console.log('Response status:', response.status);
-      console.log('Response headers:', response.headers);
 
       if (response.ok) {
         const result = await response.json();
         console.log('Product created successfully:', result);
         alert('Product created successfully!');
-        // Navigate back to products page
         navigate(user?.user_type === 'owner' ? '/owner/products' : '/seller/products');
       } else {
-        // Handle non-JSON error responses (like HTML error pages)
         const contentType = response.headers.get('content-type');
         if (contentType && contentType.includes('application/json')) {
           const error = await response.json();
           console.error('Error creating product:', error);
-          alert('Error creating product: ' + (error.message || JSON.stringify(error)));
+
+          // Handle validation errors
+          if (error.errors) {
+            const errorMessages = Object.values(error.errors).flat();
+            alert('Validation errors:\n' + errorMessages.join('\n'));
+          } else {
+            alert('Error creating product: ' + (error.message || JSON.stringify(error)));
+          }
         } else {
           const errorText = await response.text();
           console.error('Server error (HTML response):', errorText);
-          alert(`Server error (${response.status}). Check console for details.`);
+          alert(`Server error (${response.status}). Please check your internet connection and try again.`);
         }
       }
     } catch (error) {
-      console.error('Network error:', error);
-      alert('Network error: ' + error.message);
+      console.error('Request error:', error);
+
+      if (error.name === 'AbortError') {
+        alert('Request timed out. Please check your internet connection and try again with smaller images.');
+      } else if (error.message.includes('Failed to fetch')) {
+        alert('Network error: Please check your internet connection and try again.');
+      } else {
+        alert('Error: ' + error.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -389,26 +533,125 @@ const AddProduct = () => {
             <div className="form-section">
               <h3>Product Images</h3>
 
-              <div className="form-group">
-                <label htmlFor="images">Product Images (Max 5)</label>
-                <input
-                  type="file"
-                  id="images"
-                  name="images"
-                  onChange={handleImageChange}
-                  accept="image/*"
-                  multiple
-                />
-                {formData.images.length > 0 && (
-                  <div className="selected-images">
-                    <p>{formData.images.length} image(s) selected</p>
-                    <ul>
-                      {formData.images.map((file, index) => (
-                        <li key={index}>{file.name}</li>
-                      ))}
-                    </ul>
+              {/* Image Input Type Toggle */}
+              <div className="image-input-toggle">
+                <button
+                  type="button"
+                  className={`toggle-btn ${imageInputType === 'file' ? 'active' : ''}`}
+                  onClick={() => setImageInputType('file')}
+                >
+                  <Upload size={16} />
+                  Upload Files
+                </button>
+                <button
+                  type="button"
+                  className={`toggle-btn ${imageInputType === 'url' ? 'active' : ''}`}
+                  onClick={() => setImageInputType('url')}
+                >
+                  <LinkIcon size={16} />
+                  Add URLs
+                </button>
+              </div>
+
+              {/* File Upload Section */}
+              {imageInputType === 'file' && (
+                <div className="form-group">
+                  <label htmlFor="images">Upload Images (Max 5MB each, Max 5 total)</label>
+                  <input
+                    type="file"
+                    id="images"
+                    name="images"
+                    onChange={handleImageChange}
+                    accept="image/*"
+                    multiple
+                    className="file-input"
+                  />
+                  <div className="file-input-info">
+                    <small>Supported formats: JPG, PNG, GIF, WebP</small>
                   </div>
-                )}
+                </div>
+              )}
+
+              {/* URL Input Section */}
+              {imageInputType === 'url' && (
+                <div className="form-group">
+                  <label>Add Image URL</label>
+                  <div className="image-url-input">
+                    <input
+                      type="url"
+                      value={imageUrl}
+                      onChange={(e) => setImageUrl(e.target.value)}
+                      placeholder="https://example.com/image.jpg"
+                      className="url-input"
+                    />
+                    <button
+                      type="button"
+                      className={`btn btn-primary add-url-btn ${addUrlLoading ? 'loading' : ''}`}
+                      onClick={handleImageUrlAdd}
+                      disabled={addUrlLoading || !imageUrl.trim() || (formData.images.length + formData.image_urls.length) >= 5}
+                    >
+                      <LinkIcon size={16} />
+                      Add URL
+                    </button>
+                  </div>
+                  <div className="url-input-info">
+                    <small>Enter a direct link to an image (saves local storage)</small>
+                  </div>
+                </div>
+              )}
+
+              {/* Image Previews */}
+              {imagePreview.length > 0 && (
+                <div className="image-previews">
+                  <h4>Selected Images ({imagePreview.length}/5)</h4>
+                  <div className="preview-grid">
+                    {imagePreview.map((image, index) => (
+                      <div key={index} className="image-preview-item">
+                        <img
+                          src={image.url}
+                          alt={`Preview ${index + 1}`}
+                          className="preview-image"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'flex';
+                          }}
+                        />
+                        <div className="preview-error" style={{ display: 'none' }}>
+                          <span>Failed to load image</span>
+                        </div>
+                        <div className="preview-overlay">
+                          <span className="preview-type">
+                            {image.type === 'file' ? 'FILE' : 'URL'}
+                          </span>
+                          <button
+                            type="button"
+                            className="remove-image-btn"
+                            onClick={() => removeImage(index)}
+                            title="Remove image"
+                          >
+                            <X size={16} />
+                          </button>
+                        </div>
+                        <div className="preview-name">
+                          {image.type === 'file' ? image.name : 'Image URL'}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Current Images Summary */}
+              <div className="images-summary">
+                <div className="summary-item">
+                  <span>Uploaded Files: {formData.images.length}</span>
+                </div>
+                <div className="summary-item">
+                  <span>Image URLs: {formData.image_urls.length}</span>
+                </div>
+                <div className="summary-item">
+                  <span>Total: {formData.images.length + formData.image_urls.length}/5</span>
+                </div>
               </div>
             </div>
 
@@ -416,7 +659,7 @@ const AddProduct = () => {
               <button type="button" className="btn btn-secondary" onClick={handleCancel}>
                 Cancel
               </button>
-              <button type="submit" className="btn btn-primary" disabled={loading}>
+              <button type="submit" className={`btn btn-primary ${loading ? 'loading' : ''}`} disabled={loading}>
                 {loading ? 'Creating...' : 'Add Product'}
               </button>
             </div>
