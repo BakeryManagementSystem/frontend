@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
-import { useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "./BuyerPage.css";
-
+import ChatWidget from "../../components/Chatbot/ChatWidget.jsx";
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 export default function BuyerPage() {
     const location = useLocation();
+    const navigate = useNavigate();
     const params = new URLSearchParams(location.search);
     const q = params.get("q")?.trim().toLowerCase() || "";
 
@@ -22,17 +23,16 @@ export default function BuyerPage() {
     const [showBuyNowModal, setShowBuyNowModal] = useState(false);
     const [buyNowProduct, setBuyNowProduct] = useState(null);
     const [buyNowData, setBuyNowData] = useState({
-        buyer_name: '',
-        buyer_email: '',
-        buyer_phone: '',
-        buyer_address: '',
-        quantity: 1
+        buyer_name: "",
+        buyer_email: "",
+        buyer_phone: "",
+        buyer_address: "",
+        quantity: 1,
     });
     const [buyNowLoading, setBuyNowLoading] = useState(false);
     const [userProfile, setUserProfile] = useState(null);
 
     const token = localStorage.getItem("token");
-
 
     // Fetch user profile when component mounts
     useEffect(() => {
@@ -45,16 +45,16 @@ export default function BuyerPage() {
         try {
             const res = await fetch(`${API_BASE}/api/user-profile`, {
                 headers: {
-                    'Accept': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                }
+                    Accept: "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
             });
             if (res.ok) {
                 const profile = await res.json();
                 setUserProfile(profile);
             }
         } catch (error) {
-            console.error('Failed to fetch user profile:', error);
+            console.error("Failed to fetch user profile:", error);
         }
     };
 
@@ -62,9 +62,11 @@ export default function BuyerPage() {
     const openBuyNowModal = (product) => {
         setBuyNowProduct(product);
         setBuyNowData({
-            buyer_name: userProfile?.name || '',
-            buyer_email: userProfile?.email || '',
-            quantity: 1
+            buyer_name: userProfile?.name || "",
+            buyer_email: userProfile?.email || "",
+            buyer_phone: "",
+            buyer_address: "",
+            quantity: 1,
         });
         setShowBuyNowModal(true);
         document.body.style.overflow = "hidden";
@@ -75,9 +77,9 @@ export default function BuyerPage() {
         setShowBuyNowModal(false);
         setBuyNowProduct(null);
         setBuyNowData({
-            buyer_phone: '',
-            buyer_address: '',
-            quantity: 1
+            buyer_phone: "",
+            buyer_address: "",
+            quantity: 1,
         });
         document.body.style.overflow = "";
     };
@@ -95,28 +97,28 @@ export default function BuyerPage() {
 
         try {
             const res = await fetch(`${API_BASE}/api/buy-now`, {
-                method: 'POST',
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                    Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({
                     product_id: buyNowProduct.id,
-                    ...buyNowData
-                })
+                    ...buyNowData,
+                }),
             });
 
             const data = await res.json();
 
             if (res.ok) {
-                alert('Order placed successfully!');
+                alert("Order placed successfully!");
                 closeBuyNowModal();
             } else {
-                throw new Error(data.message || 'Failed to place order');
+                throw new Error(data.message || "Failed to place order");
             }
         } catch (error) {
-            console.error('Buy now error:', error);
+            console.error("Buy now error:", error);
             alert(error.message);
         } finally {
             setBuyNowLoading(false);
@@ -124,31 +126,33 @@ export default function BuyerPage() {
     };
 
     // Calculate total price
-    const totalPrice = buyNowProduct ? (buyNowProduct.price * buyNowData.quantity).toFixed(2) : '0.00';
-
-
+    const totalPrice = buyNowProduct
+        ? (buyNowProduct.price * buyNowData.quantity).toFixed(2)
+        : "0.00";
 
     // Fetch products whenever q changes (server-side search)
-     useEffect(() => {
-           let alive = true;
-           setLoading(true);
-           setErr("");
-           const url = new URL(`${API_BASE}/api/products`);
-           url.searchParams.set("per_page", "24");
-           if (q) url.searchParams.set("q", q);         // 👈 send q to backend
-               fetch(url.toString(), { headers: { Accept: "application/json" } })
-             .then((r) => r.json())
-             .then((data) => {
-                   if (!alive) return;
-                   const rows = Array.isArray(data?.data) ? data.data : data;
-                   setItems(rows || []);
-                 })
-             .catch(() => alive && setErr("Failed to load products"))
-             .finally(() => alive && setLoading(false));
-           return () => { alive = false; };
-         }, [q]);  // 👈 refetch when query changes
+    useEffect(() => {
+        let alive = true;
+        setLoading(true);
+        setErr("");
+        const url = new URL(`${API_BASE}/api/products`);
+        url.searchParams.set("per_page", "24");
+        if (q) url.searchParams.set("q", q);
+        fetch(url.toString(), { headers: { Accept: "application/json" } })
+            .then((r) => r.json())
+            .then((data) => {
+                if (!alive) return;
+                const rows = Array.isArray(data?.data) ? data.data : data;
+                setItems(rows || []);
+            })
+            .catch(() => alive && setErr("Failed to load products"))
+            .finally(() => alive && setLoading(false));
+        return () => {
+            alive = false;
+        };
+    }, [q]);
 
-    // Simple client-side filter by name/category
+    // Simple client-side filter by name/category (optional in addition to server q)
     const filtered = useMemo(() => {
         if (!q) return items;
         return items.filter((p) => {
@@ -167,11 +171,6 @@ export default function BuyerPage() {
         setSellerErr("");
         setSellerLoading(true);
         try {
-            // Adjust this endpoint to your actual public shop-profile route.
-            // Examples you might have:
-            //  - GET /api/shops/{ownerId}
-            //  - GET /api/owner/{ownerId}/shop-profile
-            //  - Or include shop data in /api/products response (ideal)
             const shopRes = await fetch(`${API_BASE}/api/shops/${ownerId}`, {
                 headers: { Accept: "application/json" },
             });
@@ -179,15 +178,7 @@ export default function BuyerPage() {
             if (shopRes.ok) {
                 shop = await shopRes.json().catch(() => null);
             }
-
-            // Optional (if you expose a public user endpoint):
-            // const usrRes = await fetch(`${API_BASE}/api/users/${ownerId}`, { headers: { Accept: "application/json" }});
-            // const owner = usrRes.ok ? await usrRes.json().catch(() => null) : null;
-
-            // If you don’t have /api/users/:id, we can try to use what’s inside product
-            // as a fallback later.
-            const data = { shop, owner: null };
-            setSeller(data);
+            setSeller({ shop, owner: null });
         } catch (e) {
             setSellerErr("Could not load shop/owner info.");
         } finally {
@@ -203,8 +194,19 @@ export default function BuyerPage() {
         } else {
             setSeller(null);
         }
-        // prevent body scroll while modal open
         document.body.style.overflow = "hidden";
+    };
+
+    const gotoShopInfo = (product) => {
+        if (!product?.id) return;
+        // close the preview modal and restore scrolling
+        setSelected(null);
+        setSeller(null);
+        setSellerErr("");
+        setSellerLoading(false);
+        document.body.style.overflow = "";
+        // navigate to the shop info page
+        navigate(`/shop-info/${product.id}`);
     };
 
     // Close modal
@@ -225,7 +227,6 @@ export default function BuyerPage() {
         return () => window.removeEventListener("keydown", onKey);
     }, [selected]);
 
-
     async function addToCart(productId, qty = 1) {
         if (!token) {
             alert("Please log in to add items to your cart.");
@@ -245,7 +246,6 @@ export default function BuyerPage() {
             if (!res.ok) {
                 throw new Error(data?.message || `Add to cart failed (${res.status})`);
             }
-            // Optional toast/snackbar here
             console.log("Added to cart:", data);
         } catch (e) {
             console.error(e);
@@ -258,7 +258,13 @@ export default function BuyerPage() {
             <section className="welcome">
                 <h1 className="welcome-title">Welcome to Smart Bakery</h1>
                 <p className="welcome-sub">
-                    {q ? <>Results for: <strong>{q}</strong></> : "Fresh baked goods delivered to your door"}
+                    {q ? (
+                        <>
+                            Results for: <strong>{q}</strong>
+                        </>
+                    ) : (
+                        "Fresh baked goods delivered to your door"
+                    )}
                 </p>
             </section>
 
@@ -284,7 +290,11 @@ export default function BuyerPage() {
                                     {p?.image_url ? (
                                         <img src={p.image_url} alt={p.name} className="item-img" />
                                     ) : (
-                                        <svg className="item-circle-icon" fill="currentColor" viewBox="0 0 24 24">
+                                        <svg
+                                            className="item-circle-icon"
+                                            fill="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
                                             <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                                         </svg>
                                     )}
@@ -298,14 +308,20 @@ export default function BuyerPage() {
                             <div className="item-actions">
                                 <button
                                     className="btn btn-primary"
-                                    onClick={(e) => { e.stopPropagation(); addToCart(p.id, 1); }}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        addToCart(p.id, 1);
+                                    }}
                                 >
                                     Add to Cart
                                 </button>
 
                                 <button
                                     className="btn btn-dark"
-                                    onClick={(e) => { e.stopPropagation(); openBuyNowModal(p); }}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        openBuyNowModal(p);
+                                    }}
                                 >
                                     Order Now
                                 </button>
@@ -316,7 +332,6 @@ export default function BuyerPage() {
             )}
 
             {/* Buy Now Modal */}
-            {/* Buy Now Modal */}
             {showBuyNowModal && buyNowProduct && (
                 <div className="modal-backdrop" onClick={closeBuyNowModal}>
                     <div
@@ -325,14 +340,23 @@ export default function BuyerPage() {
                         role="dialog"
                         aria-modal="true"
                     >
-                        <button className="modal-close" onClick={closeBuyNowModal} aria-label="Close">✕</button>
+                        <button
+                            className="modal-close"
+                            onClick={closeBuyNowModal}
+                            aria-label="Close"
+                        >
+                            ✕
+                        </button>
 
                         <div className="modal-content buy-now-layout">
                             {/* Left side - product preview */}
                             <div className="buy-now-left">
                                 <div className="product-image-box">
                                     {buyNowProduct.image_url ? (
-                                        <img src={buyNowProduct.image_url} alt={buyNowProduct.name} />
+                                        <img
+                                            src={buyNowProduct.image_url}
+                                            alt={buyNowProduct.name}
+                                        />
                                     ) : (
                                         <div className="product-placeholder">No Image</div>
                                     )}
@@ -341,7 +365,9 @@ export default function BuyerPage() {
                                     <h2 className="product-title">{buyNowProduct.name}</h2>
                                     <p className="product-price">${buyNowProduct.price}</p>
                                     {buyNowProduct.category && (
-                                        <span className="product-category">{buyNowProduct.category}</span>
+                                        <span className="product-category">
+                      {buyNowProduct.category}
+                    </span>
                                     )}
                                 </div>
                             </div>
@@ -357,7 +383,12 @@ export default function BuyerPage() {
                                             type="text"
                                             id="buyer_name"
                                             value={buyNowData.buyer_name}
-                                            onChange={(e) => setBuyNowData({ ...buyNowData, buyer_name: e.target.value })}
+                                            onChange={(e) =>
+                                                setBuyNowData({
+                                                    ...buyNowData,
+                                                    buyer_name: e.target.value,
+                                                })
+                                            }
                                             required
                                             className="form-input"
                                         />
@@ -369,7 +400,12 @@ export default function BuyerPage() {
                                             type="email"
                                             id="buyer_email"
                                             value={buyNowData.buyer_email}
-                                            onChange={(e) => setBuyNowData({ ...buyNowData, buyer_email: e.target.value })}
+                                            onChange={(e) =>
+                                                setBuyNowData({
+                                                    ...buyNowData,
+                                                    buyer_email: e.target.value,
+                                                })
+                                            }
                                             required
                                             className="form-input"
                                         />
@@ -381,7 +417,12 @@ export default function BuyerPage() {
                                             type="tel"
                                             id="buyer_phone"
                                             value={buyNowData.buyer_phone}
-                                            onChange={(e) => setBuyNowData({ ...buyNowData, buyer_phone: e.target.value })}
+                                            onChange={(e) =>
+                                                setBuyNowData({
+                                                    ...buyNowData,
+                                                    buyer_phone: e.target.value,
+                                                })
+                                            }
                                             required
                                             className="form-input"
                                         />
@@ -392,7 +433,12 @@ export default function BuyerPage() {
                                         <textarea
                                             id="buyer_address"
                                             value={buyNowData.buyer_address}
-                                            onChange={(e) => setBuyNowData({ ...buyNowData, buyer_address: e.target.value })}
+                                            onChange={(e) =>
+                                                setBuyNowData({
+                                                    ...buyNowData,
+                                                    buyer_address: e.target.value,
+                                                })
+                                            }
                                             required
                                             className="form-textarea"
                                             rows="3"
@@ -407,7 +453,10 @@ export default function BuyerPage() {
                                             min="1"
                                             value={buyNowData.quantity}
                                             onChange={(e) =>
-                                                setBuyNowData({ ...buyNowData, quantity: parseInt(e.target.value) || 1 })
+                                                setBuyNowData({
+                                                    ...buyNowData,
+                                                    quantity: parseInt(e.target.value) || 1,
+                                                })
                                             }
                                             required
                                             className="form-input"
@@ -445,7 +494,6 @@ export default function BuyerPage() {
                 </div>
             )}
 
-
             {/* Modal Preview */}
             {selected && (
                 <div className="modal-backdrop" onClick={closePreview}>
@@ -455,7 +503,13 @@ export default function BuyerPage() {
                         role="dialog"
                         aria-modal="true"
                     >
-                        <button className="modal-close" onClick={closePreview} aria-label="Close preview">✕</button>
+                        <button
+                            className="modal-close"
+                            onClick={closePreview}
+                            aria-label="Close preview"
+                        >
+                            ✕
+                        </button>
 
                         <div className="modal-content">
                             <div className="modal-media">
@@ -470,23 +524,32 @@ export default function BuyerPage() {
                                 <h2 className="modal-title">{selected.name}</h2>
                                 <div className="modal-price-row">
                   <span className="modal-price">
-                    {typeof selected.price === "number" ? selected.price.toFixed(2) : selected.price}
+                    {typeof selected.price === "number"
+                        ? selected.price.toFixed(2)
+                        : selected.price}
                   </span>
-                                    {selected.category && <span className="modal-chip">{selected.category}</span>}
+                                    {selected.category && (
+                                        <span className="modal-chip">{selected.category}</span>
+                                    )}
                                 </div>
                                 {selected.description && (
                                     <p className="modal-desc">{selected.description}</p>
                                 )}
 
                                 <div className="modal-actions">
-                                    <button className="btn btn-primary" onClick={() => addToCart(selected.id, 1)}>
+                                    <button
+                                        className="btn btn-primary"
+                                        onClick={() => addToCart(selected.id, 1)}
+                                    >
                                         Add to Cart
                                     </button>
 
-                                    <button className="btn btn-dark"
-                                            onClick={() => openBuyNowModal(selected)}
-
-                                    >Order Now</button>
+                                    <button
+                                        className="btn btn-dark"
+                                        onClick={() => openBuyNowModal(selected)}
+                                    >
+                                        Order Now
+                                    </button>
                                 </div>
 
                                 <div className="modal-divider" />
@@ -494,20 +557,33 @@ export default function BuyerPage() {
                                 <div className="modal-seller">
                                     <h3>Shop & Owner</h3>
 
-                                    {sellerLoading && <div className="buyer-loading">Loading shop info…</div>}
+                                    {sellerLoading && (
+                                        <div className="buyer-loading">Loading shop info…</div>
+                                    )}
                                     {sellerErr && <div className="buyer-error">{sellerErr}</div>}
 
                                     {!sellerLoading && !sellerErr && (
                                         <>
-                                            {/* Shop block */}
-                                            <div className="seller-block">
+                                            {/* Shop block (clickable) */}
+                                            <div
+                                                className="seller-block seller-block--click"
+                                                role="button"
+                                                tabIndex={0}
+                                                onClick={() => gotoShopInfo(selected)}
+                                                onKeyDown={(e) =>
+                                                    e.key === "Enter" ? gotoShopInfo(selected) : null
+                                                }
+                                                title="View shop details"
+                                            >
                                                 <div className="seller-avatar">🏬</div>
                                                 <div className="seller-details">
                                                     <div className="seller-name">
                                                         {seller?.shop?.shop_name || "Shop information"}
                                                     </div>
                                                     {seller?.shop?.address && (
-                                                        <div className="seller-sub">{seller.shop.address}</div>
+                                                        <div className="seller-sub">
+                                                            {seller.shop.address}
+                                                        </div>
                                                     )}
                                                     {seller?.shop?.facebook_url && (
                                                         <a
@@ -515,6 +591,7 @@ export default function BuyerPage() {
                                                             className="seller-link"
                                                             target="_blank"
                                                             rel="noreferrer"
+                                                            onClick={(e) => e.stopPropagation()}
                                                         >
                                                             Facebook
                                                         </a>
@@ -522,13 +599,13 @@ export default function BuyerPage() {
                                                 </div>
                                             </div>
 
-                                            {/* Owner block (fallback: not all APIs expose it) */}
+                                            {/* Owner block */}
                                             <div className="seller-block">
                                                 <div className="seller-avatar">👤</div>
                                                 <div className="seller-details">
                                                     <div className="seller-name">
                                                         {seller?.owner?.name ||
-                                                            selected?.owner_name || // if you later include owner name in products payload
+                                                            selected?.owner_name ||
                                                             "Owner"}
                                                     </div>
                                                     {(seller?.owner?.email || selected?.owner_email) && (
@@ -543,10 +620,10 @@ export default function BuyerPage() {
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 </div>
             )}
+            <ChatWidget title="Smart Bakery AI" subtitle="Ask about products & orders" />
         </div>
     );
 }

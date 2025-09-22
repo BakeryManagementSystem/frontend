@@ -1,8 +1,8 @@
 // src/pages/OwnerPage.jsx
 import { useEffect, useMemo, useState } from "react";
-
+import ChatWidget from "../../components/Chatbot/ChatWidget.jsx";
 // Use env API base if provided; otherwise fall back to relative "/api" (Vite proxy)
-const API_BASE = import.meta.env.VITE_API_URL || "";
+const API_BASE = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 const apiUrl = (path) => (API_BASE ? `${API_BASE}${path}` : path);
 
 // Currency helper
@@ -207,24 +207,45 @@ export default function OwnerPage() {
 
     // OPTIONAL: delete product (ensure backend checks owner)
     async function deleteProduct(p) {
-        if (!token) return showToast("Login required");
-        if (!confirm(`Delete "${p.name}"?`)) return;
+        const freshToken =
+            localStorage.getItem("token") || localStorage.getItem("access_token");
+
+        if (!freshToken) {
+            showToast("Please log in again");
+            return;
+        }
+        if (!confirm(`Delete "${p.name}"? This cannot be undone.`)) return;
+
         try {
             const res = await fetch(apiUrl(`/api/products/${p.id}`), {
                 method: "DELETE",
                 headers: {
-                    Authorization: `Bearer ${token}`,
+                    Authorization: `Bearer ${freshToken}`,
                     Accept: "application/json",
                 },
             });
-            const data = await res.json().catch(() => ({}));
-            if (!res.ok) throw new Error(data.message || "Delete failed");
+
+            // Try parse body (may be empty)
+            let data = {};
+            try { data = await res.json(); } catch {}
+
+            if (!res.ok) {
+                // Helpful messages per status
+                if (res.status === 401) throw new Error("Unauthenticated. Please log in.");
+                if (res.status === 403) throw new Error("You can only delete your own products.");
+                if (res.status === 404) throw new Error("Product not found.");
+                if (res.status === 405) throw new Error("Method not allowed. Check API route.");
+                throw new Error(data?.message || `Delete failed (${res.status})`);
+            }
+
             showToast("Deleted");
             setProducts((arr) => arr.filter((x) => x.id !== p.id));
         } catch (e) {
-            showToast(e.message);
+            console.error("Delete product error:", e);
+            showToast(e.message || "Delete failed");
         }
     }
+
 
     const categoryOptions = useMemo(() => {
         const set = new Set(products.map((p) => p.category).filter(Boolean));
@@ -572,6 +593,8 @@ export default function OwnerPage() {
             >
                 {toast.text}
             </div>
+            <ChatWidget title="Smart Bakery AI (Owner)" subtitle="Ask about revenue, orders & inventory" />
+
         </main>
     );
 }

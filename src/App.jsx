@@ -30,7 +30,7 @@ import ShopProfilePage from "./pages/OwnerSection/ShopProfilePage.jsx";
 import OwnerShopProfileEdit from "./pages/OwnerSection/OwnerShopProfileEdit.jsx";
 import Inbox from "./pages/OwnerSection/Inbox.jsx";
 import OrderStatus from "./pages/OwnerSection/OrderStatus.jsx";
-
+import ShopInformation from "./pages/OwnerSection/ShopInformation.jsx"
 import "./App.css";
 
 // Protected Route Component
@@ -56,6 +56,7 @@ function App() {
                         <Route path="/orders" element={<OrdersPage />} />
                         <Route path="/settings" element={<SettingsPage />} />
                         <Route path="/reviews" element={<ReviewsPage />} />
+                        <Route path="/shop-info/:productId" element={<ShopInformation />} />
                         <Route path="/help" element={<HelpPage />} />
                         <Route
                             path="/profile"

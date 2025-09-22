@@ -220,6 +220,15 @@
 }
 
 /* Seller info */
+.seller-block--click {
+    cursor: pointer;
+    transition: transform .08s ease, box-shadow .15s ease;
+}
+.seller-block--click:hover {
+    box-shadow: 0 8px 22px rgba(0,0,0,0.08);
+    transform: translateY(-1px);
+}
+
 .modal-seller h3 {
     margin: 0 0 10px;
     color: #2b2442;
