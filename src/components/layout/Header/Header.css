@@ -907,3 +907,70 @@
     min-width: 220px;
   }
 }
+
+/* Button fixes for clickability */
+.header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  position: relative;
+  z-index: 10;
+}
+
+.header-actions .btn,
+.user-menu button,
+.dropdown-menu button,
+.mobile-menu button {
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 1;
+  outline: none;
+  text-decoration: none;
+}
+
+.btn {
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  user-select: none;
+  outline: none;
+  border: none;
+  text-decoration: none;
+  position: relative;
+  z-index: 1;
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Ensure all interactive elements are clickable */
+.header button,
+.nav-link,
+.mobile-menu-toggle,
+.search-form button {
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 1;
+}
+
+/* Fix for any overlay issues */
+.header * {
+  pointer-events: auto;
+}
+
+.header .btn {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+
+/* Fix dropdown and menu z-index issues */
+.dropdown-menu,
+.mobile-menu,
+.user-menu {
+  z-index: 1001;
+  position: relative;
+}
