@@ -112,6 +112,37 @@ class AIService {
           context.orders = [];
         }
 
+        // Fetch ingredient data for sellers/owners
+        if (context.user?.user_type === 'seller' || context.user?.user_type === 'owner') {
+          try {
+            const ingredientsResponse = await this.apiService.getIngredients();
+            context.ingredients = ingredientsResponse.data || [];
+            console.log('Fetched ingredients:', context.ingredients); // Debug log
+          } catch (error) {
+            console.warn('Could not fetch ingredients:', error);
+            context.ingredients = [];
+          }
+
+          try {
+            const batchesResponse = await this.apiService.getIngredientBatches();
+            context.ingredientBatches = batchesResponse.data || [];
+            console.log('Fetched ingredient batches:', context.ingredientBatches); // Debug log
+          } catch (error) {
+            console.warn('Could not fetch ingredient batches:', error);
+            context.ingredientBatches = [];
+          }
+
+          // Try to fetch ingredient stats
+          try {
+            const statsResponse = await this.apiService.request('/ingredients/stats');
+            context.ingredientStats = statsResponse.data || null;
+            console.log('Fetched ingredient stats:', context.ingredientStats); // Debug log
+          } catch (error) {
+            console.warn('Could not fetch ingredient stats:', error);
+            context.ingredientStats = null;
+          }
+        }
+
         // Calculate balance info from available data - different for buyers vs sellers
         const orders = Array.isArray(context.orders) ? context.orders : [];
         if (orders.length > 0) {
@@ -202,17 +233,43 @@ class AIService {
         User information: ${JSON.stringify(contextData.user)}
         Recent sales: ${JSON.stringify(orders.slice(0, 5))}
         Business stats: ${JSON.stringify(contextData.balance || {})}
-        
+        `;
+
+        // Add ingredient information for sellers/owners
+        if (contextData.ingredients && contextData.ingredients.length > 0) {
+          systemPrompt += `
+        Ingredients inventory: ${JSON.stringify(contextData.ingredients.slice(0, 10))}
+        `;
+        }
+
+        if (contextData.ingredientBatches && contextData.ingredientBatches.length > 0) {
+          systemPrompt += `
+        Ingredient batches: ${JSON.stringify(contextData.ingredientBatches.slice(0, 5))}
+        `;
+        }
+
+        if (contextData.ingredientStats) {
+          systemPrompt += `
+        Ingredient statistics: ${JSON.stringify(contextData.ingredientStats)}
+        `;
+        }
+
+        systemPrompt += `
         As a ${roleTitle.toLowerCase()}, you can help with:
         - Sales analytics and revenue tracking
         - Order management and fulfillment
         - Product inventory and stock levels
+        - Ingredient inventory management and tracking
+        - Ingredient batch tracking and expiry monitoring
+        - Ingredient cost analysis and usage statistics
+        - Low stock alerts and reorder recommendations
         - Customer order history and patterns
         - Business performance metrics
         - Pending orders that need attention
         ${userType === 'owner' ? '- Overall business management and strategy' : '- Daily sales operations'}
         
-        Focus on business operations, sales management, and performance analytics.
+        Focus on business operations, sales management, inventory control, and performance analytics.
+        When discussing ingredients, provide specific information about stock levels, costs, suppliers, and usage patterns.
         `;
       }
     } else {
@@ -486,6 +543,85 @@ class AIService {
         const pendingOrders = contextData.balance?.pending_orders || 0;
 
         return `Business Overview: ${totalSales} total sales, $${totalRevenue.toFixed(2)} revenue, ${pendingOrders} pending orders. I can help with sales analytics, inventory management, order fulfillment, and business insights. What would you like to focus on?`;
+      }
+
+      // Ingredient-related queries for sellers/owners
+      if ((userType === 'seller' || userType === 'owner') &&
+          (message_lower.includes('ingredient') || message_lower.includes('inventory') ||
+           message_lower.includes('stock') || message_lower.includes('flour') ||
+           message_lower.includes('butter') || message_lower.includes('chocolate') ||
+           message_lower.includes('batch') || message_lower.includes('supplier'))) {
+
+        const ingredients = contextData.ingredients || [];
+        const batches = contextData.ingredientBatches || [];
+        const stats = contextData.ingredientStats;
+
+        if (message_lower.includes('stats') || message_lower.includes('statistics') || message_lower.includes('overview')) {
+          if (stats) {
+            return `📊 **Ingredient Statistics Overview:**\n\n` +
+                   `• Total Ingredients: ${stats.total_ingredients}\n` +
+                   `• Total Inventory Value: $${stats.total_value}\n` +
+                   `• Low Stock Items: ${stats.low_stock_count}\n` +
+                   `• Expired Items: ${stats.expired_count}\n` +
+                   `• Monthly Usage: $${stats.monthly_usage}\n\n` +
+                   `**Top Used Ingredients:**\n` +
+                   `${stats.top_used_ingredients?.map(ing => `• ${ing.name}: ${ing.usage} (${ing.percentage}%)`).join('\n') || 'No usage data available'}\n\n` +
+                   `**Cost Breakdown:**\n` +
+                   `• Flour Products: $${stats.cost_breakdown?.flour_products || '0'}\n` +
+                   `• Dairy Products: $${stats.cost_breakdown?.dairy_products || '0'}\n` +
+                   `• Chocolates: $${stats.cost_breakdown?.chocolates || '0'}\n` +
+                   `• Fruits: $${stats.cost_breakdown?.fruits || '0'}`;
+          } else {
+            return "I don't have access to ingredient statistics at the moment. Please check your ingredient management dashboard or try again later.";
+          }
+        }
+
+        if (message_lower.includes('low stock') || message_lower.includes('reorder')) {
+          const lowStockItems = ingredients.filter(ing => ing.current_stock <= ing.minimum_stock);
+          if (lowStockItems.length > 0) {
+            return `⚠️ **Low Stock Alert!**\n\n` +
+                   `The following ingredients need to be reordered:\n\n` +
+                   `${lowStockItems.map(ing => 
+                     `• **${ing.name}**: ${ing.current_stock} ${ing.unit} (Min: ${ing.minimum_stock} ${ing.unit})\n` +
+                     `  Supplier: ${ing.supplier}\n` +
+                     `  Cost per unit: $${ing.cost_per_unit}`
+                   ).join('\n\n')}\n\n` +
+                   `Consider placing orders soon to avoid running out of these essential ingredients.`;
+          } else {
+            return "✅ Great news! All ingredients are currently above minimum stock levels. Your inventory is well-stocked.";
+          }
+        }
+
+        if (message_lower.includes('batch') || message_lower.includes('batches')) {
+          if (batches.length > 0) {
+            const recentBatches = batches.slice(0, 5);
+            return `📦 **Recent Ingredient Batches:**\n\n` +
+                   `${recentBatches.map(batch => 
+                     `• **${batch.ingredient_name}** (Batch: ${batch.batch_number})\n` +
+                     `  Quantity: ${batch.quantity} ${batch.unit}\n` +
+                     `  Cost: $${batch.total_cost}\n` +
+                     `  Expiry: ${batch.expiry_date}\n` +
+                     `  Status: ${batch.status}`
+                   ).join('\n\n')}\n\n` +
+                   `${batches.length > 5 ? `And ${batches.length - 5} more batches...` : ''}`;
+          } else {
+            return "No ingredient batches found. Add ingredient batches to track your inventory purchases and expiry dates.";
+          }
+        }
+
+        if (ingredients.length > 0) {
+          const ingredientList = ingredients.slice(0, 5);
+          return `🥣 **Current Ingredient Inventory:**\n\n` +
+                 `${ingredientList.map(ing => 
+                   `• **${ing.name}**: ${ing.current_stock} ${ing.unit}\n` +
+                   `  Cost: $${ing.cost_per_unit}/${ing.unit} | Supplier: ${ing.supplier}\n` +
+                   `  ${ing.current_stock <= ing.minimum_stock ? '⚠️ LOW STOCK' : '✅ In Stock'}`
+                 ).join('\n\n')}\n\n` +
+                 `${ingredients.length > 5 ? `And ${ingredients.length - 5} more ingredients...` : ''}\n\n` +
+                 `What would you like to know about your ingredients?`;
+        } else {
+          return "No ingredients found in your inventory. Start by adding ingredients to track your bakery's raw materials and supplies.";
+        }
       }
     } else {
       // Guest user trying to access account features

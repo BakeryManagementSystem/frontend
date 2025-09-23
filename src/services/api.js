@@ -4,9 +4,9 @@ const API_BASE_URL = 'http://127.0.0.1:8000/api';
 class ApiService {
   constructor() {
     this.baseURL = API_BASE_URL;
-    this.isOnline = true;
+    this.isOnline = false; // Start in offline mode for testing
     this.mockData = this.initializeMockData();
-    this.forceRealAPI = true; // Force real API calls for debugging
+    this.forceRealAPI = false; // Use mock data for debugging ingredient issues
   }
 
   // Initialize mock data for offline mode
@@ -77,7 +77,136 @@ class ApiService {
             { product_name: "Coffee", quantity: 1, price: "8.75" }
           ]
         }
-      ]
+      ],
+      ingredients: [
+        {
+          id: 1,
+          name: "All-Purpose Flour",
+          unit: "kg",
+          cost_per_unit: "2.50",
+          supplier: "Local Mill Co.",
+          allergen_info: "Contains gluten",
+          nutritional_info: "High in carbohydrates",
+          storage_instructions: "Store in cool, dry place",
+          current_stock: 45.5,
+          minimum_stock: 10.0,
+          created_at: "2024-01-01T00:00:00Z"
+        },
+        {
+          id: 2,
+          name: "Organic Butter",
+          unit: "kg",
+          cost_per_unit: "8.75",
+          supplier: "Farm Fresh Dairy",
+          allergen_info: "Contains milk",
+          nutritional_info: "High in fat, vitamin A",
+          storage_instructions: "Keep refrigerated",
+          current_stock: 12.3,
+          minimum_stock: 5.0,
+          created_at: "2024-01-01T00:00:00Z"
+        },
+        {
+          id: 3,
+          name: "Active Dry Yeast",
+          unit: "g",
+          cost_per_unit: "0.02",
+          supplier: "Baking Supplies Inc.",
+          allergen_info: "None",
+          nutritional_info: "Rich in B vitamins",
+          storage_instructions: "Store in freezer for best results",
+          current_stock: 2500,
+          minimum_stock: 500,
+          created_at: "2024-01-01T00:00:00Z"
+        },
+        {
+          id: 4,
+          name: "Dark Chocolate",
+          unit: "kg",
+          cost_per_unit: "12.30",
+          supplier: "Premium Cocoa Co.",
+          allergen_info: "May contain nuts",
+          nutritional_info: "Rich in antioxidants",
+          storage_instructions: "Store below 18°C",
+          current_stock: 8.7,
+          minimum_stock: 3.0,
+          created_at: "2024-01-01T00:00:00Z"
+        },
+        {
+          id: 5,
+          name: "Fresh Blueberries",
+          unit: "kg",
+          cost_per_unit: "15.99",
+          supplier: "Berry Farm Direct",
+          allergen_info: "None",
+          nutritional_info: "High in antioxidants, vitamin C",
+          storage_instructions: "Keep refrigerated, use within 3 days",
+          current_stock: 5.2,
+          minimum_stock: 2.0,
+          created_at: "2024-01-01T00:00:00Z"
+        }
+      ],
+      ingredientBatches: [
+        {
+          id: 1,
+          ingredient_id: 1,
+          ingredient_name: "All-Purpose Flour",
+          quantity: 25.0,
+          unit: "kg",
+          unit_cost: "2.50",
+          total_cost: "62.50",
+          batch_number: "FL-2024-001",
+          expiry_date: "2024-12-31",
+          received_date: "2024-01-15",
+          supplier: "Local Mill Co.",
+          status: "in_stock"
+        },
+        {
+          id: 2,
+          ingredient_id: 2,
+          ingredient_name: "Organic Butter",
+          quantity: 10.0,
+          unit: "kg",
+          unit_cost: "8.75",
+          total_cost: "87.50",
+          batch_number: "BT-2024-002",
+          expiry_date: "2024-10-15",
+          received_date: "2024-01-10",
+          supplier: "Farm Fresh Dairy",
+          status: "in_stock"
+        },
+        {
+          id: 3,
+          ingredient_id: 3,
+          ingredient_name: "Active Dry Yeast",
+          quantity: 1500,
+          unit: "g",
+          unit_cost: "0.02",
+          total_cost: "30.00",
+          batch_number: "YS-2024-003",
+          expiry_date: "2025-01-30",
+          received_date: "2024-01-12",
+          supplier: "Baking Supplies Inc.",
+          status: "in_stock"
+        }
+      ],
+      ingredientStats: {
+        total_ingredients: 5,
+        total_value: "1,245.67",
+        low_stock_count: 2,
+        expired_count: 0,
+        monthly_usage: "890.45",
+        top_used_ingredients: [
+          { name: "All-Purpose Flour", usage: "25.5 kg", percentage: 35 },
+          { name: "Organic Butter", usage: "12.3 kg", percentage: 20 },
+          { name: "Dark Chocolate", usage: "8.7 kg", percentage: 15 }
+        ],
+        cost_breakdown: {
+          flour_products: "45.2",
+          dairy_products: "32.8",
+          chocolates: "15.5",
+          fruits: "6.5"
+        }
+      }
     };
   }
 
@@ -210,6 +339,29 @@ class ApiService {
 
     if (endpoint.includes('/orders')) {
       return { data: this.mockData.orders };
+    }
+
+    // Handle ingredient-related endpoints
+    if (endpoint.includes('/ingredients')) {
+      if (endpoint.includes('/owner/ingredient-batches')) {
+        return { data: this.mockData.ingredientBatches };
+      }
+      if (endpoint.includes('/ingredients/stats')) {
+        return { data: this.mockData.ingredientStats };
+      }
+      // Single ingredient request
+      if (endpoint.includes('/ingredients/') && !endpoint.includes('?')) {
+        const id = parseInt(endpoint.split('/ingredients/')[1]);
+        const ingredient = this.mockData.ingredients.find(i => i.id === id);
+        return ingredient ? { data: ingredient } : { error: 'Ingredient not found' };
+      }
+      // Ingredients list
+      return { data: this.mockData.ingredients };
+    }
+
+    // Handle ingredient batches
+    if (endpoint.includes('/owner/ingredient-batches')) {
+      return { data: this.mockData.ingredientBatches };
     }
 
     // Handle shop-related endpoints
