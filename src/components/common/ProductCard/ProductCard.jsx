@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useCart } from '../../../context/CartContext';
 import { useAuth } from '../../../context/AuthContext';
 import ApiService from '../../../services/api';
-import { Heart, ShoppingCart, Star, Eye } from 'lucide-react';
+import { Heart, ShoppingCart, Star, Eye, Share } from 'lucide-react';
 import './ProductCard.css';
 
 const ProductCard = ({ product, showWishlist = true }) => {
@@ -65,6 +65,33 @@ const ProductCard = ({ product, showWishlist = true }) => {
     }
   };
 
+  const handleShare = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const productUrl = `${window.location.origin}/products/${product.id}`;
+    const shareData = {
+      title: product.name,
+      text: `Check out this amazing product: ${product.name}`,
+      url: productUrl
+    };
+
+    try {
+      // Check if Web Share API is available (mobile devices, some browsers)
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        // Fallback: Copy to clipboard
+        await navigator.clipboard.writeText(productUrl);
+        alert('Product link copied to clipboard!');
+      }
+    } catch (error) {
+      // Final fallback: Show URL in alert
+      console.error('Error sharing:', error);
+      alert(`Share this product: ${productUrl}`);
+    }
+  };
+
   const formatPrice = (price) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -110,7 +137,7 @@ const ProductCard = ({ product, showWishlist = true }) => {
           )}
 
           <div className="product-actions">
-            {showWishlist && isAuthenticated && isBuyer && (
+            {showWishlist && (
               <button
                 className={`action-btn wishlist-btn ${isInWishlist ? 'active' : ''}`}
                 onClick={handleWishlist}
@@ -120,6 +147,13 @@ const ProductCard = ({ product, showWishlist = true }) => {
                 <Heart size={18} fill={isInWishlist ? "currentColor" : "none"} />
               </button>
             )}
+            <button
+              className="action-btn share-btn"
+              onClick={handleShare}
+              title="Share Product"
+            >
+              <Share size={18} />
+            </button>
             <button
               className="action-btn view-btn"
               title="Quick View"

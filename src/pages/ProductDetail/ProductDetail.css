@@ -3,6 +3,13 @@
   min-height: 100vh;
 }
 
+.product-detail-page {
+  padding-top: 80px; /* Add top padding to account for fixed header */
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
+}
+
 .breadcrumb {
   display: flex;
   align-items: center;
@@ -37,6 +44,8 @@
   grid-template-columns: 1fr 1fr;
   gap: var(--spacing-2xl);
   margin-bottom: var(--spacing-2xl);
+  position: relative;
+  z-index: 2;
 }
 
 /* Product Images */
@@ -116,6 +125,8 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-lg);
+  position: relative;
+  z-index: 3;
 }
 
 .product-header {
@@ -137,12 +148,16 @@
   flex-direction: column;
   gap: var(--spacing-lg);
   margin: var(--spacing-xl) 0;
+  position: relative;
+  z-index: 4;
 }
 
 .quantity-selector {
   display: flex;
   align-items: center;
   gap: var(--spacing-md);
+  position: relative;
+  z-index: 5;
 }
 
 .quantity-selector label {
@@ -200,6 +215,8 @@
   display: flex;
   gap: var(--spacing-md);
   flex-wrap: wrap;
+  position: relative;
+  z-index: 5;
 }
 
 .add-to-cart-btn {
@@ -343,6 +360,8 @@
   align-items: center;
   gap: var(--spacing-lg);
   margin-bottom: var(--spacing-lg);
+  position: relative;
+  z-index: 5;
 }
 
 .quantity-selector label {
@@ -613,6 +632,66 @@
 .product-not-found p {
   color: var(--text-secondary);
   margin-bottom: var(--spacing-xl);
+}
+
+/* Button Base Styles */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  gap: var(--spacing-xs);
+  white-space: nowrap;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Button Sizes */
+.btn-sm {
+  padding: var(--spacing-xs) var(--spacing-md);
+  font-size: var(--font-size-xs);
+}
+
+.btn-lg {
+  padding: var(--spacing-md) var(--spacing-xl);
+  font-size: var(--font-size-md);
+  min-height: 50px;
+}
+
+/* Button Variants */
+.btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--primary-hover);
+  border-color: var(--primary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-outline {
+  background-color: transparent;
+  border-color: var(--border-medium);
+  color: var(--text-primary);
+}
+
+.btn-outline:hover:not(:disabled) {
+  background-color: var(--bg-secondary);
+  border-color: var(--primary-color);
+  color: var(--primary-color);
 }
 
 /* Responsive Design */
