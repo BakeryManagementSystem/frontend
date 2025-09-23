@@ -98,7 +98,7 @@ const ProductCard = ({ product, showWishlist = true }) => {
       <Link to={`/products/${product.id}`} className="product-card-link">
         <div className="product-image-container">
           <img
-            src={product.image || 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=300&fit=crop&crop=center'}
+            src={product.image || 'https://images.unsplash.com/photo-1509440159596-0249088772ff'}
             alt={product.name}
             className="product-image"
           />
