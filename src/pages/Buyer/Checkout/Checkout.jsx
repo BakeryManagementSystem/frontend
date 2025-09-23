@@ -31,7 +31,7 @@ const Checkout = () => {
 
   const [shippingData, setShippingData] = useState({
     firstName: user?.name?.split(' ')[0] || '',
-    lastName: user?.name?.split(' ')[1] || '',
+    lastName: user?.name?.split(' ').slice(1).join(' ') || '',
     email: user?.email || '',
     phone: user?.phone || '',
     address: '',
@@ -63,6 +63,79 @@ const Checkout = () => {
     }
   }, [items, navigate]);
 
+  // Prefill from DB and local storage on mount
+  useEffect(() => {
+    let cancelled = false;
+
+    const mergeIfEmpty = (current, incoming) => {
+      const next = { ...current };
+      Object.keys(incoming).forEach((key) => {
+        if (!current[key] && incoming[key]) {
+          next[key] = incoming[key];
+        }
+      });
+      return next;
+    };
+
+    const pickFromUser = (u = {}) => {
+      // Flat fields
+      const flat = {
+        name: u.name || '',
+        email: u.email || '',
+        phone: u.phone || u.mobile || (u.profile && (u.profile.phone || u.profile.mobile)) || '',
+        address: u.address || u.address_line1 || (u.profile && (u.profile.address || u.profile.address_line1)) || '',
+        city: u.city || (u.profile && u.profile.city) || '',
+        state: u.state || u.region || (u.profile && (u.profile.state || u.profile.region)) || '',
+        zip: u.zip || u.zip_code || u.postal_code || (u.profile && (u.profile.zip || u.profile.zip_code || u.profile.postal_code)) || '',
+        country: u.country || (u.profile && u.profile.country) || ''
+      };
+      const [fn, ...ln] = (flat.name || '').trim().split(' ').filter(Boolean);
+      return {
+        firstName: fn || '',
+        lastName: ln.join(' ') || '',
+        email: flat.email,
+        phone: flat.phone,
+        address: flat.address,
+        city: flat.city,
+        state: flat.state,
+        zipCode: flat.zip,
+        country: flat.country || 'United States'
+      };
+    };
+
+    const prefill = async () => {
+      // Local storage first (most recent)
+      try {
+        const cached = localStorage.getItem('bms_checkout_shipping');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          setShippingData((prev) => mergeIfEmpty(prev, parsed));
+        }
+      } catch {}
+
+      // Then DB profile
+      try {
+        const resp = await ApiService.getUser();
+        if (!cancelled && resp) {
+          const mapped = pickFromUser(resp);
+          setShippingData((prev) => mergeIfEmpty(prev, mapped));
+          // Prefill payment cardholder if empty
+          setPaymentData((prev) => ({
+            ...prev,
+            cardholderName: prev.cardholderName || resp.name || `${mapped.firstName} ${mapped.lastName}`.trim()
+          }));
+        }
+      } catch {
+        // ignore if endpoint not available; form stays editable
+      }
+    };
+
+    prefill();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const subtotal = getTotalPrice();
   const shippingCost = shippingMethod === 'express' ? 15.00 : (subtotal >= 25 ? 0 : 7.50);
   const tax = subtotal * 0.08;
@@ -78,6 +151,10 @@ const Checkout = () => {
   const handleShippingSubmit = (e) => {
     e.preventDefault();
     if (validateShippingData()) {
+      // Cache for next time
+      try {
+        localStorage.setItem('bms_checkout_shipping', JSON.stringify(shippingData));
+      } catch {}
       setStep(2);
     }
   };

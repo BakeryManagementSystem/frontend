@@ -1,21 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../../../context/AuthContext';
-import { useCart } from '../../../context/CartContext';
 import ApiService from '../../../services/api';
+import ProductCard from '../../../components/common/ProductCard/ProductCard';
 import {
   Heart,
-  ShoppingCart,
   Trash2,
   Search,
-  Star,
   Filter
 } from 'lucide-react';
 import './Wishlist.css';
 
 const Wishlist = () => {
-  const { user } = useAuth();
-  const { addToCart } = useCart();
   const [wishlistItems, setWishlistItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -45,34 +40,33 @@ const Wishlist = () => {
   const removeFromWishlist = async (productId) => {
     try {
       await ApiService.removeFromWishlist(productId);
-      setWishlistItems(prev => prev.filter(item => item.product_id !== productId));
+      setWishlistItems(prev => prev.filter(item => (item.product_id || item.id) !== productId));
     } catch (error) {
       console.error('Failed to remove from wishlist:', error);
       alert('Failed to remove item from wishlist. Please try again.');
     }
   };
 
-  const handleAddToCart = (item) => {
-    const product = {
-      id: item.product_id,
-      name: item.name,
-      price: item.price,
-      image: item.image,
-      category: item.category,
-      seller: item.seller,
-      inStock: item.inStock
-    };
-    addToCart(product);
-  };
-
   const filteredItems = wishlistItems.filter(item => {
-    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const name = (item.name || '').toLowerCase();
+    const matchesSearch = name.includes(searchQuery.toLowerCase());
+    const inStock = !!item.inStock;
     const matchesFilter = filter === 'all' ||
-      (filter === 'in-stock' && item.inStock) ||
-      (filter === 'out-of-stock' && !item.inStock);
+      (filter === 'in-stock' && inStock) ||
+      (filter === 'out-of-stock' && !inStock);
 
     return matchesSearch && matchesFilter;
   });
+
+  if (loading) {
+    return (
+      <div className="wishlist-page">
+        <div className="container">
+          <div className="loading-text">Loading wishlist...</div>
+        </div>
+      </div>
+    );
+  }
 
   if (error) {
     return (
@@ -100,7 +94,7 @@ const Wishlist = () => {
         </div>
 
         {wishlistItems.length === 0 ? (
-          <div className="empty-wishlist">
+          <div className="empty-wishlist empty-state">
             <Heart size={64} className="empty-icon" />
             <h2>Your wishlist is empty</h2>
             <p>Start adding items to your wishlist to see them here</p>
@@ -142,79 +136,37 @@ const Wishlist = () => {
               <p>Showing {filteredItems.length} of {wishlistItems.length} items</p>
             </div>
 
-            {/* Wishlist Grid */}
-            <div className="wishlist-grid">
-              {filteredItems.map(item => (
-                <div key={item.id} className="wishlist-item">
-                  <div className="item-image">
-                    <Link to={`/products/${item.product_id}`}>
-                      <img
-                        src={item.image || 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=300&fit=crop&crop=center'}
-                        alt={item.name}
-                        className="product-image"
-                      />
-                    </Link>
-
+            {/* Wishlist Grid using ProductCard */}
+            <div className="products-grid">
+              {filteredItems.map(item => {
+                const product = {
+                  id: item.product_id || item.id,
+                  name: item.name,
+                  image: item.image,
+                  price: item.price,
+                  category: item.category,
+                  seller: item.seller,
+                  inStock: item.inStock,
+                  rating: item.rating || 0,
+                  reviewCount: item.reviewCount || 0,
+                };
+                return (
+                  <div key={product.id} className="wishlist-card-wrapper">
                     <button
-                      className="remove-btn"
-                      onClick={() => removeFromWishlist(item.product_id)}
+                      className="wishlist-remove-btn"
+                      onClick={() => removeFromWishlist(product.id)}
                       title="Remove from wishlist"
                     >
                       <Trash2 size={16} />
                     </button>
+                    <ProductCard product={product} />
                   </div>
-
-                  <div className="item-info">
-                    <div className="item-category">{item.category}</div>
-
-                    <h3 className="item-name">
-                      <Link to={`/products/${item.product_id}`}>
-                        {item.name}
-                      </Link>
-                    </h3>
-
-                    <div className="item-seller">
-                      by {item.seller}
-                    </div>
-
-                    <div className="item-price">
-                      <span className="current-price">${item.price}</span>
-                    </div>
-
-                    <div className="item-status">
-                      <span className={`status ${item.inStock ? 'in-stock' : 'out-of-stock'}`}>
-                        {item.inStock ? 'In Stock' : 'Out of Stock'}
-                      </span>
-                    </div>
-
-                    <div className="item-added">
-                      Added {new Date(item.addedDate).toLocaleDateString()}
-                    </div>
-
-                    <div className="item-actions">
-                      <button
-                        className="btn btn-primary btn-sm"
-                        onClick={() => handleAddToCart(item)}
-                        disabled={!item.inStock}
-                      >
-                        <ShoppingCart size={14} />
-                        Add to Cart
-                      </button>
-
-                      <Link
-                        to={`/products/${item.product_id}`}
-                        className="btn btn-outline btn-sm"
-                      >
-                        View Details
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {filteredItems.length === 0 && searchQuery && (
-              <div className="no-results">
+              <div className="no-results empty-state">
                 <h3>No items found</h3>
                 <p>No wishlist items match your search for "{searchQuery}"</p>
                 <button
