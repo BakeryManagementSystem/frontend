@@ -80,16 +80,34 @@ const ProductDetail = () => {
     setWishlistLoading(true);
 
     try {
+      let response;
       if (isInWishlist) {
-        await ApiService.removeFromWishlist(id);
+        response = await ApiService.removeFromWishlist(id);
         setIsInWishlist(false);
+        alert("Product removed from wishlist!");
       } else {
-        await ApiService.addToWishlist(id);
+        response = await ApiService.addToWishlist(id);
         setIsInWishlist(true);
+        alert("Product added to wishlist!");
       }
+      console.log("Wishlist operation successful:", response);
     } catch (error) {
       console.error("Failed to update wishlist:", error);
-      alert("Failed to update wishlist. Please try again.");
+      // More detailed error handling
+      if (error.response) {
+        // API returned an error response
+        const errorMessage =
+          error.response.data?.message ||
+          error.response.statusText ||
+          "Unknown server error";
+        alert(`Failed to update wishlist: ${errorMessage}`);
+      } else if (error.request) {
+        // Network error
+        alert("Network error. Please check your connection and try again.");
+      } else {
+        // Other error
+        alert("An unexpected error occurred. Please try again.");
+      }
     } finally {
       setWishlistLoading(false);
     }
@@ -116,6 +134,30 @@ const ProductDetail = () => {
     const newQuantity = quantity + change;
     if (newQuantity >= 1 && newQuantity <= (product?.stock_quantity || 10)) {
       setQuantity(newQuantity);
+    }
+  };
+
+  const handleShare = async () => {
+    const productUrl = `${window.location.origin}/products/${product.id}`;
+    const shareData = {
+      title: product.name,
+      text: `Check out this amazing product: ${product.name}`,
+      url: productUrl,
+    };
+
+    try {
+      // Check if Web Share API is available (mobile devices, some browsers)
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        // Fallback: Copy to clipboard
+        await navigator.clipboard.writeText(productUrl);
+        alert("Product link copied to clipboard!");
+      }
+    } catch (error) {
+      // Final fallback: Show URL in alert
+      console.error("Error sharing:", error);
+      alert(`Share this product: ${productUrl}`);
     }
   };
 
@@ -299,23 +341,28 @@ const ProductDetail = () => {
                   Add to Cart
                 </button>
 
-                {isAuthenticated && isBuyer && (
-                  <button
-                    className={`btn btn-outline btn-lg wishlist-btn ${
-                      isInWishlist ? "active" : ""
-                    }`}
-                    onClick={handleWishlist}
-                    disabled={wishlistLoading}
-                  >
-                    <Heart
-                      size={20}
-                      fill={isInWishlist ? "currentColor" : "none"}
-                    />
-                    {isInWishlist ? "Remove from Wishlist" : "Add to Wishlist"}
-                  </button>
-                )}
+                <button
+                  className={`btn btn-outline btn-lg wishlist-btn ${
+                    isInWishlist ? "active" : ""
+                  }`}
+                  onClick={handleWishlist}
+                  disabled={wishlistLoading}
+                >
+                  <Heart
+                    size={20}
+                    fill={isInWishlist ? "currentColor" : "none"}
+                  />
+                  {wishlistLoading
+                    ? "Processing..."
+                    : isInWishlist
+                    ? "Remove from Wishlist"
+                    : "Add to Wishlist"}
+                </button>
 
-                <button className="btn btn-outline btn-lg share-btn">
+                <button
+                  className="btn btn-outline btn-lg share-btn"
+                  onClick={handleShare}
+                >
                   <Share size={20} />
                   Share
                 </button>
