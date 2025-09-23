@@ -253,23 +253,45 @@
   padding: var(--spacing-md);
   background-color: var(--bg-secondary);
   border-radius: var(--radius-md);
+  transition: background-color 0.2s ease;
+}
+
+.order-product:hover {
+  background-color: var(--bg-tertiary);
 }
 
 .product-image {
-  width: 60px;
-  height: 60px;
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  min-height: 48px;
+  max-width: 48px;
+  max-height: 48px;
   object-fit: cover;
   border-radius: var(--radius-sm);
+  border: 1px solid var(--border-light);
+  background-color: var(--bg-card);
+  flex-shrink: 0;
+}
+
+.product-image:hover {
+  border-color: var(--primary-color);
+  transition: border-color 0.2s ease;
 }
 
 .product-details {
   flex: 1;
+  min-width: 0; /* Allows text to truncate properly */
 }
 
 .product-name {
   font-weight: 500;
   color: var(--text-primary);
   margin-bottom: var(--spacing-xs);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .product-quantity {
@@ -281,6 +303,8 @@
   font-weight: 600;
   color: var(--primary-color);
   font-size: var(--font-size-base);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 /* Shipping Section */
