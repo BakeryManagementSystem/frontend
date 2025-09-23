@@ -61,7 +61,7 @@ const IngredientsManagement = () => {
 
       // Calculate stats
       const totalIngredients = ingredientsRes.data?.length || 0;
-      const totalInvestment = batchesRes.data?.reduce((sum, batch) => sum + (batch.total_cost || 0), 0) || 0;
+      const totalInvestment = ingredientsRes.data?.reduce((sum, ingredient) => sum + (parseFloat(ingredient.current_unit_price) || 0), 0) || 0;
       const currentMonth = new Date().getMonth();
       const currentYear = new Date().getFullYear();
       const monthlySpent = batchesRes.data?.filter(batch => {
@@ -69,7 +69,7 @@ const IngredientsManagement = () => {
         return batchDate.getMonth() === currentMonth && batchDate.getFullYear() === currentYear;
       }).reduce((sum, batch) => sum + (batch.total_cost || 0), 0) || 0;
 
-      const avgCost = totalIngredients > 0 ? (ingredientsRes.data?.reduce((sum, ing) => sum + (ing.current_unit_price || 0), 0) / totalIngredients) : 0;
+      const avgCost = totalIngredients > 0 ? (ingredientsRes.data?.reduce((sum, ing) => sum + (parseFloat(ing.current_unit_price) || 0), 0) / totalIngredients) : 0;
 
       setStats({
         totalIngredients,
@@ -125,9 +125,21 @@ const IngredientsManagement = () => {
     try {
       await ApiService.deleteIngredient(id);
       fetchData();
+      setError(''); // Clear any existing errors on success
     } catch (error) {
       console.error('Failed to delete ingredient:', error);
-      setError('Failed to delete ingredient. Please try again.');
+
+      // Handle the specific constraint violation error
+      if (error.response && error.response.status === 422 && error.response.data.error === 'CONSTRAINT_VIOLATION') {
+        const errorData = error.response.data;
+        setError(`Cannot delete "${errorData.details.ingredient_name}" because it is being used in ${errorData.details.batch_items_count} batch item(s). Please remove the ingredient from all batches before deleting.`);
+      } else if (error.response && error.response.data && error.response.data.message) {
+        // Handle other API errors with specific messages
+        setError(error.response.data.message);
+      } else {
+        // Fallback for unexpected errors
+        setError('Failed to delete ingredient. Please try again.');
+      }
     }
   };
 

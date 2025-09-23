@@ -148,13 +148,26 @@ class ApiService {
         const errorData = await response.json().catch(() => ({}));
 
         if (response.status === 422) {
-          // Validation errors from Laravel
+          // Check if it's a constraint violation error (our custom error)
+          if (errorData.error === 'CONSTRAINT_VIOLATION') {
+            // Create error object with response data for constraint violations
+            const error = new Error(errorData.message || 'Constraint violation');
+            error.response = { status: response.status, data: errorData };
+            throw error;
+          }
+
+          // Handle Laravel validation errors
           const validationErrors = errorData.errors || {};
           const firstError = Object.values(validationErrors)[0];
-          throw new Error(firstError ? firstError[0] : 'Validation failed');
+          const error = new Error(firstError ? firstError[0] : 'Validation failed');
+          error.response = { status: response.status, data: errorData };
+          throw error;
         }
 
-        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+        // For other HTTP errors, preserve response data
+        const error = new Error(errorData.message || `HTTP error! status: ${response.status}`);
+        error.response = { status: response.status, data: errorData };
+        throw error;
       }
 
       return await response.json();
@@ -629,11 +642,6 @@ class ApiService {
     return this.request(`/owner/ingredient-batches/${id}`, {
       method: 'DELETE',
     });
-  }
-
-  // Enhanced dashboard for sellers with investment tracking
-  async getSellerDashboard() {
-    return this.request('/seller/dashboard');
   }
 
   // PDF Generation methods
