@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNotifications } from '../../../context/NotificationContext.jsx';
+import { useNotifications } from '../../../context/NotificationContext';
 import { Bell, Check, Clock, Package, CreditCard, Truck, CheckCircle, AlertCircle } from 'lucide-react';
 import './NotificationDropdown.css';
 
@@ -14,49 +14,24 @@ const NotificationDropdown = () => {
   };
 
   const getNotificationIcon = (type) => {
-    switch (type) {
-      case 'new_order':
-        return <Package size={16} className="icon-new-order" />;
-      case 'order_status_update':
-        return <Truck size={16} className="icon-status-update" />;
-      case 'order_created':
-      case 'order_accepted':
-        return <Package size={16} className="icon-order" />;
-      case 'order_shipped':
-        return <Truck size={16} className="icon-shipped" />;
-      case 'order_delivered':
-        return <CheckCircle size={16} className="icon-delivered" />;
-      case 'order_cancelled':
-        return <AlertCircle size={16} className="icon-cancelled" />;
-      case 'payment_processed':
-      case 'payment_received':
-        return <CreditCard size={16} className="icon-payment" />;
-      case 'payment_required':
-        return <CreditCard size={16} className="icon-payment-required" />;
-      default:
-        return <Bell size={16} />;
-    }
+    const t = (type || '').toLowerCase();
+    if (t.includes('cancel')) return <AlertCircle size={16} className="icon-cancelled" />;
+    if (t.includes('deliver')) return <CheckCircle size={16} className="icon-delivered" />;
+    if (t.includes('ship')) return <Truck size={16} className="icon-shipped" />;
+    if (t.includes('payment') || t.includes('pay')) return <CreditCard size={16} className="icon-payment" />;
+    if (t.includes('status')) return <Truck size={16} className="icon-status-update" />;
+    if (t.includes('new') || t.includes('created') || t.includes('accept') || t === 'order' || t.includes('order')) return <Package size={16} className="icon-order" />;
+    return <Bell size={16} />;
   };
 
   const getNotificationColor = (type) => {
-    switch (type) {
-      case 'order_accepted':
-      case 'order_delivered':
-      case 'payment_processed':
-      case 'payment_received':
-        return 'success';
-      case 'new_order':
-      case 'order_created':
-      case 'order_shipped':
-      case 'order_status_update':
-        return 'info';
-      case 'order_cancelled':
-        return 'error';
-      case 'payment_required':
-        return 'warning';
-      default:
-        return 'default';
-    }
+    const t = (type || '').toLowerCase();
+    if (t.includes('cancel')) return 'error';
+    if (t.includes('deliver') || t.includes('accept') || t.includes('success')) return 'success';
+    if (t.includes('payment') || t.includes('pay')) return 'success';
+    if (t.includes('ship') || t.includes('status') || t.includes('new') || t.includes('created') || t.includes('order')) return 'info';
+    if (t.includes('require') || t.includes('warning')) return 'warning';
+    return 'default';
   };
 
   const formatTimeAgo = (dateString) => {

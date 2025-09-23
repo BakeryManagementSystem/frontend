@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search, TrendingUp, Package, Wheat, Croissant, Cake, Cookie, Cherry, Donut, Circle, Sparkles } from 'lucide-react';
+import ApiService from '../../services/api';
 import './Categories.css';
 
 const Categories = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -13,106 +15,132 @@ const Categories = () => {
   }, []);
 
   const fetchCategories = async () => {
-    // Remove loading animation - fetch categories immediately
-    setCategories([
-      {
-        id: 1,
-        name: 'Bread & Rolls',
-        slug: 'bread-rolls',
-        description: 'Fresh artisan breads, dinner rolls, baguettes, and specialty loaves',
-        productCount: 150,
-        image: 'https://images.unsplash.com/photo-1549931319-a545dcf3bc73?w=400&h=300&fit=crop&crop=center',
-        icon: <Wheat size={32} />,
-        color: '#D2691E',
-        trending: true,
-        subcategories: ['Sourdough', 'Whole Wheat', 'Baguettes', 'Dinner Rolls', 'Specialty Breads']
-      },
-      {
-        id: 2,
-        name: 'Pastries',
-        slug: 'pastries',
-        description: 'Delicate pastries, croissants, danishes, and sweet breakfast treats',
-        productCount: 200,
-        image: 'https://images.unsplash.com/photo-1555507036-ab794f4eed25?w=400&h=300&fit=crop&crop=center',
-        icon: <Croissant size={32} />,
-        color: '#DEB887',
-        trending: true,
-        subcategories: ['Croissants', 'Danishes', 'Puff Pastries', 'Eclairs', 'Breakfast Pastries']
-      },
-      {
-        id: 3,
-        name: 'Cakes',
-        slug: 'cakes',
-        description: 'Custom cakes, layer cakes, cheesecakes, and celebration desserts',
-        productCount: 80,
-        image: 'https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=400&h=300&fit=crop&crop=center',
-        icon: <Cake size={32} />,
-        color: '#FF69B4',
-        trending: false,
-        subcategories: ['Birthday Cakes', 'Wedding Cakes', 'Cheesecakes', 'Layer Cakes', 'Custom Designs']
-      },
-      {
-        id: 4,
-        name: 'Cookies',
-        slug: 'cookies',
-        description: 'Freshly baked cookies, biscotti, macarons, and sweet treats',
-        productCount: 120,
-        image: 'https://images.unsplash.com/photo-1499636136210-6f4ee915583e?w=400&h=300&fit=crop&crop=center',
-        icon: <Cookie size={32} />,
-        color: '#CD853F',
-        trending: false,
-        subcategories: ['Chocolate Chip', 'Sugar Cookies', 'Macarons', 'Biscotti', 'Seasonal Cookies']
-      },
-      {
-        id: 5,
-        name: 'Muffins & Cupcakes',
-        slug: 'muffins-cupcakes',
-        description: 'Delicious muffins, cupcakes, and individual sweet treats',
-        productCount: 90,
-        image: 'https://images.unsplash.com/photo-1587668178277-295251f900ce?w=400&h=300&fit=crop&crop=center',
-        icon: <Cherry size={32} />,
-        color: '#FFB6C1',
-        trending: false,
-        subcategories: ['Blueberry Muffins', 'Chocolate Cupcakes', 'Seasonal Flavors', 'Mini Cupcakes', 'Specialty Muffins']
-      },
-      {
-        id: 6,
-        name: 'Donuts',
-        slug: 'donuts',
-        description: 'Fresh donuts, glazed, filled, and specialty varieties',
-        productCount: 60,
-        image: 'https://images.unsplash.com/photo-1551024601-bec78aea704b?w=400&h=300&fit=crop&crop=center',
-        icon: <Donut size={32} />,
-        color: '#FF6347',
-        trending: true,
-        subcategories: ['Glazed Donuts', 'Filled Donuts', 'Cake Donuts', 'Old-Fashioned', 'Specialty Donuts']
-      },
-      {
-        id: 7,
-        name: 'Bagels',
-        slug: 'bagels',
-        description: 'Traditional and specialty bagels, fresh baked daily',
-        productCount: 45,
-        image: 'https://images.unsplash.com/photo-1608198093002-ad4e005484ec?w=400&h=300&fit=crop&crop=center',
-        icon: <Circle size={32} />,
-        color: '#DAA520',
-        trending: false,
-        subcategories: ['Plain Bagels', 'Everything Bagels', 'Sesame Bagels', 'Poppy Seed', 'Specialty Flavors']
-      },
-      {
-        id: 8,
-        name: 'Specialty Items',
-        slug: 'specialty',
-        description: 'Seasonal and specialty baked goods, custom orders',
-        productCount: 35,
-        image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&h=300&fit=crop&crop=center',
-        icon: <Sparkles size={32} />,
-        color: '#9370DB',
-        trending: false,
-        subcategories: ['Seasonal Items', 'Gluten-Free', 'Vegan Options', 'Custom Orders', 'Holiday Specials']
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Fetch real categories from API
+      const response = await ApiService.getCategories();
+
+      if (response && Array.isArray(response)) {
+        // Map API response to the format expected by the UI
+        const mappedCategories = response.map(category => ({
+          id: category.id,
+          name: category.name,
+          slug: category.slug || category.name.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-'),
+          description: category.description || `Quality ${category.name.toLowerCase()} made fresh daily`,
+          productCount: category.products_count || 0,
+          image: getDefaultImage(category.name),
+          icon: getCategoryIcon(category.name),
+          color: getCategoryColor(category.name),
+          trending: false, // Will be determined below
+          subcategories: getDefaultSubcategories(category.name)
+        }));
+
+        // Determine trending categories with improved logic
+        const sortedByCount = [...mappedCategories].sort((a, b) => b.productCount - a.productCount);
+
+        // Mark categories as trending based on multiple criteria:
+        // 1. Categories with more than 5 products
+        // 2. Or the top 3 categories with the most products (even if they have few products)
+        // 3. Ensure at least one category is marked as trending if any exist
+        const trendingCategories = sortedByCount.filter(cat => cat.productCount > 5);
+
+        if (trendingCategories.length === 0 && sortedByCount.length > 0) {
+          // If no categories have more than 5 products, mark the top 3 as trending
+          for (let i = 0; i < Math.min(3, sortedByCount.length); i++) {
+            sortedByCount[i].trending = true;
+          }
+        } else if (trendingCategories.length > 0) {
+          // Mark categories with more than 5 products as trending, max 4 categories
+          for (let i = 0; i < Math.min(4, trendingCategories.length); i++) {
+            const categoryIndex = mappedCategories.findIndex(cat => cat.id === trendingCategories[i].id);
+            if (categoryIndex !== -1) {
+              mappedCategories[categoryIndex].trending = true;
+            }
+          }
+        }
+
+        console.log('Categories loaded:', mappedCategories.length);
+        console.log('Trending categories:', mappedCategories.filter(cat => cat.trending).length);
+        console.log('Category details:', mappedCategories.map(cat => ({ name: cat.name, count: cat.productCount, trending: cat.trending })));
+
+        setCategories(mappedCategories);
+      } else {
+        console.warn('Invalid response format:', response);
+        setCategories([]);
       }
-    ]);
-    setLoading(false);
+    } catch (err) {
+      console.error('Error fetching categories:', err);
+      setError('Failed to load categories. Please try again.');
+
+      // Fallback to empty array instead of mock data
+      setCategories([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Helper function to get category icon
+  const getCategoryIcon = (categoryName) => {
+    const iconMap = {
+      'Bread & Rolls': <Wheat size={32} />,
+      'Pastries': <Croissant size={32} />,
+      'Cakes': <Cake size={32} />,
+      'Cookies': <Cookie size={32} />,
+      'Muffins & Cupcakes': <Cherry size={32} />,
+      'Donuts': <Donut size={32} />,
+      'Bagels': <Circle size={32} />,
+      'Specialty & Dietary': <Sparkles size={32} />
+    };
+
+    return iconMap[categoryName] || <Package size={32} />;
+  };
+
+  // Helper function to get category color
+  const getCategoryColor = (categoryName) => {
+    const colorMap = {
+      'Bread & Rolls': '#D2691E',
+      'Pastries': '#DEB887',
+      'Cakes': '#FF69B4',
+      'Cookies': '#CD853F',
+      'Muffins & Cupcakes': '#FFB6C1',
+      'Donuts': '#FF6347',
+      'Bagels': '#DAA520',
+      'Specialty & Dietary': '#9370DB'
+    };
+
+    return colorMap[categoryName] || '#6639a6';
+  };
+
+  // Helper function to get default image
+  const getDefaultImage = (categoryName) => {
+    const imageMap = {
+      'Bread & Rolls': 'https://images.unsplash.com/photo-1549931319-a545dcf3bc73?w=400&h=300&fit=crop&crop=center',
+      'Pastries': 'https://images.unsplash.com/photo-1506459225024-1428097a7e18?w=400&h=300&fit=crop&crop=center',
+      'Cakes': 'https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=400&h=300&fit=crop&crop=center',
+      'Cookies': 'https://images.unsplash.com/photo-1499636136210-6f4ee915583e?w=400&h=300&fit=crop&crop=center',
+      'Muffins & Cupcakes': 'https://images.unsplash.com/photo-1587668178277-295251f900ce?w=400&h=300&fit=crop&crop=center',
+      'Donuts': 'https://images.unsplash.com/photo-1551024601-bec78aea704b?w=400&h=300&fit=crop&crop=center',
+      'Bagels': 'https://images.unsplash.com/photo-1608198093002-ad4e005484ec?w=400&h=300&fit=crop&crop=center',
+      'Specialty & Dietary': 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&h=300&fit=crop&crop=center'
+    };
+
+    return imageMap[categoryName] || 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=300&fit=crop&crop=center';
+  };
+
+  // Helper function to get default subcategories
+  const getDefaultSubcategories = (categoryName) => {
+    const subcategoryMap = {
+      'Bread & Rolls': ['Sourdough', 'Whole Wheat', 'Baguettes', 'Dinner Rolls', 'Specialty Breads'],
+      'Pastries': ['Croissants', 'Danishes', 'Puff Pastries', 'Eclairs', 'Breakfast Pastries'],
+      'Cakes': ['Birthday Cakes', 'Wedding Cakes', 'Cheesecakes', 'Layer Cakes', 'Custom Designs'],
+      'Cookies': ['Chocolate Chip', 'Sugar Cookies', 'Macarons', 'Biscotti', 'Seasonal Cookies'],
+      'Muffins & Cupcakes': ['Blueberry Muffins', 'Chocolate Cupcakes', 'Seasonal Flavors', 'Mini Cupcakes', 'Specialty Muffins'],
+      'Specialty & Dietary': ['Seasonal Items', 'Gluten-Free', 'Vegan Options', 'Custom Orders', 'Holiday Specials']
+    };
+
+    return subcategoryMap[categoryName] || ['Browse All', 'Popular Items', 'New Arrivals'];
   };
 
   const handleCategoryClick = (categorySlug) => {
@@ -122,6 +150,64 @@ const Categories = () => {
   const handleSubcategoryClick = (categorySlug, subcategory) => {
     navigate(`/products?category=${categorySlug}&subcategory=${encodeURIComponent(subcategory)}`);
   };
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="categories-page">
+        <div className="container">
+          <div className="page-header">
+            <h1>Browse Categories</h1>
+            <p>Loading categories...</p>
+          </div>
+          <div className="categories-loading">
+            <div className="loading-spinner"></div>
+            <p>Loading categories...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="categories-page">
+        <div className="container">
+          <div className="page-header">
+            <h1>Browse Categories</h1>
+            <p>Unable to load categories</p>
+          </div>
+          <div className="error-state">
+            <h3>Oops! Something went wrong</h3>
+            <p>{error}</p>
+            <button onClick={fetchCategories} className="btn btn-primary">
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Empty state
+  if (categories.length === 0) {
+    return (
+      <div className="categories-page">
+        <div className="container">
+          <div className="page-header">
+            <h1>Browse Categories</h1>
+            <p>No categories available</p>
+          </div>
+          <div className="empty-state">
+            <Package size={64} />
+            <h3>No categories found</h3>
+            <p>Categories will appear here once they are added to the system.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="categories-page">

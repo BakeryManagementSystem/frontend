@@ -1,95 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../../../context/CartContext';
-import { useAuth } from '../../../context/AuthContext';
-import ApiService from '../../../services/api';
-import { Heart, ShoppingCart, Star, Eye, Share } from 'lucide-react';
+import { ShoppingCart, Star } from 'lucide-react';
 import './ProductCard.css';
 
-const ProductCard = ({ product, showWishlist = true }) => {
+const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
-  const { isBuyer, isAuthenticated } = useAuth();
-  const [isInWishlist, setIsInWishlist] = useState(false);
-  const [wishlistLoading, setWishlistLoading] = useState(false);
-
-  useEffect(() => {
-    if (isAuthenticated && isBuyer) {
-      checkWishlistStatus();
-    }
-  }, [product.id, isAuthenticated, isBuyer]);
-
-  const checkWishlistStatus = async () => {
-    try {
-      const response = await ApiService.checkWishlist(product.id);
-      setIsInWishlist(response.in_wishlist);
-    } catch (error) {
-      console.error('Failed to check wishlist status:', error);
-    }
-  };
 
   const handleAddToCart = (e) => {
     e.preventDefault();
     e.stopPropagation();
     addToCart(product);
-  };
-
-  const handleWishlist = async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (!isAuthenticated) {
-      alert('Please login to add items to your wishlist');
-      return;
-    }
-
-    if (!isBuyer) {
-      alert('Only buyers can add items to wishlist');
-      return;
-    }
-
-    setWishlistLoading(true);
-
-    try {
-      if (isInWishlist) {
-        await ApiService.removeFromWishlist(product.id);
-        setIsInWishlist(false);
-      } else {
-        await ApiService.addToWishlist(product.id);
-        setIsInWishlist(true);
-      }
-    } catch (error) {
-      console.error('Failed to update wishlist:', error);
-      alert('Failed to update wishlist. Please try again.');
-    } finally {
-      setWishlistLoading(false);
-    }
-  };
-
-  const handleShare = async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    const productUrl = `${window.location.origin}/products/${product.id}`;
-    const shareData = {
-      title: product.name,
-      text: `Check out this amazing product: ${product.name}`,
-      url: productUrl
-    };
-
-    try {
-      // Check if Web Share API is available (mobile devices, some browsers)
-      if (navigator.share) {
-        await navigator.share(shareData);
-      } else {
-        // Fallback: Copy to clipboard
-        await navigator.clipboard.writeText(productUrl);
-        alert('Product link copied to clipboard!');
-      }
-    } catch (error) {
-      // Final fallback: Show URL in alert
-      console.error('Error sharing:', error);
-      alert(`Share this product: ${productUrl}`);
-    }
   };
 
   const formatPrice = (price) => {
@@ -135,32 +56,6 @@ const ProductCard = ({ product, showWishlist = true }) => {
               -{product.discount}%
             </div>
           )}
-
-          <div className="product-actions">
-            {showWishlist && (
-              <button
-                className={`action-btn wishlist-btn ${isInWishlist ? 'active' : ''}`}
-                onClick={handleWishlist}
-                disabled={wishlistLoading}
-                title={isInWishlist ? "Remove from Wishlist" : "Add to Wishlist"}
-              >
-                <Heart size={18} fill={isInWishlist ? "currentColor" : "none"} />
-              </button>
-            )}
-            <button
-              className="action-btn share-btn"
-              onClick={handleShare}
-              title="Share Product"
-            >
-              <Share size={18} />
-            </button>
-            <button
-              className="action-btn view-btn"
-              title="Quick View"
-            >
-              <Eye size={18} />
-            </button>
-          </div>
         </div>
 
         <div className="product-info">
@@ -181,9 +76,11 @@ const ProductCard = ({ product, showWishlist = true }) => {
             </span>
           </div>
 
-          <div className="product-seller">
-            by {product.seller}
-          </div>
+          {product.seller && (
+            <div className="product-seller">
+              by {product.seller}
+            </div>
+          )}
 
           <div className="product-price">
             {product.originalPrice && (
@@ -192,7 +89,7 @@ const ProductCard = ({ product, showWishlist = true }) => {
             <span className="current-price">{formatPrice(product.discountPrice || product.price)}</span>
           </div>
 
-          {!product.inStock && (
+          {product.inStock === false && (
             <div className="out-of-stock">
               Out of Stock
             </div>
@@ -204,7 +101,7 @@ const ProductCard = ({ product, showWishlist = true }) => {
         <button
           className="btn btn-primary btn-sm add-to-cart"
           onClick={handleAddToCart}
-          disabled={!product.inStock}
+          disabled={product.inStock === false}
         >
           <ShoppingCart size={16} />
           Add to Cart

@@ -39,19 +39,35 @@ export const NotificationProvider = ({ children }) => {
         const mockNotifications = [
           {
             id: 1,
-            title: 'Welcome to BMS!',
-            message: 'Thanks for joining our bakery management system.',
-            type: 'info',
+            title: 'New order received',
+            message: 'Order #1234 has been placed for 2 items.',
+            type: 'new_order',
             read_at: null,
             created_at: new Date().toISOString()
           },
           {
             id: 2,
-            title: 'Order Update',
-            message: 'Your recent order has been processed.',
-            type: 'order_accepted',
+            title: 'Order Shipped',
+            message: 'Your order #1233 has been shipped and is on its way.',
+            type: 'order_shipped',
             read_at: null,
             created_at: new Date(Date.now() - 3600000).toISOString()
+          },
+          {
+            id: 3,
+            title: 'Payment Successful',
+            message: 'Payment for order #1232 has been successfully processed.',
+            type: 'payment_processed',
+            read_at: new Date().toISOString(),
+            created_at: new Date(Date.now() - 86400000).toISOString()
+          },
+          {
+            id: 4,
+            title: 'Order Cancelled',
+            message: 'Your order #1231 has been cancelled.',
+            type: 'order_cancelled',
+            read_at: null,
+            created_at: new Date(Date.now() - 172800000).toISOString()
           }
         ];
         setNotifications(mockNotifications);

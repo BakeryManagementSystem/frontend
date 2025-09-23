@@ -59,17 +59,24 @@
   justify-content: center;
   width: 40px;
   height: 40px;
-  background-color: rgba(255, 255, 255, 0.1);
   border-radius: 50%;
-  color: var(--text-inverse);
+  color: var(--primary-color);
   text-decoration: none;
   transition: all 0.2s ease;
+}
+
+.social-link svg {
+  color: var(--primary-color);
 }
 
 .social-link:hover {
   background-color: var(--primary-color);
   color: var(--text-inverse);
   transform: translateY(-2px);
+}
+
+.social-link:hover svg {
+  color: var(--primary-color);
 }
 
 /* Footer Titles */
@@ -126,8 +133,10 @@
   padding: var(--spacing-xl) 0;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
   gap: var(--spacing-xl);
 }
 

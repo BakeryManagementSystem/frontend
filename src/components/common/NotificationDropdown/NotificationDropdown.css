@@ -85,7 +85,7 @@
 .mark-all-read {
   background: none;
   border: none;
-  color: #6366f1;
+  color: var(--primary-color);
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
@@ -98,7 +98,7 @@
 }
 
 .mark-all-read:hover {
-  background-color: #eef2ff;
+  background-color: var(--primary-bg, rgba(102, 57, 166, 0.08));
 }
 
 .notification-list {
@@ -127,11 +127,11 @@
 }
 
 .notification-item.unread {
-  background-color: #f0f9ff;
+  background-color: var(--primary-bg, rgba(102, 57, 166, 0.06));
 }
 
 .notification-item.unread:hover {
-  background-color: #e0f2fe;
+  background-color: var(--primary-bg, rgba(102, 57, 166, 0.12));
 }
 
 .notification-icon {
@@ -151,11 +151,11 @@
 }
 
 .icon-status-update {
-  color: #3b82f6;
+  color: var(--primary-color);
 }
 
 .icon-order {
-  color: #6366f1;
+  color: var(--primary-color);
 }
 
 .icon-shipped {
@@ -215,7 +215,7 @@
   transform: translateY(-50%);
   width: 8px;
   height: 8px;
-  background-color: #3b82f6;
+  background-color: var(--primary-color);
   border-radius: 50%;
 }
 
@@ -249,7 +249,7 @@
   width: 100%;
   background: none;
   border: none;
-  color: #6366f1;
+  color: var(--primary-color);
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -259,24 +259,28 @@
 }
 
 .view-all-btn:hover {
-  background-color: #eef2ff;
+  background-color: var(--primary-bg, rgba(102, 57, 166, 0.08));
 }
 
 /* Color variants for different notification types */
 .notification-item.success .notification-icon {
-  background-color: #dcfce7;
+  background-color: #e6f7f1;
+  color: #0d9488;
 }
 
 .notification-item.info .notification-icon {
-  background-color: #dbeafe;
+  background-color: var(--primary-bg, rgba(102, 57, 166, 0.05));
+  color: var(--primary-color);
 }
 
 .notification-item.warning .notification-icon {
-  background-color: #fef3c7;
+  background-color: #fffbeb;
+  color: #f59e0b;
 }
 
 .notification-item.error .notification-icon {
   background-color: #fee2e2;
+  color: #ef4444;
 }
 
 /* Responsive adjustments */

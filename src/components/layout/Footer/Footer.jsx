@@ -24,7 +24,7 @@ const Footer = () => {
             {/* Company Info */}
             <div className="footer-section">
               <div className="footer-logo">
-                <img src="/logo_white.png" alt="BMS" className="footer-logo-image" />
+                <ChefHat size={32} />
                 <span className="footer-logo-text">BMS</span>
               </div>
               <p className="footer-description">
@@ -78,25 +78,6 @@ const Footer = () => {
                 <li><Link to="/baker-guidelines">Guidelines</Link></li>
                 <li><Link to="/pricing">Pricing & Features</Link></li>
               </ul>
-            </div>
-
-            {/* Contact Info */}
-            <div className="footer-section">
-              <h3 className="footer-title">Contact Info</h3>
-              <div className="contact-info">
-                <div className="contact-item">
-                  <Phone size={16} />
-                  <span>+1 (555) 123-BAKE</span>
-                </div>
-                <div className="contact-item">
-                  <Mail size={16} />
-                  <span>support@bakery-ms.com</span>
-                </div>
-                <div className="contact-item">
-                  <MapPin size={16} />
-                  <span>123 Bakery Street, Sweet City, SC 12345</span>
-                </div>
-              </div>
             </div>
           </div>
         </div>

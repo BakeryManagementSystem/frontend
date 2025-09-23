@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import ApiService from '../../../services/api';
+import ProductCard from '../../../components/common/ProductCard/ProductCard';
 import {
   ShoppingBag,
   Heart,
@@ -107,6 +108,16 @@ const BuyerDashboard = () => {
       day: 'numeric'
     });
   };
+
+  if (loading) {
+    return (
+      <div className="buyer-dashboard">
+        <div className="container">
+          <div className="loading-text">Loading dashboard...</div>
+        </div>
+      </div>
+    );
+  }
 
   if (error) {
     return (
@@ -223,23 +234,10 @@ const BuyerDashboard = () => {
               View All →
             </Link>
           </div>
-          <div className="wishlist-grid">
+          <div className="products-grid wishlist-grid">
             {dashboardData.wishlistItems.length > 0 ? (
               dashboardData.wishlistItems.map((item) => (
-                <div key={item.id} className="wishlist-card">
-                  <div className="wishlist-image">
-                    <img src={item.image || '/placeholder-product.jpg'} alt={item.name} />
-                  </div>
-                  <div className="wishlist-content">
-                    <h4>{item.name}</h4>
-                    <p className="wishlist-price">{formatPrice(item.price)}</p>
-                    <div className="wishlist-actions">
-                      <Link to={`/products/${item.id}`} className="btn btn-sm btn-primary">
-                        View Product
-                      </Link>
-                    </div>
-                  </div>
-                </div>
+                <ProductCard key={item.id} product={item} />
               ))
             ) : (
               <div className="empty-state">
@@ -255,36 +253,27 @@ const BuyerDashboard = () => {
         </div>
 
         {/* Recommended Products */}
-        {dashboardData.recommendedProducts.length > 0 && (
-          <div className="dashboard-section">
-            <div className="section-header">
-              <h2>Recommended for You</h2>
-            </div>
-            <div className="products-grid">
-              {dashboardData.recommendedProducts.map((product) => (
-                <div key={product.id} className="product-card">
-                  <div className="product-image">
-                    <img src={product.image || '/placeholder-product.jpg'} alt={product.name} />
-                  </div>
-                  <div className="product-content">
-                    <h4>{product.name}</h4>
-                    <p className="product-price">{formatPrice(product.price)}</p>
-                    {product.rating && (
-                      <div className="product-rating">
-                        <Star size={14} fill="currentColor" />
-                        <span>{product.rating}</span>
-                        <span>({product.reviewCount})</span>
-                      </div>
-                    )}
-                    <Link to={`/products/${product.id}`} className="btn btn-sm btn-primary">
-                      View Product
-                    </Link>
-                  </div>
-                </div>
-              ))}
-            </div>
+        <div className="dashboard-section">
+          <div className="section-header">
+            <h2>Recommended for You</h2>
           </div>
-        )}
+          <div className="products-grid recommended-grid">
+            {dashboardData.recommendedProducts.length > 0 ? (
+              dashboardData.recommendedProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))
+            ) : (
+              <div className="empty-state">
+                <Star size={48} />
+                <h3>No recommendations yet</h3>
+                <p>Browse products to get personalized recommendations</p>
+                <Link to="/products" className="btn btn-primary">
+                  Browse Products
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
