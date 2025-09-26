@@ -449,6 +449,15 @@ const Checkout = () => {
                       />
                     </div>
                   </div>
+                  <div className="form-group">
+                    <label>Country *</label>
+                    <input
+                      type="text"
+                      value={shippingData.country}
+                      onChange={(e) => handleShippingChange('country', e.target.value)}
+                      required
+                    />
+                  </div>
 
                   <div className="shipping-methods">
                     <h3>Shipping Method</h3>
