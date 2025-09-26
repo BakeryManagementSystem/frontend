@@ -439,6 +439,7 @@ const Checkout = () => {
                         required
                       />
                     </div>
+                  </div>
 
                     <div className="form-row">
                     <div className="form-group">
@@ -450,7 +451,6 @@ const Checkout = () => {
                         required
                       />
                     </div>
-                  </div>
                   <div className="form-group">
                     <label>Country *</label>
                     <input
