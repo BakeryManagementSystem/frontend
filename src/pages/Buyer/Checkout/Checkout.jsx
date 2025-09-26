@@ -38,7 +38,7 @@ const Checkout = () => {
     city: '',
     state: '',
     zipCode: '',
-    country: 'United States'
+    country: user?.address?.country || ''
   });
 
   const [paymentData, setPaymentData] = useState({
