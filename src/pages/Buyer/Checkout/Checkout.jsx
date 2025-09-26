@@ -439,6 +439,8 @@ const Checkout = () => {
                         required
                       />
                     </div>
+
+                    <div className="form-row">
                     <div className="form-group">
                       <label>ZIP Code *</label>
                       <input
@@ -458,6 +460,7 @@ const Checkout = () => {
                       required
                     />
                   </div>
+                    </div>
 
                   <div className="shipping-methods">
                     <h3>Shipping Method</h3>
