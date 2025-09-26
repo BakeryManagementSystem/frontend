@@ -113,16 +113,27 @@ const Checkout = () => {
         }
       } catch {}
 
-      // Then DB profile
+      // Then DB profile (use getUserProfile for full address)
       try {
-        const resp = await ApiService.getUser();
+        const resp = await ApiService.getUserProfile();
         if (!cancelled && resp) {
-          const mapped = pickFromUser(resp);
-          setShippingData((prev) => mergeIfEmpty(prev, mapped));
+          // Map profile fields to shippingData
+          const address = resp.address || {};
+          setShippingData((prev) => mergeIfEmpty(prev, {
+            firstName: resp.first_name || resp.name?.split(' ')[0] || '',
+            lastName: resp.last_name || resp.name?.split(' ').slice(1).join(' ') || '',
+            email: resp.email || '',
+            phone: resp.phone || '',
+            address: address.street || '',
+            city: address.city || '',
+            state: address.state || '',
+            zipCode: address.zipCode || address.zip_code || '',
+            country: address.country || ''
+          }));
           // Prefill payment cardholder if empty
           setPaymentData((prev) => ({
             ...prev,
-            cardholderName: prev.cardholderName || resp.name || `${mapped.firstName} ${mapped.lastName}`.trim()
+            cardholderName: prev.cardholderName || resp.name || `${resp.first_name || ''} ${resp.last_name || ''}`.trim()
           }));
         }
       } catch {
