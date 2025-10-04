@@ -198,17 +198,6 @@ const AddProduct = () => {
     setImagePreview(prev => prev.filter((_, i) => i !== index));
   };
 
-  const getApiUrl = (endpoint) => {
-    let base = import.meta.env.VITE_API_URL || 'https://backend-production-cc2c.up.railway.app/api';
-    // Remove trailing slash
-    base = base.replace(/\/$/, '');
-    // If base already ends with /api, don't add it again
-    if (base.endsWith('/api')) {
-      return `${base}${endpoint}`;
-    }
-    return `${base}${endpoint}`;
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -249,60 +238,25 @@ const AddProduct = () => {
         formDataToSend.append('ingredient_cost', totalIngredientCost.toFixed(2));
       }
 
-      console.log('Submitting to:', getApiUrl('/products'));
+      console.log('Submitting product...');
       console.log('User:', user);
       console.log('Token:', token);
 
-      // Create an AbortController for timeout handling
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 seconds timeout
+      // Use ApiService instead of direct fetch
+      const result = await ApiService.createSellerProduct(formDataToSend);
 
-      const response = await fetch(getApiUrl('/products'), {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-        body: formDataToSend,
-        signal: controller.signal
-      });
-
-      clearTimeout(timeoutId);
-
-      console.log('Response status:', response.status);
-
-      if (response.ok) {
-        const result = await response.json();
-        console.log('Product created successfully:', result);
-        alert('Product created successfully!');
-        navigate(user?.user_type === 'owner' ? '/owner/products' : '/seller/products');
-      } else {
-        const contentType = response.headers.get('content-type');
-        if (contentType && contentType.includes('application/json')) {
-          const error = await response.json();
-          console.error('Error creating product:', error);
-
-          // Handle validation errors
-          if (error.errors) {
-            const errorMessages = Object.values(error.errors).flat();
-            alert('Validation errors:\n' + errorMessages.join('\n'));
-          } else {
-            alert('Error creating product: ' + (error.message || JSON.stringify(error)));
-          }
-        } else {
-          const errorText = await response.text();
-          console.error('Server error (HTML response):', errorText);
-          alert(`Server error (${response.status}). Please check your internet connection and try again.`);
-        }
-      }
+      console.log('Product created successfully:', result);
+      alert('Product created successfully!');
+      navigate(user?.user_type === 'owner' ? '/owner/products' : '/seller/products');
     } catch (error) {
       console.error('Request error:', error);
 
-      if (error.name === 'AbortError') {
-        alert('Request timed out. Please check your internet connection and try again with smaller images.');
-      } else if (error.message.includes('Failed to fetch')) {
-        alert('Network error: Please check your internet connection and try again.');
+      // Handle validation errors
+      if (error.response?.data?.errors) {
+        const errorMessages = Object.values(error.response.data.errors).flat();
+        alert('Validation errors:\n' + errorMessages.join('\n'));
       } else {
-        alert('Error: ' + error.message);
+        alert('Error creating product: ' + (error.message || 'Please try again'));
       }
     } finally {
       setLoading(false);

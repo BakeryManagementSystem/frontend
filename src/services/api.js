@@ -4,7 +4,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://backend-production
 class ApiService {
   constructor() {
     this.baseURL = API_BASE_URL;
-    this.isOnline = false; // Start in offline mode for testing
+    this.isOnline = true; // Start in online mode to check real backend first
     this.mockData = this.initializeMockData();
     this.forceRealAPI = false; // Use mock data for debugging ingredient issues
   }
