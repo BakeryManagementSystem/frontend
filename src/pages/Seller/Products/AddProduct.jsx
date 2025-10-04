@@ -199,14 +199,14 @@ const AddProduct = () => {
   };
 
   const getApiUrl = (endpoint) => {
-    let base = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
+    let base = import.meta.env.VITE_API_URL || 'https://backend-production-cc2c.up.railway.app/api';
     // Remove trailing slash
     base = base.replace(/\/$/, '');
     // If base already ends with /api, don't add it again
     if (base.endsWith('/api')) {
       return `${base}${endpoint}`;
     }
-    return `${base}/api${endpoint}`;
+    return `${base}${endpoint}`;
   };
 
   const handleSubmit = async (e) => {
