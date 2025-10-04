@@ -619,12 +619,28 @@ class ApiService {
   }
 
   // Seller Dashboard API
-  async getSellerDashboard() {
-    return this.request('/seller/dashboard');
+  async getSellerDashboard(params = {}) {
+    const searchParams = new URLSearchParams();
+    Object.keys(params).forEach(key => {
+      if (params[key] !== undefined && params[key] !== null && params[key] !== '') {
+        searchParams.append(key, params[key]);
+      }
+    });
+    const queryString = searchParams.toString();
+    const endpoint = `/seller/dashboard${queryString ? `?${queryString}` : ''}`;
+    return this.request(endpoint);
   }
 
-  async getSellerStats() {
-    return this.request('/seller/stats');
+  async getSellerStats(params = {}) {
+    const searchParams = new URLSearchParams();
+    Object.keys(params).forEach(key => {
+      if (params[key] !== undefined && params[key] !== null && params[key] !== '') {
+        searchParams.append(key, params[key]);
+      }
+    });
+    const queryString = searchParams.toString();
+    const endpoint = `/seller/stats${queryString ? `?${queryString}` : ''}`;
+    return this.request(endpoint);
   }
 
   // Seller Products API
@@ -796,101 +812,177 @@ class ApiService {
     });
   }
 
-  // PDF Generation methods
+  // PDF Generation methods - using centralized request handling
   async generateInvoice(orderId) {
-    const response = await fetch(`${this.baseURL}/orders/${orderId}/invoice`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
-      },
-    });
+    try {
+      // Check if we're online
+      if (!this.isOnline) {
+        await this.checkConnection();
+      }
 
-    if (!response.ok) {
-      throw new Error('Failed to generate invoice');
+      if (!this.isOnline) {
+        throw new Error('Unable to connect to server. Please check your connection and try again.');
+      }
+
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch(`${this.baseURL}/orders/${orderId}/invoice`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/pdf',
+        },
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => 'Unknown error');
+        throw new Error(`Failed to generate invoice: ${errorText}`);
+      }
+
+      // Create blob and download
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `invoice-${orderId}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Failed to generate invoice:', error);
+      throw error;
     }
-
-    // Create blob and download
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `invoice-${orderId}.pdf`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
   }
 
   async previewInvoice(orderId) {
-    const response = await fetch(`${this.baseURL}/orders/${orderId}/invoice/preview`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
-      },
-    });
+    try {
+      // Check if we're online
+      if (!this.isOnline) {
+        await this.checkConnection();
+      }
 
-    if (!response.ok) {
-      throw new Error('Failed to preview invoice');
+      if (!this.isOnline) {
+        throw new Error('Unable to connect to server. Please check your connection and try again.');
+      }
+
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch(`${this.baseURL}/orders/${orderId}/invoice/preview`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/pdf',
+        },
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => 'Unknown error');
+        throw new Error(`Failed to preview invoice: ${errorText}`);
+      }
+
+      // Open in new tab
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      window.open(url, '_blank');
+
+      // Clean up after a delay to ensure the window has opened
+      setTimeout(() => {
+        window.URL.revokeObjectURL(url);
+      }, 100);
+    } catch (error) {
+      console.error('Failed to preview invoice:', error);
+      throw error;
     }
-
-    // Open in new tab
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    window.open(url, '_blank');
-    window.URL.revokeObjectURL(url);
   }
 
   async exportAnalytics(timeRange = '30days', reportType = 'overview') {
-    const params = new URLSearchParams({
-      timeRange,
-      reportType
-    });
+    try {
+      // Check if we're online
+      if (!this.isOnline) {
+        await this.checkConnection();
+      }
 
-    const response = await fetch(`${this.baseURL}/analytics/export?${params}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
-      },
-    });
+      if (!this.isOnline) {
+        throw new Error('Unable to connect to server. Please check your connection and try again.');
+      }
 
-    if (!response.ok) {
-      throw new Error('Failed to export analytics');
+      const params = new URLSearchParams({
+        timeRange,
+        reportType
+      });
+
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch(`${this.baseURL}/analytics/export?${params}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/pdf',
+        },
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => 'Unknown error');
+        throw new Error(`Failed to export analytics: ${errorText}`);
+      }
+
+      // Create blob and download
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `analytics-report-${timeRange}-${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Failed to export analytics:', error);
+      throw error;
     }
-
-    // Create blob and download
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `analytics-report-${timeRange}-${new Date().toISOString().split('T')[0]}.pdf`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
   }
 
   async previewAnalytics(timeRange = '30days', reportType = 'overview') {
-    const params = new URLSearchParams({
-      timeRange,
-      reportType
-    });
+    try {
+      // Check if we're online
+      if (!this.isOnline) {
+        await this.checkConnection();
+      }
 
-    const response = await fetch(`${this.baseURL}/analytics/export/preview?${params}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
-      },
-    });
+      if (!this.isOnline) {
+        throw new Error('Unable to connect to server. Please check your connection and try again.');
+      }
 
-    if (!response.ok) {
-      throw new Error('Failed to preview analytics');
+      const params = new URLSearchParams({
+        timeRange,
+        reportType
+      });
+
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch(`${this.baseURL}/analytics/export/preview?${params}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/pdf',
+        },
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => 'Unknown error');
+        throw new Error(`Failed to preview analytics: ${errorText}`);
+      }
+
+      // Open in new tab
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      window.open(url, '_blank');
+
+      // Clean up after a delay to ensure the window has opened
+      setTimeout(() => {
+        window.URL.revokeObjectURL(url);
+      }, 100);
+    } catch (error) {
+      console.error('Failed to preview analytics:', error);
+      throw error;
     }
-
-    // Open in new tab
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    window.open(url, '_blank');
-    window.URL.revokeObjectURL(url);
   }
 }
 
