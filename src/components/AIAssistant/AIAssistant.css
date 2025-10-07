@@ -655,6 +655,9 @@
     gap: 8px;
     align-items: flex-start;
     min-height: 56px;
+    position: relative;
+    display: flex;
+    justify-content: space-between;
   }
 
   .header-left {
@@ -662,9 +665,9 @@
     min-width: 0;
     flex: 1;
     overflow: visible;
-    margin-right: 8px;
     display: flex;
     align-items: flex-start;
+    max-width: calc(100% - 70px); /* Reserve space for buttons */
   }
 
   .header-icon {
@@ -686,6 +689,7 @@
     display: flex;
     flex-direction: column;
     gap: 1px;
+    max-width: calc(100% - 36px); /* Account for icon width */
   }
 
   .header-text h3 {
@@ -719,8 +723,10 @@
     flex-direction: row !important;
     align-items: flex-start !important;
     flex-wrap: nowrap !important;
-    margin-left: 0;
+    margin-left: 8px;
     margin-top: 2px;
+    width: 60px; /* Fixed width to prevent expansion */
+    justify-content: flex-end;
   }
 
   /* Hide minimize button on mobile */
@@ -738,6 +744,7 @@
     max-width: 28px !important;
     max-height: 28px !important;
     flex-shrink: 0 !important;
+    position: relative;
   }
 
   .header-btn svg {
