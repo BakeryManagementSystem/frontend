@@ -277,6 +277,12 @@
   flex-shrink: 0;
 }
 
+.header-btn svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
 .header-btn:hover {
   background: rgba(255, 255, 255, 0.3);
   transform: scale(1.05);

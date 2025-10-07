@@ -196,7 +196,7 @@ const AIAssistant = () => {
                 aria-label={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
                 title={isFullscreen ? 'Exit Fullscreen (ESC)' : 'Fullscreen'}
               >
-                <Maximize size={18} />
+                <Maximize />
               </button>
               <button
                 onClick={() => setIsMinimized(!isMinimized)}
@@ -204,7 +204,7 @@ const AIAssistant = () => {
                 aria-label={isMinimized ? 'Maximize' : 'Minimize'}
                 title={isMinimized ? 'Maximize' : 'Minimize'}
               >
-                {isMinimized ? <Maximize2 size={18} /> : <Minimize2 size={18} />}
+                {isMinimized ? <Maximize2 /> : <Minimize2 />}
               </button>
               <button
                 onClick={() => {
@@ -216,7 +216,7 @@ const AIAssistant = () => {
                 aria-label="Close"
                 title="Close"
               >
-                <X size={18} />
+                <X />
               </button>
             </div>
           </div>
