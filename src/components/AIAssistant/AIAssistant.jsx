@@ -36,11 +36,11 @@ const AIAssistant = () => {
     if (userType === 'seller' || userType === 'owner') {
       return [
         { text: '📊 Business Overview', prompt: 'Show me my business overview' },
-        { text: '💰 Sales Report', prompt: 'Show my total sales and revenue' },
-        { text: '⏳ Pending Orders', prompt: 'What pending orders need attention?' },
+        { text: '💰 Sales Report', prompt: 'Show my sales and revenue' },
+        { text: '⏳ Pending Orders', prompt: 'Show pending orders' },
         { text: '🥣 Low Stock Items', prompt: 'What ingredients are low in stock?' },
         { text: '⚠️ Expiring Items', prompt: 'Show expired or expiring ingredients' },
-        { text: '📈 Ingredient Stats', prompt: 'Show ingredient statistics' },
+        { text: '📈 Ingredient Stats', prompt: 'Show ingredient statistics overview' },
       ];
     } else if (userType === 'buyer') {
       return [
@@ -48,8 +48,8 @@ const AIAssistant = () => {
         { text: '💳 My Spending', prompt: 'How much have I spent?' },
         { text: '🎂 Recommendations', prompt: 'Recommend products for me' },
         { text: '🛍️ Browse Products', prompt: 'What products do you have?' },
-        { text: '⭐ Best Sellers', prompt: 'Show me your best sellers' },
-        { text: '📍 Store Info', prompt: 'Store hours and location' },
+        { text: '⭐ Best Sellers', prompt: 'Show me best sellers' },
+        { text: '📋 Categories', prompt: 'Show product categories' },
       ];
     } else {
       // Guest user
@@ -58,7 +58,7 @@ const AIAssistant = () => {
         { text: '📋 Categories', prompt: 'Show me product categories' },
         { text: '🎂 Custom Cakes', prompt: 'Tell me about custom cakes' },
         { text: '📝 Create Account', prompt: 'How do I create an account?' },
-        { text: '📍 Store Info', prompt: 'Store hours and location' },
+        { text: '🏪 About Us', prompt: 'Tell me about your bakery' },
         { text: '❓ Help', prompt: 'What can you help me with?' },
       ];
     }
