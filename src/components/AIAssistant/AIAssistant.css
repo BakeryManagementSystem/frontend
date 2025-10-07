@@ -636,24 +636,24 @@
   }
 
   .ai-assistant-header {
-    padding: 14px 16px;
+    padding: 12px 14px;
   }
 
   .header-left {
-    gap: 10px;
+    gap: 8px;
     min-width: 0;
     flex: 1;
   }
 
   .header-icon {
-    width: 34px;
-    height: 34px;
+    width: 30px;
+    height: 30px;
     flex-shrink: 0;
   }
 
   .header-icon svg {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
   }
 
   .header-text {
@@ -662,42 +662,46 @@
   }
 
   .header-text h3 {
-    font-size: 15px;
+    font-size: 14px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
   .status {
-    font-size: 11px;
+    font-size: 10px;
+    white-space: nowrap;
   }
 
   .header-actions {
-    gap: 6px;
+    gap: 4px !important;
     flex-shrink: 0;
-    flex-direction: row;
-    align-items: center;
-    flex-wrap: nowrap;
+    flex-direction: row !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
   }
 
   /* Hide minimize button on mobile */
   .header-actions .header-btn:nth-child(2) {
-    display: none;
+    display: none !important;
   }
 
   .header-btn {
     padding: 0 !important;
     border-radius: 6px;
-    width: 32px !important;
-    height: 32px !important;
-    min-width: 32px !important;
-    min-height: 32px !important;
-    flex-shrink: 0;
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    min-height: 28px !important;
+    max-width: 28px !important;
+    max-height: 28px !important;
+    flex-shrink: 0 !important;
   }
 
   .header-btn svg {
-    width: 15px !important;
-    height: 15px !important;
+    width: 14px !important;
+    height: 14px !important;
+    flex-shrink: 0 !important;
   }
 
   .ai-assistant-messages {
