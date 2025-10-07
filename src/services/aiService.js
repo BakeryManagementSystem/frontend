@@ -342,7 +342,38 @@ class AIService {
         };
       }
 
-      // Try to handle simple queries with local data first
+      // PRIORITY 1: Try backend API first (authenticated users only)
+      if (isAuthenticated) {
+        try {
+          console.log('Calling backend AI API with message:', userMessage);
+          const backendResponse = await this.apiService.request('/ai/chat', {
+            method: 'POST',
+            data: {
+              message: userMessage,
+              context: {
+                user_type: contextData.user?.user_type,
+                user_id: contextData.user?.id
+              }
+            }
+          });
+
+          if (backendResponse.success && backendResponse.data?.message) {
+            console.log('Backend API response received:', backendResponse.data);
+            return {
+              success: true,
+              message: backendResponse.data.message,
+              data: backendResponse.data.data,
+              suggestions: backendResponse.data.suggestions,
+              actions: backendResponse.data.actions
+            };
+          }
+        } catch (backendError) {
+          console.warn('Backend AI API failed, falling back to other methods:', backendError);
+          // Continue to fallback methods
+        }
+      }
+
+      // PRIORITY 2: Try to handle simple queries with local data
       try {
         const localResponse = this.handleLocalQueries(userMessage, contextData, isAuthenticated);
         if (localResponse) {
@@ -353,7 +384,7 @@ class AIService {
         // Continue to try other methods
       }
 
-      // If no local response and Gemini API key is available, use Gemini
+      // PRIORITY 3: If Gemini API key is available, use Gemini
       if (this.geminiApiKey) {
         try {
           const systemPrompt = this.generateSystemPrompt(isAuthenticated, contextData);
@@ -365,7 +396,7 @@ class AIService {
         }
       }
 
-      // Enhanced fallback response based on the user's message
+      // PRIORITY 4: Enhanced fallback response based on the user's message
       const message_lower = userMessage.toLowerCase();
 
       // Provide specific responses for common bakery keywords
