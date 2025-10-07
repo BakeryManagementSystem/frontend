@@ -274,18 +274,33 @@ class AIService {
       }
     } else {
       systemPrompt += `
-      The user is NOT logged in (GUEST). Provide general information only.
+      The user is NOT logged in (GUEST). Provide general information and encourage account creation.
+      
+      IMPORTANT GUIDELINES FOR GUEST USERS:
+      - When they ask about "orders", "order history", or "my orders": Explain that they need an account to place and track orders. Encourage them to register.
+      - When they ask about "stats", "statistics", or "analytics": Explain these features are for sellers/business owners. If they want to buy, direct them to register as a buyer. If they want to sell, direct them to register as a seller.
+      - When they ask about "account", "profile", or "balance": Encourage them to create an account to access personalized features.
+      - Always be friendly and guide them to the registration page when appropriate.
       
       You can help with:
-      - Viewing available products and their details
-      - Browse product categories
+      - Viewing available products and their details (show specific products from the list)
+      - Browse product categories (list the categories available)
       - General bakery information and services
-      - How to create an account or place orders
+      - How to create an account or place orders (provide clear steps)
       - Store hours, location, and contact information
       - General inquiries about the bakery
+      - Product recommendations and popular items
       
-      For account-specific features like order history, account balance, or personalized recommendations, 
-      politely ask them to log in or create an account first.
+      RESPONSE STYLE FOR GUESTS:
+      - Be welcoming and encouraging
+      - Provide specific product information when asked about products
+      - Guide them to create an account for order-related queries
+      - Explain the benefits of having an account (order tracking, history, personalized recommendations)
+      - For seller/business queries, explain that they need a seller account
+      
+      When they ask about orders/purchases: Say "To place orders and track your purchases, you'll need to create an account! Once registered, you can browse our products, add items to your cart, and place orders with ease. Would you like me to guide you through the registration process?"
+      
+      When they ask about stats/analytics: Say "Analytics and statistics are available for sellers and business owners. If you're interested in selling your bakery products on our platform, you can register as a seller! Would you like to know more about becoming a seller?"
       
       Do NOT provide any personal account information or order details.
       `;
@@ -418,6 +433,135 @@ class AIService {
   handleLocalQueries(message, contextData, isAuthenticated) {
     const message_lower = message.toLowerCase();
 
+    // ===== ROLE-BASED QUERY VALIDATION =====
+    // Check if user is asking for features outside their role
+
+    // Define seller/owner specific keywords
+    const sellerKeywords = [
+      'sales', 'revenue', 'income', 'earnings', 'profit', 'money made',
+      'ingredient', 'ingredients', 'inventory', 'stock', 'supplies',
+      'batch', 'batches', 'supplier', 'reorder', 'low stock',
+      'business', 'management', 'analytics', 'performance', 'metrics',
+      'pending orders', 'customer orders', 'orders received',
+      'add product', 'manage product', 'edit product', 'delete product',
+      'expiry', 'expired', 'cost analysis', 'usage'
+    ];
+
+    // Define buyer specific keywords
+    const buyerKeywords = [
+      'my orders', 'order history', 'purchase history', 'what did i order',
+      'my purchases', 'bought', 'total spent', 'spending', 'my balance',
+      'recommend', 'what should i buy', 'cart', 'checkout',
+      'delivery', 'track order', 'order status'
+    ];
+
+    // Define authentication required keywords
+    const authRequiredKeywords = [
+      'my orders', 'order history', 'account', 'balance', 'profile',
+      'my purchases', 'purchase history', 'dashboard', 'stats',
+      'sales', 'revenue', 'ingredients', 'business'
+    ];
+
+    // Check if guest user is asking for authenticated features
+    if (!isAuthenticated) {
+      const isAskingAuthFeature = authRequiredKeywords.some(keyword => message_lower.includes(keyword));
+
+      if (isAskingAuthFeature) {
+        // Check if asking for seller features
+        const isAskingSellerFeature = sellerKeywords.some(keyword => message_lower.includes(keyword));
+
+        if (isAskingSellerFeature) {
+          return "🔐 **Seller/Owner Features Require Login**\n\n" +
+                 "The features you're asking about (sales, revenue, inventory, ingredients, business management) are available for **Seller** and **Owner** accounts.\n\n" +
+                 "**To access these features:**\n" +
+                 "1. If you already have a seller account, please log in\n" +
+                 "2. If you want to become a seller, please contact us to register as a seller\n\n" +
+                 "**Seller Account Benefits:**\n" +
+                 "• Track sales and revenue\n" +
+                 "• Manage ingredient inventory\n" +
+                 "• Monitor low stock and expiry dates\n" +
+                 "• View business analytics and performance\n" +
+                 "• Manage product catalog\n\n" +
+                 "Would you like to know more about becoming a seller or need help logging in?";
+        }
+
+        // Asking for buyer features
+        return "🔐 **Account Features Require Login**\n\n" +
+               "To access your order history, account balance, and personalized features, please log in to your account.\n\n" +
+               "**Don't have an account yet?**\n" +
+               "Create a free buyer account to:\n" +
+               "• Place and track orders\n" +
+               "• View purchase history\n" +
+               "• Get personalized recommendations\n" +
+               "• Manage your profile\n" +
+               "• Save favorite products\n\n" +
+               "Would you like help with registration or login?";
+      }
+    }
+
+    // Check if authenticated user is asking for features outside their role
+    if (isAuthenticated && contextData.user) {
+      const userType = contextData.user.user_type;
+
+      // BUYER asking for SELLER features
+      if (userType === 'buyer') {
+        const isAskingSellerFeature = sellerKeywords.some(keyword => message_lower.includes(keyword));
+
+        if (isAskingSellerFeature) {
+          // Check if it's about purchasing/ordering (allowed for buyers)
+          const isOrderingRelated = message_lower.includes('buy') ||
+                                   message_lower.includes('order') ||
+                                   message_lower.includes('purchase') ||
+                                   message_lower.includes('cart') ||
+                                   message_lower.includes('checkout');
+
+          if (!isOrderingRelated) {
+            return "🛍️ **Buyer Account - Seller Features Not Available**\n\n" +
+                   "Hi! I noticed you're asking about features like sales tracking, inventory management, or business analytics. These features are only available for **Seller** and **Owner** accounts.\n\n" +
+                   "**Your current account type:** Buyer (Customer)\n\n" +
+                   "**As a buyer, you can:**\n" +
+                   "• Browse and purchase products\n" +
+                   "• View your order history and spending\n" +
+                   "• Track your orders\n" +
+                   "• Get product recommendations\n" +
+                   "• Manage your account profile\n\n" +
+                   "**Interested in selling?**\n" +
+                   "If you want to sell bakery products, please contact our support team to upgrade to a seller account.\n\n" +
+                   "How can I help you with your shopping today?";
+          }
+        }
+      }
+
+      // SELLER/OWNER asking for BUYER-specific features
+      if (userType === 'seller' || userType === 'owner') {
+        const isAskingBuyerFeature = message_lower.includes('what should i buy') ||
+                                     message_lower.includes('recommend products for me') ||
+                                     message_lower.includes('my cart') ||
+                                     message_lower.includes('checkout') ||
+                                     (message_lower.includes('my purchases') && !message_lower.includes('customer')) ||
+                                     (message_lower.includes('my spending') && !message_lower.includes('customer'));
+
+        if (isAskingBuyerFeature) {
+          return "💼 **Seller/Owner Account - Limited Buyer Features**\n\n" +
+                 `Hi ${contextData.user.name}! I noticed you're asking about buyer-specific features like personal shopping, cart, or recommendations.\n\n` +
+                 `**Your current account type:** ${userType === 'owner' ? 'Business Owner' : 'Seller'}\n\n` +
+                 "**Your account is designed for business management:**\n" +
+                 "• Track sales and revenue\n" +
+                 "• Manage ingredient inventory and batches\n" +
+                 "• Monitor customer orders\n" +
+                 "• View business analytics\n" +
+                 "• Manage product catalog\n\n" +
+                 "**Need to purchase items?**\n" +
+                 "If you want to shop as a customer, you would need a separate buyer account.\n\n" +
+                 "Can I help you with your business operations instead? Try asking about:\n" +
+                 "• 'Show my sales data'\n" +
+                 "• 'What ingredients are low in stock?'\n" +
+                 "• 'Business overview'\n" +
+                 "• 'Pending orders'";
+        }
+      }
+    }
+
     // Handle conversational responses about cakes
     if ((message_lower.includes('yes') || message_lower.includes('sure') || message_lower.includes('okay') || message_lower.includes('ok')) &&
         (message_lower.includes('cake') || message_lower.includes('order') || message_lower.includes('custom'))) {
@@ -448,8 +592,12 @@ class AIService {
                "To place an order, please create an account or call us at (555) 123-CAKE. Would you like to see examples of our work?");
     }
 
-    // Product-related queries
-    if (message_lower.includes('products') || message_lower.includes('what do you sell')) {
+    // Product-related queries with expanded variations
+    if (message_lower.includes('products') || message_lower.includes('what do you sell') ||
+        message_lower.includes('items') || message_lower.includes('menu') ||
+        message_lower.includes('catalog') || message_lower.includes('available') ||
+        message_lower.includes('what can i buy') || message_lower.includes('show me') ||
+        message_lower.includes('list') || message_lower.includes('browse')) {
       const products = contextData.products || [];
       if (products.length > 0) {
         const productList = products.slice(0, 5).map(p => `${p.name} - $${p.price}`).join(', ');
@@ -467,8 +615,10 @@ class AIService {
       }
     }
 
-    // Category queries
-    if (message_lower.includes('categories') || message_lower.includes('types')) {
+    // Category queries with expanded variations
+    if (message_lower.includes('categories') || message_lower.includes('types') ||
+        message_lower.includes('sections') || message_lower.includes('groups') ||
+        message_lower.includes('kind of') || message_lower.includes('variety')) {
       const categories = contextData.categories || [];
       if (categories.length > 0) {
         const categoryList = categories.map(c => c.name).join(', ');
@@ -491,143 +641,332 @@ class AIService {
       const userType = contextData.user.user_type;
       const user = contextData.user;
 
-      // Order/Sales history queries
-      if (message_lower.includes('my orders') || message_lower.includes('order history') ||
-          message_lower.includes('sales') || message_lower.includes('revenue')) {
+      // ===== BUYER-SPECIFIC QUERIES WITH EXTENSIVE VARIATIONS =====
+      if (userType === 'buyer') {
+        // Order history queries - extensive keyword variations
+        if (message_lower.includes('my orders') || message_lower.includes('order history') ||
+            message_lower.includes('orders') || message_lower.includes('purchases') ||
+            message_lower.includes('bought') || message_lower.includes('purchase history') ||
+            message_lower.includes('what did i order') || message_lower.includes('what have i bought') ||
+            message_lower.includes('previous orders') || message_lower.includes('past orders') ||
+            message_lower.includes('recent orders') || message_lower.includes('last order') ||
+            message_lower.includes('order list') || message_lower.includes('transaction') ||
+            message_lower.includes('buying history') || message_lower.includes('shopping history')) {
 
-        const orders = Array.isArray(contextData.orders) ? contextData.orders : [];
-
-        if (userType === 'buyer') {
+          const orders = Array.isArray(contextData.orders) ? contextData.orders : [];
           if (orders.length > 0) {
             const recentOrder = orders[0];
             const totalSpent = contextData.balance?.total_spent || 0;
-            return `Your most recent order was #${recentOrder.id} for $${recentOrder.total_amount}. You have ${orders.length} total orders with a total spending of $${totalSpent.toFixed(2)}. Would you like details about any specific order?`;
+            return `Your most recent order was #${recentOrder.id} for $${recentOrder.total_amount} on ${recentOrder.created_at}. You have ${orders.length} total orders with a total spending of $${totalSpent.toFixed(2)}. Would you like details about any specific order?`;
           } else {
             return "You haven't placed any orders yet. Browse our delicious products and place your first order to start enjoying our fresh bakery items!";
           }
-        } else if (userType === 'seller' || userType === 'owner') {
+        }
+
+        // Balance/Spending queries - extensive keyword variations
+        if (message_lower.includes('balance') || message_lower.includes('account') ||
+            message_lower.includes('profile') || message_lower.includes('spending') ||
+            message_lower.includes('spent') || message_lower.includes('how much') ||
+            message_lower.includes('total cost') || message_lower.includes('expense') ||
+            message_lower.includes('money') || message_lower.includes('budget') ||
+            message_lower.includes('summary') || message_lower.includes('overview') ||
+            message_lower.includes('stats') || message_lower.includes('statistics') ||
+            message_lower.includes('my info') || message_lower.includes('my details') ||
+            message_lower.includes('account info') || message_lower.includes('user info')) {
+          const totalSpent = contextData.balance?.total_spent || 0;
+          const totalOrders = contextData.balance?.total_orders || 0;
+          const lastOrderDate = contextData.balance?.last_order_date || 'N/A';
+          return `Hello ${user.name}! 👋\n\n` +
+                 `**Your Account Summary:**\n` +
+                 `• Total Orders: ${totalOrders}\n` +
+                 `• Total Spent: $${totalSpent.toFixed(2)}\n` +
+                 `• Last Order: ${lastOrderDate}\n` +
+                 `• Member Since: ${user.created_at || 'N/A'}\n\n` +
+                 `How can I help you with your shopping today? Would you like to browse products or check your order history?`;
+        }
+
+        // Recommendations queries
+        if (message_lower.includes('recommend') || message_lower.includes('suggestion') ||
+            message_lower.includes('what should i buy') || message_lower.includes('best seller') ||
+            message_lower.includes('popular') || message_lower.includes('favorite') ||
+            message_lower.includes('top products') || message_lower.includes('most ordered')) {
+          const products = contextData.products || [];
+          const topProducts = products.slice(0, 3);
+          return `Based on your preferences, here are our top recommendations:\n\n` +
+                 `${topProducts.map((p, i) => `${i + 1}. **${p.name}** - $${p.price}\n   ${p.description || 'A customer favorite!'}`).join('\n\n')}\n\n` +
+                 `Would you like to add any of these to your cart?`;
+        }
+      }
+
+      // ===== SELLER/OWNER-SPECIFIC QUERIES WITH EXTENSIVE VARIATIONS =====
+      if (userType === 'seller' || userType === 'owner') {
+        // Sales/Revenue queries - extensive keyword variations
+        if (message_lower.includes('sales') || message_lower.includes('revenue') ||
+            message_lower.includes('income') || message_lower.includes('earnings') ||
+            message_lower.includes('profit') || message_lower.includes('money made') ||
+            message_lower.includes('total sales') || message_lower.includes('sales data') ||
+            message_lower.includes('sales report') || message_lower.includes('sales history') ||
+            message_lower.includes('how much sold') || message_lower.includes('sold') ||
+            message_lower.includes('orders received') || message_lower.includes('customer orders') ||
+            message_lower.includes('transactions') || message_lower.includes('completed orders')) {
+
+          const orders = Array.isArray(contextData.orders) ? contextData.orders : [];
           if (orders.length > 0) {
             const totalRevenue = contextData.balance?.total_revenue || 0;
             const pendingOrders = contextData.balance?.pending_orders || 0;
-            return `You have ${orders.length} total sales generating $${totalRevenue.toFixed(2)} in revenue. Currently, ${pendingOrders} orders are pending fulfillment. Would you like to see detailed sales analytics or manage pending orders?`;
+            const lastSaleDate = contextData.balance?.last_sale_date || 'N/A';
+            return `📊 **Sales Overview:**\n\n` +
+                   `• Total Sales: ${orders.length}\n` +
+                   `• Total Revenue: $${totalRevenue.toFixed(2)}\n` +
+                   `• Pending Orders: ${pendingOrders}\n` +
+                   `• Last Sale: ${lastSaleDate}\n\n` +
+                   `Would you like to see detailed sales analytics or manage pending orders?`;
           } else {
             return "No sales recorded yet. Once customers start placing orders, you'll be able to track sales performance and revenue here.";
           }
         }
-      }
 
-      // Balance/Account queries
-      if (message_lower.includes('balance') || message_lower.includes('account') || message_lower.includes('profile')) {
-        if (userType === 'buyer') {
-          const totalSpent = contextData.balance?.total_spent || 0;
-          const totalOrders = contextData.balance?.total_orders || 0;
-          return `Hello ${user.name}! Your buyer account shows ${totalOrders} orders with total spending of $${totalSpent.toFixed(2)}. How can I help you with your shopping today?`;
-        } else if (userType === 'seller') {
-          const totalRevenue = contextData.balance?.total_revenue || 0;
-          const totalSales = contextData.balance?.total_sales || 0;
-          return `Hello ${user.name}! Your seller account shows ${totalSales} sales generating $${totalRevenue.toFixed(2)} in revenue. How can I assist with your bakery operations?`;
-        } else if (userType === 'owner') {
+        // Business/Account queries - extensive keyword variations
+        if (message_lower.includes('business') || message_lower.includes('management') ||
+            message_lower.includes('dashboard') || message_lower.includes('overview') ||
+            message_lower.includes('summary') || message_lower.includes('stats') ||
+            message_lower.includes('statistics') || message_lower.includes('analytics') ||
+            message_lower.includes('performance') || message_lower.includes('metrics') ||
+            message_lower.includes('my account') || message_lower.includes('account info') ||
+            message_lower.includes('profile') || message_lower.includes('balance') ||
+            message_lower.includes('how is business') || message_lower.includes('business doing')) {
           const totalRevenue = contextData.balance?.total_revenue || 0;
           const totalSales = contextData.balance?.total_sales || 0;
           const pendingOrders = contextData.balance?.pending_orders || 0;
-          return `Hello ${user.name}! As the owner, your bakery has ${totalSales} total sales with $${totalRevenue.toFixed(2)} revenue. ${pendingOrders} orders need attention. How can I help with business management?`;
-        }
-      }
 
-      // Business-specific queries for sellers/owners
-      if ((userType === 'seller' || userType === 'owner') &&
-          (message_lower.includes('business') || message_lower.includes('management') ||
-           message_lower.includes('analytics') || message_lower.includes('performance'))) {
-        const totalRevenue = contextData.balance?.total_revenue || 0;
-        const totalSales = contextData.balance?.total_sales || 0;
-        const pendingOrders = contextData.balance?.pending_orders || 0;
-
-        return `Business Overview: ${totalSales} total sales, $${totalRevenue.toFixed(2)} revenue, ${pendingOrders} pending orders. I can help with sales analytics, inventory management, order fulfillment, and business insights. What would you like to focus on?`;
-      }
-
-      // Ingredient-related queries for sellers/owners
-      if ((userType === 'seller' || userType === 'owner') &&
-          (message_lower.includes('ingredient') || message_lower.includes('inventory') ||
-           message_lower.includes('stock') || message_lower.includes('flour') ||
-           message_lower.includes('butter') || message_lower.includes('chocolate') ||
-           message_lower.includes('batch') || message_lower.includes('supplier'))) {
-
-        const ingredients = contextData.ingredients || [];
-        const batches = contextData.ingredientBatches || [];
-        const stats = contextData.ingredientStats;
-
-        if (message_lower.includes('stats') || message_lower.includes('statistics') || message_lower.includes('overview')) {
-          if (stats) {
-            return `📊 **Ingredient Statistics Overview:**\n\n` +
-                   `• Total Ingredients: ${stats.total_ingredients}\n` +
-                   `• Total Inventory Value: $${stats.total_value}\n` +
-                   `• Low Stock Items: ${stats.low_stock_count}\n` +
-                   `• Expired Items: ${stats.expired_count}\n` +
-                   `• Monthly Usage: $${stats.monthly_usage}\n\n` +
-                   `**Top Used Ingredients:**\n` +
-                   `${stats.top_used_ingredients?.map(ing => `• ${ing.name}: ${ing.usage} (${ing.percentage}%)`).join('\n') || 'No usage data available'}\n\n` +
-                   `**Cost Breakdown:**\n` +
-                   `• Flour Products: $${stats.cost_breakdown?.flour_products || '0'}\n` +
-                   `• Dairy Products: $${stats.cost_breakdown?.dairy_products || '0'}\n` +
-                   `• Chocolates: $${stats.cost_breakdown?.chocolates || '0'}\n` +
-                   `• Fruits: $${stats.cost_breakdown?.fruits || '0'}`;
-          } else {
-            return "I don't have access to ingredient statistics at the moment. Please check your ingredient management dashboard or try again later.";
-          }
+          return `Hello ${user.name}! 👋\n\n` +
+                 `**Business Overview:**\n` +
+                 `• Total Sales: ${totalSales}\n` +
+                 `• Total Revenue: $${totalRevenue.toFixed(2)}\n` +
+                 `• Pending Orders: ${pendingOrders}\n` +
+                 `• Account Type: ${userType === 'owner' ? 'Business Owner' : 'Seller'}\n\n` +
+                 `I can help with sales analytics, inventory management, order fulfillment, and business insights. What would you like to focus on?`;
         }
 
-        if (message_lower.includes('low stock') || message_lower.includes('reorder')) {
-          const lowStockItems = ingredients.filter(ing => ing.current_stock <= ing.minimum_stock);
-          if (lowStockItems.length > 0) {
-            return `⚠️ **Low Stock Alert!**\n\n` +
-                   `The following ingredients need to be reordered:\n\n` +
-                   `${lowStockItems.map(ing => 
-                     `• **${ing.name}**: ${ing.current_stock} ${ing.unit} (Min: ${ing.minimum_stock} ${ing.unit})\n` +
-                     `  Supplier: ${ing.supplier}\n` +
-                     `  Cost per unit: $${ing.cost_per_unit}`
+        // Pending orders queries - extensive keyword variations
+        if (message_lower.includes('pending') || message_lower.includes('waiting') ||
+            message_lower.includes('needs attention') || message_lower.includes('to fulfill') ||
+            message_lower.includes('unfulfilled') || message_lower.includes('active orders') ||
+            message_lower.includes('current orders') || message_lower.includes('in progress') ||
+            message_lower.includes('processing') || message_lower.includes('need to process')) {
+          const orders = Array.isArray(contextData.orders) ? contextData.orders : [];
+          const pendingOrders = orders.filter(order => order.status === 'pending' || order.status === 'processing');
+
+          if (pendingOrders.length > 0) {
+            return `⏳ **Pending Orders (${pendingOrders.length}):**\n\n` +
+                   `${pendingOrders.slice(0, 5).map(order => 
+                     `• Order #${order.id} - $${order.total_amount}\n` +
+                     `  Status: ${order.status}\n` +
+                     `  Date: ${order.created_at}`
                    ).join('\n\n')}\n\n` +
-                   `Consider placing orders soon to avoid running out of these essential ingredients.`;
+                   `${pendingOrders.length > 5 ? `And ${pendingOrders.length - 5} more pending orders...` : ''}\n\n` +
+                   `These orders need your attention for processing and fulfillment.`;
           } else {
-            return "✅ Great news! All ingredients are currently above minimum stock levels. Your inventory is well-stocked.";
+            return "✅ Great! You have no pending orders at the moment. All orders are processed.";
           }
         }
 
-        if (message_lower.includes('batch') || message_lower.includes('batches')) {
-          if (batches.length > 0) {
-            const recentBatches = batches.slice(0, 5);
-            return `📦 **Recent Ingredient Batches:**\n\n` +
-                   `${recentBatches.map(batch => 
-                     `• **${batch.ingredient_name}** (Batch: ${batch.batch_number})\n` +
-                     `  Quantity: ${batch.quantity} ${batch.unit}\n` +
-                     `  Cost: $${batch.total_cost}\n` +
-                     `  Expiry: ${batch.expiry_date}\n` +
-                     `  Status: ${batch.status}`
+        // Ingredient-related queries - EXTENSIVE keyword variations
+        if (message_lower.includes('ingredient') || message_lower.includes('ingredients') ||
+            message_lower.includes('inventory') || message_lower.includes('stock') ||
+            message_lower.includes('supplies') || message_lower.includes('materials') ||
+            message_lower.includes('raw materials') || message_lower.includes('flour') ||
+            message_lower.includes('butter') || message_lower.includes('sugar') ||
+            message_lower.includes('chocolate') || message_lower.includes('milk') ||
+            message_lower.includes('eggs') || message_lower.includes('cream') ||
+            message_lower.includes('batch') || message_lower.includes('batches') ||
+            message_lower.includes('supplier') || message_lower.includes('suppliers') ||
+            message_lower.includes('reorder') || message_lower.includes('purchase') ||
+            message_lower.includes('what do i have') || message_lower.includes('stock level') ||
+            message_lower.includes('running low') || message_lower.includes('need to buy') ||
+            message_lower.includes('expiry') || message_lower.includes('expired') ||
+            message_lower.includes('cost') || message_lower.includes('usage') ||
+            message_lower.includes('consumption') || message_lower.includes('how much left')) {
+
+          const ingredients = contextData.ingredients || [];
+          const batches = contextData.ingredientBatches || [];
+          const stats = contextData.ingredientStats;
+
+          // Ingredient statistics queries
+          if (message_lower.includes('stats') || message_lower.includes('statistics') ||
+              message_lower.includes('overview') || message_lower.includes('summary') ||
+              message_lower.includes('analytics') || message_lower.includes('report')) {
+            if (stats) {
+              return `📊 **Ingredient Statistics Overview:**\n\n` +
+                     `• Total Ingredients: ${stats.total_ingredients}\n` +
+                     `• Total Inventory Value: $${stats.total_value}\n` +
+                     `• Low Stock Items: ${stats.low_stock_count}\n` +
+                     `• Expired Items: ${stats.expired_count}\n` +
+                     `• Monthly Usage: $${stats.monthly_usage}\n\n` +
+                     `**Top Used Ingredients:**\n` +
+                     `${stats.top_used_ingredients?.map(ing => `• ${ing.name}: ${ing.usage} (${ing.percentage}%)`).join('\n') || 'No usage data available'}\n\n` +
+                     `**Cost Breakdown:**\n` +
+                     `• Flour Products: $${stats.cost_breakdown?.flour_products || '0'}\n` +
+                     `• Dairy Products: $${stats.cost_breakdown?.dairy_products || '0'}\n` +
+                     `• Chocolates: $${stats.cost_breakdown?.chocolates || '0'}\n` +
+                     `• Fruits: $${stats.cost_breakdown?.fruits || '0'}`;
+            } else {
+              return "I don't have access to ingredient statistics at the moment. Please check your ingredient management dashboard or try again later.";
+            }
+          }
+
+          // Low stock and reorder queries
+          if (message_lower.includes('low stock') || message_lower.includes('running low') ||
+              message_lower.includes('reorder') || message_lower.includes('need to buy') ||
+              message_lower.includes('shortage') || message_lower.includes('almost out') ||
+              message_lower.includes('need more') || message_lower.includes('purchase') ||
+              message_lower.includes('order more')) {
+            const lowStockItems = ingredients.filter(ing => ing.current_stock <= ing.minimum_stock);
+            if (lowStockItems.length > 0) {
+              return `⚠️ **Low Stock Alert! (${lowStockItems.length} items)**\n\n` +
+                     `The following ingredients need to be reordered:\n\n` +
+                     `${lowStockItems.map(ing => 
+                       `• **${ing.name}**: ${ing.current_stock} ${ing.unit} (Min: ${ing.minimum_stock} ${ing.unit})\n` +
+                       `  Supplier: ${ing.supplier}\n` +
+                       `  Cost per unit: $${ing.cost_per_unit}`
+                     ).join('\n\n')}\n\n` +
+                     `Consider placing orders soon to avoid running out of these essential ingredients.`;
+            } else {
+              return "✅ Great news! All ingredients are currently above minimum stock levels. Your inventory is well-stocked.";
+            }
+          }
+
+          // Batch tracking queries
+          if (message_lower.includes('batch') || message_lower.includes('batches') ||
+              message_lower.includes('recent purchase') || message_lower.includes('deliveries') ||
+              message_lower.includes('received') || message_lower.includes('incoming')) {
+            if (batches.length > 0) {
+              const recentBatches = batches.slice(0, 5);
+              return `📦 **Recent Ingredient Batches (${batches.length} total):**\n\n` +
+                     `${recentBatches.map(batch => 
+                       `• **${batch.ingredient_name}** (Batch: ${batch.batch_number})\n` +
+                       `  Quantity: ${batch.quantity} ${batch.unit}\n` +
+                       `  Cost: $${batch.total_cost}\n` +
+                       `  Received: ${batch.received_date || 'N/A'}\n` +
+                       `  Expiry: ${batch.expiry_date}\n` +
+                       `  Status: ${batch.status}`
+                     ).join('\n\n')}\n\n` +
+                     `${batches.length > 5 ? `And ${batches.length - 5} more batches...` : ''}`;
+            } else {
+              return "No ingredient batches found. Add ingredient batches to track your inventory purchases and expiry dates.";
+            }
+          }
+
+          // Expiry tracking queries
+          if (message_lower.includes('expiry') || message_lower.includes('expired') ||
+              message_lower.includes('expiring') || message_lower.includes('expire soon') ||
+              message_lower.includes('bad') || message_lower.includes('spoiled') ||
+              message_lower.includes('old') || message_lower.includes('date')) {
+            const expiredBatches = batches.filter(batch => {
+              const expiryDate = new Date(batch.expiry_date);
+              return expiryDate < new Date();
+            });
+            const expiringBatches = batches.filter(batch => {
+              const expiryDate = new Date(batch.expiry_date);
+              const thirtyDaysFromNow = new Date();
+              thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+              return expiryDate <= thirtyDaysFromNow && expiryDate >= new Date();
+            });
+
+            let response = '';
+            if (expiredBatches.length > 0) {
+              response += `❌ **Expired Items (${expiredBatches.length}):**\n\n` +
+                         `${expiredBatches.map(batch => 
+                           `• ${batch.ingredient_name} (Batch: ${batch.batch_number}) - Expired: ${batch.expiry_date}`
+                         ).join('\n')}\n\n`;
+            }
+            if (expiringBatches.length > 0) {
+              response += `⚠️ **Expiring Soon (${expiringBatches.length}):**\n\n` +
+                         `${expiringBatches.map(batch => 
+                           `• ${batch.ingredient_name} (Batch: ${batch.batch_number}) - Expires: ${batch.expiry_date}`
+                         ).join('\n')}\n\n`;
+            }
+            if (response === '') {
+              response = "✅ Good news! No expired ingredients and no items expiring in the next 30 days.";
+            }
+            return response;
+          }
+
+          // Cost and usage queries
+          if (message_lower.includes('cost') || message_lower.includes('price') ||
+              message_lower.includes('expense') || message_lower.includes('spending') ||
+              message_lower.includes('usage') || message_lower.includes('consumption') ||
+              message_lower.includes('how much') || message_lower.includes('value')) {
+            if (stats) {
+              return `💰 **Ingredient Cost Analysis:**\n\n` +
+                     `• Total Inventory Value: $${stats.total_value}\n` +
+                     `• Monthly Usage Cost: $${stats.monthly_usage}\n` +
+                     `• Average Cost per Item: $${(stats.total_value / stats.total_ingredients).toFixed(2)}\n\n` +
+                     `**Cost Breakdown by Category:**\n` +
+                     `• Flour Products: $${stats.cost_breakdown?.flour_products || '0'}\n` +
+                     `• Dairy Products: $${stats.cost_breakdown?.dairy_products || '0'}\n` +
+                     `• Chocolates: $${stats.cost_breakdown?.chocolates || '0'}\n` +
+                     `• Fruits: $${stats.cost_breakdown?.fruits || '0'}\n` +
+                     `• Other: $${stats.cost_breakdown?.other || '0'}\n\n` +
+                     `This helps you track ingredient expenses and optimize purchasing decisions.`;
+            }
+          }
+
+          // Supplier queries
+          if (message_lower.includes('supplier') || message_lower.includes('vendors') ||
+              message_lower.includes('where to buy') || message_lower.includes('purchase from') ||
+              message_lower.includes('who supplies')) {
+            const uniqueSuppliers = [...new Set(ingredients.map(ing => ing.supplier))];
+            if (uniqueSuppliers.length > 0) {
+              return `🏢 **Your Suppliers (${uniqueSuppliers.length}):**\n\n` +
+                     `${uniqueSuppliers.map(supplier => {
+                       const supplierIngredients = ingredients.filter(ing => ing.supplier === supplier);
+                       return `• **${supplier}**\n` +
+                              `  Supplies: ${supplierIngredients.length} ingredients\n` +
+                              `  Items: ${supplierIngredients.slice(0, 3).map(i => i.name).join(', ')}${supplierIngredients.length > 3 ? '...' : ''}`;
+                     }).join('\n\n')}`;
+            }
+          }
+
+          // General ingredient inventory display
+          if (ingredients.length > 0) {
+            const ingredientList = ingredients.slice(0, 5);
+            return `🥣 **Current Ingredient Inventory (${ingredients.length} total):**\n\n` +
+                   `${ingredientList.map(ing => 
+                     `• **${ing.name}**: ${ing.current_stock} ${ing.unit}\n` +
+                     `  Cost: $${ing.cost_per_unit}/${ing.unit} | Supplier: ${ing.supplier}\n` +
+                     `  ${ing.current_stock <= ing.minimum_stock ? '⚠️ LOW STOCK' : '✅ In Stock'}`
                    ).join('\n\n')}\n\n` +
-                   `${batches.length > 5 ? `And ${batches.length - 5} more batches...` : ''}`;
+                   `${ingredients.length > 5 ? `And ${ingredients.length - 5} more ingredients...\n\n` : ''}` +
+                   `Ask me about low stock, batches, costs, or specific ingredients!`;
           } else {
-            return "No ingredient batches found. Add ingredient batches to track your inventory purchases and expiry dates.";
+            return "No ingredients found in your inventory. Start by adding ingredients to track your bakery's raw materials and supplies.";
           }
         }
 
-        if (ingredients.length > 0) {
-          const ingredientList = ingredients.slice(0, 5);
-          return `🥣 **Current Ingredient Inventory:**\n\n` +
-                 `${ingredientList.map(ing => 
-                   `• **${ing.name}**: ${ing.current_stock} ${ing.unit}\n` +
-                   `  Cost: $${ing.cost_per_unit}/${ing.unit} | Supplier: ${ing.supplier}\n` +
-                   `  ${ing.current_stock <= ing.minimum_stock ? '⚠️ LOW STOCK' : '✅ In Stock'}`
-                 ).join('\n\n')}\n\n` +
-                 `${ingredients.length > 5 ? `And ${ingredients.length - 5} more ingredients...` : ''}\n\n` +
-                 `What would you like to know about your ingredients?`;
-        } else {
-          return "No ingredients found in your inventory. Start by adding ingredients to track your bakery's raw materials and supplies.";
+        // Product management queries
+        if (message_lower.includes('add product') || message_lower.includes('new product') ||
+            message_lower.includes('create product') || message_lower.includes('manage product') ||
+            message_lower.includes('update product') || message_lower.includes('edit product') ||
+            message_lower.includes('delete product') || message_lower.includes('remove product')) {
+          return `📦 **Product Management:**\n\n` +
+                 `You can manage your products through the dashboard. Here's what you can do:\n` +
+                 `• Add new products with pricing and descriptions\n` +
+                 `• Update existing product information\n` +
+                 `• Set product availability and stock levels\n` +
+                 `• Organize products by categories\n` +
+                 `• Upload product images\n` +
+                 `• Set special offers and discounts\n\n` +
+                 `Would you like guidance on any specific product management task?`;
         }
       }
     } else {
       // Guest user trying to access account features
       if (message_lower.includes('my orders') || message_lower.includes('account') ||
           message_lower.includes('balance') || message_lower.includes('profile') ||
-          message_lower.includes('history')) {
+          message_lower.includes('history') || message_lower.includes('stats') ||
+          message_lower.includes('dashboard') || message_lower.includes('sales') ||
+          message_lower.includes('revenue') || message_lower.includes('purchases')) {
         return "To view your account information, order history, and personalized features, please log in to your account first. If you don't have an account, you can easily create one to start enjoying our bakery services!";
       }
     }

@@ -1,13 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import aiService from '../../services/aiService';
-import { Send, Bot, User, Sparkles, X, Minimize2, Maximize2 } from 'lucide-react';
+import { Send, Bot, User, Sparkles, X, Minimize2, Maximize2, Maximize } from 'lucide-react';
 import './AIAssistant.css';
 
 const AIAssistant = () => {
   const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [messages, setMessages] = useState([
     {
       id: 1,
@@ -40,6 +41,23 @@ const AIAssistant = () => {
       inputRef.current.focus();
     }
   }, [isOpen, isMinimized]);
+
+  // Handle ESC key to exit fullscreen
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape' && isFullscreen) {
+        setIsFullscreen(false);
+      }
+    };
+
+    if (isFullscreen) {
+      document.addEventListener('keydown', handleEscape);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [isFullscreen]);
 
   const handleSend = async () => {
     if (!input.trim() || loading) return;
@@ -88,6 +106,11 @@ const AIAssistant = () => {
     }
   };
 
+  const toggleFullscreen = () => {
+    setIsFullscreen(!isFullscreen);
+    setIsMinimized(false); // Exit minimized state when entering fullscreen
+  };
+
   return (
     <>
       {/* Floating Button */}
@@ -96,36 +119,60 @@ const AIAssistant = () => {
           className="ai-assistant-button"
           onClick={() => setIsOpen(true)}
           aria-label="Open AI Assistant"
+          title="AI Assistant - Ask me anything!"
         >
-          <Sparkles size={24} />
+          <div className="button-icon">
+            <Sparkles size={24} />
+          </div>
           <span className="ai-pulse"></span>
+          <span className="ai-pulse-secondary"></span>
+          <span className="button-label">AI Assistant</span>
         </button>
       )}
 
       {/* Chat Window */}
       {isOpen && (
-        <div className={`ai-assistant-window ${isMinimized ? 'minimized' : ''}`}>
+        <div className={`ai-assistant-window ${isMinimized ? 'minimized' : ''} ${isFullscreen ? 'fullscreen' : ''}`}>
           {/* Header */}
           <div className="ai-assistant-header">
             <div className="header-left">
-              <Bot size={20} />
+              <div className="header-icon">
+                <Bot size={20} />
+              </div>
               <div className="header-text">
                 <h3>AI Assistant</h3>
-                <span className="status">Powered by Gemini</span>
+                <span className="status">
+                  <span className="status-dot"></span>
+                  Powered by Gemini
+                </span>
               </div>
             </div>
             <div className="header-actions">
               <button
+                onClick={toggleFullscreen}
+                className="header-btn"
+                aria-label={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+                title={isFullscreen ? 'Exit Fullscreen (ESC)' : 'Fullscreen'}
+              >
+                <Maximize size={18} />
+              </button>
+              <button
                 onClick={() => setIsMinimized(!isMinimized)}
                 className="header-btn"
                 aria-label={isMinimized ? 'Maximize' : 'Minimize'}
+                title={isMinimized ? 'Maximize' : 'Minimize'}
               >
                 {isMinimized ? <Maximize2 size={18} /> : <Minimize2 size={18} />}
               </button>
               <button
-                onClick={() => setIsOpen(false)}
-                className="header-btn"
+                onClick={() => {
+                  setIsOpen(false);
+                  setIsFullscreen(false);
+                  setIsMinimized(false);
+                }}
+                className="header-btn close-btn"
                 aria-label="Close"
+                title="Close"
               >
                 <X size={18} />
               </button>
@@ -191,6 +238,7 @@ const AIAssistant = () => {
                   disabled={!input.trim() || loading}
                   className="send-button"
                   aria-label="Send message"
+                  title="Send message (Enter)"
                 >
                   <Send size={20} />
                 </button>
