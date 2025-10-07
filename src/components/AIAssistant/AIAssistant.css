@@ -652,13 +652,14 @@
 
   .ai-assistant-header {
     padding: 12px 14px;
-    gap: 10px;
+    gap: 8px;
   }
 
   .header-left {
     gap: 8px;
     min-width: 0;
     flex: 1;
+    overflow: visible;
   }
 
   .header-icon {
@@ -673,20 +674,25 @@
   }
 
   .header-text {
-    min-width: 0;
+    min-width: 140px;
     flex: 1;
+    overflow: visible;
   }
 
   .header-text h3 {
-    font-size: 15px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-size: 14px;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    line-height: 1.2;
+    margin-bottom: 2px;
   }
 
   .status {
-    font-size: 11px;
-    white-space: nowrap;
+    font-size: 10.5px;
+    white-space: normal;
+    overflow: visible;
+    line-height: 1.2;
   }
 
   .header-actions {
