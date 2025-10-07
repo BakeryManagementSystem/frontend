@@ -35,31 +35,31 @@ const AIAssistant = () => {
 
     if (userType === 'seller' || userType === 'owner') {
       return [
-        { text: '📊 Business Overview', prompt: 'Show me my business overview' },
-        { text: '💰 Sales Report', prompt: 'Show my sales and revenue' },
-        { text: '⏳ Pending Orders', prompt: 'Show pending orders' },
-        { text: '🥣 Low Stock Items', prompt: 'What ingredients are low in stock?' },
-        { text: '⚠️ Expiring Items', prompt: 'Show expired or expiring ingredients' },
-        { text: '📈 Ingredient Stats', prompt: 'Show ingredient statistics overview' },
+        { text: '📊 Business Overview', prompt: 'business overview' },
+        { text: '💰 Sales Report', prompt: 'show my sales and revenue' },
+        { text: '⏳ Pending Orders', prompt: 'pending orders' },
+        { text: '🥣 Low Stock Items', prompt: 'low stock ingredients' },
+        { text: '⚠️ Expiring Items', prompt: 'expired ingredients' },
+        { text: '📈 Ingredient Stats', prompt: 'ingredient statistics' },
       ];
     } else if (userType === 'buyer') {
       return [
-        { text: '📦 My Orders', prompt: 'Show my order history' },
-        { text: '💳 My Spending', prompt: 'How much have I spent?' },
-        { text: '🎂 Recommendations', prompt: 'Recommend products for me' },
-        { text: '🛍️ Browse Products', prompt: 'What products do you have?' },
-        { text: '⭐ Best Sellers', prompt: 'Show me best sellers' },
-        { text: '📋 Categories', prompt: 'Show product categories' },
+        { text: '📦 My Orders', prompt: 'my order history' },
+        { text: '💳 My Spending', prompt: 'how much have i spent' },
+        { text: '🎂 Recommendations', prompt: 'recommend products' },
+        { text: '🛍️ Browse Products', prompt: 'show products' },
+        { text: '⭐ Best Sellers', prompt: 'popular products' },
+        { text: '📋 Categories', prompt: 'show categories' },
       ];
     } else {
       // Guest user
       return [
-        { text: '🛍️ View Products', prompt: 'What products do you sell?' },
-        { text: '📋 Categories', prompt: 'Show me product categories' },
-        { text: '🎂 Custom Cakes', prompt: 'Tell me about custom cakes' },
-        { text: '📝 Create Account', prompt: 'How do I create an account?' },
-        { text: '🏪 About Us', prompt: 'Tell me about your bakery' },
-        { text: '❓ Help', prompt: 'What can you help me with?' },
+        { text: '🛍️ View Products', prompt: 'what products do you sell' },
+        { text: '📋 Categories', prompt: 'show categories' },
+        { text: '🎂 Custom Cakes', prompt: 'custom cakes' },
+        { text: '📝 Create Account', prompt: 'how to create account' },
+        { text: '🏪 About Us', prompt: 'about bakery' },
+        { text: '❓ Help', prompt: 'help' },
       ];
     }
   };
@@ -109,7 +109,7 @@ const AIAssistant = () => {
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setLoading(true);
-    setShowQuickPrompts(false); // Hide quick prompts after first message
+    // Don't hide quick prompts - keep them visible
 
     try {
       // Use the existing aiService which connects to Google Gemini with local data
@@ -261,8 +261,8 @@ const AIAssistant = () => {
                   </div>
                 )}
 
-                {/* Quick Prompts - Show only on first load */}
-                {showQuickPrompts && messages.length === 1 && (
+                {/* Quick Prompts - Always visible */}
+                {showQuickPrompts && (
                   <div className="quick-prompts-container">
                     <div className="quick-prompts-label">Quick Actions:</div>
                     <div className="quick-prompts">

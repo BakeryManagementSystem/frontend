@@ -53,25 +53,26 @@
 
 .button-label {
   position: absolute;
-  bottom: -32px;
+  bottom: -28px;
   left: 50%;
   transform: translateX(-50%);
   background: rgba(102, 57, 166, 0.95);
   color: white;
-  padding: 6px 12px;
-  border-radius: 8px;
-  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
   font-weight: 600;
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
   transition: all 0.3s ease;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 1001;
 }
 
 .ai-assistant-button:hover .button-label {
   opacity: 1;
-  bottom: -36px;
+  bottom: -32px;
 }
 
 .ai-pulse {
