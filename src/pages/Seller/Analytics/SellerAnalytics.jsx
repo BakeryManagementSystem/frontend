@@ -83,7 +83,7 @@ const SellerAnalytics = () => {
           newCustomers: 0,
           returningCustomers: 0,
           topCustomers: [],
-          geography: []
+          geography: shop.customer_geography || []
         }
       });
     } catch (error) {

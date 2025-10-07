@@ -9,7 +9,7 @@ import Header from "./components/layout/Header/Header";
 import Footer from "./components/layout/Footer/Footer";
 
 // AI Assistant Component
-import FloatingAIAssistant from "./components/common/FloatingAIAssistant/FloatingAIAssistant";
+import AIAssistant from "./components/AIAssistant/AIAssistant";
 
 // Offline Indicator Component
 import OfflineIndicator from "./components/common/OfflineIndicator/OfflineIndicator";
@@ -278,7 +278,7 @@ function App() {
               <Footer />
 
               {/* Floating AI Assistant - Available on all pages */}
-              <FloatingAIAssistant />
+              <AIAssistant />
             </div>
           </Router>
         </CartProvider>

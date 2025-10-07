@@ -984,6 +984,17 @@ class ApiService {
       throw error;
     }
   }
+
+  // AI Assistant API
+  async chatWithAI(message, context = {}) {
+    return this.request('/ai/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ message, context }),
+    });
+  }
 }
 
 export default new ApiService();
