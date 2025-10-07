@@ -46,21 +46,36 @@ const SellerAnalytics = () => {
         ApiService.getSellerShopStats({ timeRange })
       ]);
 
+      console.log('Dashboard response:', dashboardData);
+      console.log('Order stats response:', orderStats);
+      console.log('Shop stats response:', shopStats);
+
       // Extract data from responses (handle both wrapped and unwrapped formats)
-      const dashboard = dashboardData.success ? dashboardData.data : dashboardData;
-      const orders = orderStats.success ? orderStats.data : orderStats;
-      const shop = shopStats.success ? shopStats.data : shopStats;
+      const dashboard = dashboardData?.data || dashboardData;
+      const orders = orderStats?.data || orderStats;
+      const shop = shopStats?.data || shopStats;
+
+      console.log('Extracted dashboard:', dashboard);
+      console.log('Extracted orders:', orders);
+      console.log('Extracted shop:', shop);
 
       // Access stats from dashboard (it's nested under 'stats' key)
-      const stats = dashboard.stats || {};
+      const stats = dashboard?.stats || {};
+      const topProducts = dashboard?.topProducts || [];
+
+      // Calculate changes from previous period (placeholder - you can enhance this)
+      const totalRevenue = stats.totalRevenue || orders.total_revenue || 0;
+      const totalOrders = stats.totalOrders || orders.total_orders || 0;
+      const totalViews = shop.total_views || 0;
+      const conversionRate = totalViews > 0 ? (totalOrders / totalViews * 100) : 0;
 
       setAnalyticsData({
         overview: {
-          totalRevenue: stats.totalRevenue || orders.total_revenue || 0,
-          totalOrders: stats.totalOrders || orders.total_orders || 0,
-          totalViews: shop.total_views || 0,
-          conversionRate: ((stats.totalOrders || orders.total_orders || 0) / (shop.total_views || 1) * 100) || 0,
-          averageOrderValue: orders.average_order_value || (stats.totalRevenue / (stats.totalOrders || 1)) || 0,
+          totalRevenue: totalRevenue,
+          totalOrders: totalOrders,
+          totalViews: totalViews,
+          conversionRate: conversionRate,
+          averageOrderValue: orders.average_order_value || (totalOrders > 0 ? totalRevenue / totalOrders : 0),
           totalProducts: stats.totalProducts || shop.total_products || 0,
           activeProducts: stats.totalProducts || shop.total_products || 0,
           lowStockProducts: stats.lowStockItems || 0,
@@ -76,7 +91,7 @@ const SellerAnalytics = () => {
           byCategory: orders.sales_by_category || []
         },
         products: {
-          topSelling: dashboard.topProducts || [],
+          topSelling: topProducts,
           lowStock: []
         },
         customers: {
@@ -86,6 +101,8 @@ const SellerAnalytics = () => {
           geography: shop.customer_geography || []
         }
       });
+
+      console.log('Analytics data set successfully');
     } catch (error) {
       console.error('Failed to fetch analytics data:', error);
       addNotification('Failed to load analytics data. Please try again.', 'error');
