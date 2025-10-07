@@ -25,8 +25,44 @@ const AIAssistant = () => {
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showQuickPrompts, setShowQuickPrompts] = useState(true);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+
+  // Define role-based quick prompts
+  const getQuickPrompts = () => {
+    const userType = user?.user_type || user?.role;
+
+    if (userType === 'seller' || userType === 'owner') {
+      return [
+        { text: '📊 Business Overview', prompt: 'Show me my business overview' },
+        { text: '💰 Sales Report', prompt: 'Show my total sales and revenue' },
+        { text: '⏳ Pending Orders', prompt: 'What pending orders need attention?' },
+        { text: '🥣 Low Stock Items', prompt: 'What ingredients are low in stock?' },
+        { text: '⚠️ Expiring Items', prompt: 'Show expired or expiring ingredients' },
+        { text: '📈 Ingredient Stats', prompt: 'Show ingredient statistics' },
+      ];
+    } else if (userType === 'buyer') {
+      return [
+        { text: '📦 My Orders', prompt: 'Show my order history' },
+        { text: '💳 My Spending', prompt: 'How much have I spent?' },
+        { text: '🎂 Recommendations', prompt: 'Recommend products for me' },
+        { text: '🛍️ Browse Products', prompt: 'What products do you have?' },
+        { text: '⭐ Best Sellers', prompt: 'Show me your best sellers' },
+        { text: '📍 Store Info', prompt: 'Store hours and location' },
+      ];
+    } else {
+      // Guest user
+      return [
+        { text: '🛍️ View Products', prompt: 'What products do you sell?' },
+        { text: '📋 Categories', prompt: 'Show me product categories' },
+        { text: '🎂 Custom Cakes', prompt: 'Tell me about custom cakes' },
+        { text: '📝 Create Account', prompt: 'How do I create an account?' },
+        { text: '📍 Store Info', prompt: 'Store hours and location' },
+        { text: '❓ Help', prompt: 'What can you help me with?' },
+      ];
+    }
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -59,12 +95,13 @@ const AIAssistant = () => {
     };
   }, [isFullscreen]);
 
-  const handleSend = async () => {
-    if (!input.trim() || loading) return;
+  const handleSend = async (message = null) => {
+    const messageToSend = message || input.trim();
+    if (!messageToSend || loading) return;
 
     const userMessage = {
       id: Date.now(),
-      text: input.trim(),
+      text: messageToSend,
       isBot: false,
       timestamp: new Date()
     };
@@ -72,10 +109,11 @@ const AIAssistant = () => {
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setLoading(true);
+    setShowQuickPrompts(false); // Hide quick prompts after first message
 
     try {
       // Use the existing aiService which connects to Google Gemini with local data
-      const response = await aiService.sendMessage(input.trim());
+      const response = await aiService.sendMessage(messageToSend);
 
       const assistantMessage = {
         id: Date.now() + 1,
@@ -97,6 +135,10 @@ const AIAssistant = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleQuickPromptClick = (prompt) => {
+    handleSend(prompt);
   };
 
   const handleKeyPress = (e) => {
@@ -219,6 +261,25 @@ const AIAssistant = () => {
                   </div>
                 )}
 
+                {/* Quick Prompts - Show only on first load */}
+                {showQuickPrompts && messages.length === 1 && (
+                  <div className="quick-prompts-container">
+                    <div className="quick-prompts-label">Quick Actions:</div>
+                    <div className="quick-prompts">
+                      {getQuickPrompts().map((promptItem, index) => (
+                        <button
+                          key={index}
+                          className="quick-prompt-btn"
+                          onClick={() => handleQuickPromptClick(promptItem.prompt)}
+                          disabled={loading}
+                        >
+                          {promptItem.text}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <div ref={messagesEndRef} />
               </div>
 
@@ -234,7 +295,7 @@ const AIAssistant = () => {
                   disabled={loading}
                 />
                 <button
-                  onClick={handleSend}
+                  onClick={() => handleSend()}
                   disabled={!input.trim() || loading}
                   className="send-button"
                   aria-label="Send message"
