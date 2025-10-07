@@ -651,62 +651,62 @@
   }
 
   .ai-assistant-header {
-    padding: 12px 14px;
-    gap: 8px;
-    align-items: flex-start;
+    padding: 10px 12px;
+    gap: 6px;
+    align-items: center;
   }
 
   .header-left {
-    gap: 8px;
+    gap: 6px;
     min-width: 0;
     flex: 1;
-    overflow: visible;
-    margin-right: auto;
+    overflow: hidden;
+    margin-right: 0;
   }
 
   .header-icon {
-    width: 30px;
-    height: 30px;
+    width: 28px;
+    height: 28px;
     flex-shrink: 0;
-    margin-top: 2px;
   }
 
   .header-icon svg {
-    width: 16px;
-    height: 16px;
+    width: 15px;
+    height: 15px;
   }
 
   .header-text {
     min-width: 0;
     flex: 1;
-    overflow: visible;
+    overflow: hidden;
   }
 
   .header-text h3 {
-    font-size: 14px;
-    white-space: normal;
-    overflow: visible;
-    text-overflow: clip;
-    line-height: 1.3;
-    margin-bottom: 2px;
-    word-break: break-word;
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.4;
+    margin-bottom: 1px;
+    word-break: normal;
   }
 
   .status {
-    font-size: 10.5px;
-    white-space: normal;
-    overflow: visible;
+    font-size: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     line-height: 1.3;
-    word-break: break-word;
+    word-break: normal;
   }
 
   .header-actions {
     gap: 4px !important;
     flex-shrink: 0;
     flex-direction: row !important;
-    align-items: flex-start !important;
+    align-items: center !important;
     flex-wrap: nowrap !important;
-    margin-left: 8px;
+    margin-left: 0;
   }
 
   /* Hide minimize button on mobile */
