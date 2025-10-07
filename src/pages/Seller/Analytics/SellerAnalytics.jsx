@@ -46,74 +46,46 @@ const SellerAnalytics = () => {
         ApiService.getSellerShopStats({ timeRange })
       ]);
 
-      // Transform the real data into the expected format
-      if (dashboardData.success && orderStats.success && shopStats.success) {
-        const dashboard = dashboardData.data || {};
-        const orders = orderStats.data || {};
-        const shop = shopStats.data || {};
+      // Extract data from responses (handle both wrapped and unwrapped formats)
+      const dashboard = dashboardData.success ? dashboardData.data : dashboardData;
+      const orders = orderStats.success ? orderStats.data : orderStats;
+      const shop = shopStats.success ? shopStats.data : shopStats;
 
-        setAnalyticsData({
-          overview: {
-            totalRevenue: dashboard.total_revenue || orders.total_revenue || 0,
-            totalOrders: dashboard.total_orders || orders.total_orders || 0,
-            totalViews: shop.total_views || dashboard.total_views || 0,
-            conversionRate: dashboard.conversion_rate || ((orders.total_orders || 0) / (shop.total_views || 1) * 100) || 0,
-            averageOrderValue: dashboard.average_order_value || orders.average_order_value || 0,
-            totalProducts: dashboard.total_products || 0,
-            activeProducts: dashboard.active_products || 0,
-            lowStockProducts: dashboard.low_stock_products || 0,
-            // Add percentage changes from API data
-            revenueChange: dashboard.revenue_change || orders.revenue_change || 0,
-            ordersChange: dashboard.orders_change || orders.orders_change || 0,
-            viewsChange: shop.views_change || dashboard.views_change || 0,
-            conversionRateChange: dashboard.conversion_rate_change || 0
-          },
-          sales: {
-            daily: orders.daily_sales || [],
-            monthly: orders.monthly_sales || [],
-            byCategory: orders.sales_by_category || []
-          },
-          products: {
-            topSelling: dashboard.top_selling_products || [],
-            lowStock: dashboard.low_stock_products || []
-          },
-          customers: {
-            newCustomers: dashboard.new_customers || 0,
-            returningCustomers: dashboard.returning_customers || 0,
-            topCustomers: dashboard.top_customers || [],
-            geography: dashboard.customer_geography || []
-          }
-        });
-      } else {
-        // Fallback to empty data structure
-        setAnalyticsData({
-          overview: {
-            totalRevenue: 0,
-            totalOrders: 0,
-            totalViews: 0,
-            conversionRate: 0,
-            averageOrderValue: 0,
-            totalProducts: 0,
-            activeProducts: 0,
-            lowStockProducts: 0
-          },
-          sales: {
-            daily: [],
-            monthly: [],
-            byCategory: []
-          },
-          products: {
-            topSelling: [],
-            lowStock: []
-          },
-          customers: {
-            newCustomers: 0,
-            returningCustomers: 0,
-            topCustomers: [],
-            geography: []
-          }
-        });
-      }
+      // Access stats from dashboard (it's nested under 'stats' key)
+      const stats = dashboard.stats || {};
+
+      setAnalyticsData({
+        overview: {
+          totalRevenue: stats.totalRevenue || orders.total_revenue || 0,
+          totalOrders: stats.totalOrders || orders.total_orders || 0,
+          totalViews: shop.total_views || 0,
+          conversionRate: ((stats.totalOrders || orders.total_orders || 0) / (shop.total_views || 1) * 100) || 0,
+          averageOrderValue: orders.average_order_value || (stats.totalRevenue / (stats.totalOrders || 1)) || 0,
+          totalProducts: stats.totalProducts || shop.total_products || 0,
+          activeProducts: stats.totalProducts || shop.total_products || 0,
+          lowStockProducts: stats.lowStockItems || 0,
+          // Add percentage changes from API data
+          revenueChange: 0,
+          ordersChange: 0,
+          viewsChange: 0,
+          conversionRateChange: 0
+        },
+        sales: {
+          daily: orders.daily_sales || [],
+          monthly: orders.monthly_sales || [],
+          byCategory: orders.sales_by_category || []
+        },
+        products: {
+          topSelling: dashboard.topProducts || [],
+          lowStock: []
+        },
+        customers: {
+          newCustomers: 0,
+          returningCustomers: 0,
+          topCustomers: [],
+          geography: []
+        }
+      });
     } catch (error) {
       console.error('Failed to fetch analytics data:', error);
       addNotification('Failed to load analytics data. Please try again.', 'error');

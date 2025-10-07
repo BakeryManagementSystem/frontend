@@ -52,11 +52,15 @@ const SellerDashboard = () => {
     setError('');
     try {
       const response = await ApiService.getSellerDashboard();
+
+      // Handle new response format with success/data wrapper
+      const data = response.success ? response.data : response;
+
       setDashboardData({
-        stats: response.stats || {},
-        recentOrders: response.recentOrders || [],
-        topProducts: response.topProducts || [],
-        recentActivities: response.recentActivities || []
+        stats: data.stats || {},
+        recentOrders: data.recentOrders || [],
+        topProducts: data.topProducts || [],
+        recentActivities: data.recentActivities || []
       });
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error);
