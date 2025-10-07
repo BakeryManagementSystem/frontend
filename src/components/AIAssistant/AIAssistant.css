@@ -664,8 +664,8 @@
     flex-direction: row;
   }
 
-  /* Hide fullscreen button on mobile */
-  .header-actions .header-btn:first-child {
+  /* Hide minimize button on mobile */
+  .header-actions .header-btn:nth-child(2) {
     display: none;
   }
 
@@ -798,8 +798,8 @@
     flex-direction: row;
   }
 
-  /* Hide fullscreen button on mobile */
-  .header-actions .header-btn:first-child {
+  /* Hide minimize button on mobile */
+  .header-actions .header-btn:nth-child(2) {
     display: none;
   }
 
@@ -947,8 +947,8 @@
     gap: 5px;
   }
 
-  /* Hide fullscreen button on mobile */
-  .header-actions .header-btn:first-child {
+  /* Hide minimize button on mobile */
+  .header-actions .header-btn:nth-child(2) {
     display: none;
   }
 
