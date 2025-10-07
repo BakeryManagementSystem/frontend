@@ -323,22 +323,303 @@
 }
 
 /* Responsive Design */
-@media (max-width: 480px) {
+@media (max-width: 768px) {
   .floating-ai-container {
-    width: calc(100vw - 40px);
-    height: calc(100vh - 100px);
-    bottom: 70px;
-    right: 20px;
-    max-width: 380px;
+    width: calc(100vw - 32px);
+    height: calc(100vh - 140px);
+    bottom: 16px;
+    right: 16px;
+    max-height: calc(100vh - 140px);
   }
 
   .floating-ai-trigger {
-    bottom: 20px;
-    right: 20px;
+    bottom: 16px;
+    right: 16px;
+    width: 56px;
+    height: 56px;
+  }
+
+  .ai-header {
+    padding: 12px 16px;
+  }
+
+  .ai-name {
+    font-size: 13px;
+  }
+
+  .ai-status {
+    font-size: 10px;
+  }
+
+  .ai-messages {
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .message-content {
+    max-width: calc(100% - 50px);
+  }
+
+  .message-text {
+    font-size: 13.5px;
+    padding: 10px 14px;
+  }
+
+  .ai-input-container {
+    padding: 12px 16px 10px;
+  }
+
+  .ai-input {
+    font-size: 13.5px;
+  }
+
+  .ai-footer-text {
+    font-size: 10px;
+    margin-top: 6px;
   }
 }
 
-/* Animation for opening */
+@media (max-width: 480px) {
+  .floating-ai-container {
+    width: calc(100vw - 16px);
+    height: calc(100vh - 80px);
+    bottom: 8px;
+    right: 8px;
+    border-radius: 12px;
+    max-height: calc(100vh - 80px);
+  }
+
+  .floating-ai-trigger {
+    bottom: 12px;
+    right: 12px;
+    width: 54px;
+    height: 54px;
+  }
+
+  .ai-notification-badge {
+    top: -6px;
+    right: -6px;
+    padding: 2px 5px;
+    font-size: 9px;
+  }
+
+  .ai-header {
+    padding: 10px 12px;
+  }
+
+  .ai-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .ai-name {
+    font-size: 12.5px;
+  }
+
+  .ai-status {
+    font-size: 9px;
+  }
+
+  .ai-action-btn {
+    padding: 5px;
+  }
+
+  .ai-action-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .ai-messages {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .message-avatar {
+    width: 28px;
+    height: 28px;
+  }
+
+  .message-avatar svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .message-content {
+    max-width: calc(100% - 40px);
+  }
+
+  .message-text {
+    font-size: 13px;
+    padding: 9px 12px;
+    border-radius: 16px;
+  }
+
+  .message-time {
+    font-size: 10px;
+  }
+
+  .typing-indicator {
+    padding: 9px 12px;
+  }
+
+  .typing-indicator span {
+    width: 5px;
+    height: 5px;
+  }
+
+  .ai-input-container {
+    padding: 10px 12px 8px;
+  }
+
+  .ai-input-wrapper {
+    padding: 6px 10px;
+    border-radius: 18px;
+  }
+
+  .ai-input {
+    font-size: 13px;
+    padding: 3px 0;
+    max-height: 70px;
+  }
+
+  .ai-send-btn {
+    width: 30px;
+    height: 30px;
+  }
+
+  .ai-send-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .ai-footer-text {
+    font-size: 9px;
+    margin-top: 5px;
+  }
+}
+
+/* Extra small devices */
+@media (max-width: 360px) {
+  .floating-ai-container {
+    width: calc(100vw - 8px);
+    height: calc(100vh - 60px);
+    bottom: 4px;
+    right: 4px;
+  }
+
+  .floating-ai-trigger {
+    width: 50px;
+    height: 50px;
+  }
+
+  .ai-name {
+    font-size: 12px;
+  }
+
+  .message-text {
+    font-size: 12.5px;
+  }
+
+  .ai-input {
+    font-size: 12.5px;
+  }
+}
+
+/* Landscape orientation on mobile */
+@media (max-height: 500px) and (max-width: 768px) {
+  .floating-ai-container {
+    height: calc(100vh - 40px);
+    bottom: 4px;
+  }
+
+  .ai-messages {
+    padding: 10px;
+  }
+
+  .ai-input-container {
+    padding: 8px 12px 6px;
+  }
+
+  .ai-footer-text {
+    margin-top: 4px;
+    font-size: 9px;
+  }
+}
+
+/* Touch devices optimization */
+@media (hover: none) and (pointer: coarse) {
+  .floating-ai-trigger:hover {
+    transform: scale(1.05);
+  }
+
+  .ai-action-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+  }
+
+  .ai-send-btn:hover:not(:disabled) {
+    transform: scale(1.05);
+  }
+
+  /* Larger touch targets for better mobile UX */
+  .ai-action-btn {
+    min-width: 36px;
+    min-height: 36px;
+  }
+
+  .ai-send-btn {
+    min-width: 36px;
+    min-height: 36px;
+  }
+}
+
+/* iOS safe area support */
+@supports (padding: max(0px)) {
+  .floating-ai-container {
+    bottom: max(8px, env(safe-area-inset-bottom));
+    right: max(8px, env(safe-area-inset-right));
+  }
+
+  .floating-ai-trigger {
+    bottom: max(12px, env(safe-area-inset-bottom));
+    right: max(12px, env(safe-area-inset-right));
+  }
+
+  @media (max-width: 480px) {
+    .floating-ai-container {
+      height: calc(100vh - 80px - env(safe-area-inset-bottom));
+    }
+  }
+}
+
+/* Prevent zoom on input focus (iOS) */
+@media (max-width: 768px) {
+  .ai-input {
+    font-size: max(13px, 16px);
+  }
+}
+
+/* Better scrolling on mobile */
+.ai-messages {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* Accessibility improvements for mobile */
+@media (max-width: 768px) {
+  .floating-ai-trigger:focus,
+  .ai-action-btn:focus,
+  .ai-send-btn:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+  }
+
+  /* Better contrast for readability */
+  .message-time {
+    font-weight: 500;
+  }
+}
+
+/* Animation for mobile */
 @keyframes slideInUp {
   from {
     transform: translateY(100%);

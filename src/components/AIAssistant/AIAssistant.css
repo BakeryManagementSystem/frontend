@@ -611,6 +611,7 @@
     height: calc(100vh - 140px);
     right: 16px;
     bottom: 16px;
+    max-height: calc(100vh - 140px);
   }
 
   .ai-assistant-button {
@@ -620,8 +621,47 @@
     height: 60px;
   }
 
+  .ai-assistant-header {
+    padding: 12px 16px;
+  }
+
+  .header-text h3 {
+    font-size: 15px;
+  }
+
+  .ai-assistant-messages {
+    padding: 16px;
+    gap: 12px;
+  }
+
   .message-content {
     max-width: 80%;
+  }
+
+  .message-text {
+    padding: 10px 14px;
+    font-size: 13.5px;
+  }
+
+  .ai-assistant-input {
+    padding: 12px 16px;
+    gap: 10px;
+  }
+
+  .ai-assistant-input textarea {
+    padding: 8px 12px;
+    font-size: 13.5px;
+    min-height: 36px;
+  }
+
+  .send-button {
+    width: 36px;
+    height: 36px;
+  }
+
+  .ai-footer-text {
+    padding: 6px 16px 12px;
+    font-size: 10px;
   }
 
   .ai-assistant-window.fullscreen .ai-assistant-messages {
@@ -638,21 +678,27 @@
 
   .quick-prompts {
     grid-template-columns: 1fr 1fr;
+    gap: 6px;
   }
 
   .quick-prompt-btn {
     font-size: 12px;
     padding: 8px 10px;
   }
+
+  .quick-prompts-label {
+    font-size: 12px;
+  }
 }
 
 @media (max-width: 480px) {
   .ai-assistant-window:not(.fullscreen) {
     width: calc(100vw - 16px);
-    height: calc(100vh - 100px);
+    height: calc(100vh - 80px);
     right: 8px;
     bottom: 8px;
     border-radius: 12px;
+    max-height: calc(100vh - 80px);
   }
 
   .ai-assistant-button {
@@ -662,24 +708,171 @@
     height: 56px;
   }
 
+  .ai-assistant-header {
+    padding: 10px 12px;
+    border-radius: 12px 12px 0 0;
+  }
+
+  .header-icon {
+    width: 32px;
+    height: 32px;
+  }
+
   .header-text h3 {
     font-size: 14px;
   }
 
   .status {
-    font-size: 11px;
+    font-size: 10px;
+  }
+
+  .header-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+  }
+
+  .header-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .ai-assistant-messages {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .message-avatar {
+    width: 32px;
+    height: 32px;
+  }
+
+  .message-avatar svg {
+    width: 18px;
+    height: 18px;
   }
 
   .message-text {
     font-size: 13px;
+    padding: 9px 12px;
   }
 
   .message-content {
     max-width: 85%;
   }
 
+  .message-time {
+    font-size: 10px;
+  }
+
+  .ai-assistant-input {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+
+  .ai-assistant-input textarea {
+    font-size: 13px;
+    padding: 7px 10px;
+    min-height: 34px;
+    max-height: 100px;
+  }
+
+  .send-button {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+  }
+
+  .send-button svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .ai-footer-text {
+    padding: 5px 12px 10px;
+    font-size: 9px;
+  }
+
+  .quick-prompts-container {
+    gap: 8px;
+    margin-top: 8px;
+  }
+
   .quick-prompts {
     grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .quick-prompt-btn {
+    font-size: 11.5px;
+    padding: 8px 12px;
+  }
+
+  .quick-prompts-label {
+    font-size: 11px;
+  }
+
+  .typing-indicator {
+    padding: 9px 12px;
+  }
+
+  .typing-indicator span {
+    width: 7px;
+    height: 7px;
+  }
+}
+
+/* Extra small devices */
+@media (max-width: 360px) {
+  .ai-assistant-window:not(.fullscreen) {
+    width: calc(100vw - 8px);
+    height: calc(100vh - 60px);
+    right: 4px;
+    bottom: 4px;
+  }
+
+  .ai-assistant-button {
+    bottom: 12px;
+    right: 12px;
+    width: 52px;
+    height: 52px;
+  }
+
+  .header-text h3 {
+    font-size: 13px;
+  }
+
+  .message-text {
+    font-size: 12.5px;
+  }
+
+  .ai-assistant-input textarea {
+    font-size: 12.5px;
+  }
+
+  .quick-prompt-btn {
+    font-size: 11px;
+    padding: 7px 10px;
+  }
+}
+
+/* Landscape orientation on mobile */
+@media (max-height: 500px) and (max-width: 768px) {
+  .ai-assistant-window:not(.fullscreen) {
+    height: calc(100vh - 40px);
+    bottom: 4px;
+  }
+
+  .ai-assistant-messages {
+    padding: 10px;
+  }
+
+  .ai-assistant-input {
+    padding: 8px 12px;
+  }
+
+  .ai-footer-text {
+    padding: 4px 12px 8px;
   }
 }
 
@@ -691,6 +884,7 @@
 
   .header-btn:hover {
     background: rgba(255, 255, 255, 0.25);
+    transform: scale(1);
   }
 
   .send-button:hover:not(:disabled) {
@@ -699,56 +893,64 @@
 
   .quick-prompt-btn:hover:not(:disabled) {
     transform: translateY(0);
-  }
-}
-
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  .ai-assistant-window {
-    background: #1a1a1a;
-  }
-
-  .ai-assistant-messages {
-    background: #2a2a2a;
-  }
-
-  .message.assistant .message-text {
-    background: #333;
-    color: #e0e0e0;
-  }
-
-  .ai-assistant-input {
-    background: #1a1a1a;
-    border-top-color: #444;
-  }
-
-  .ai-assistant-input textarea {
-    background: #333;
-    color: #e0e0e0;
-    border-color: #444;
-  }
-
-  .ai-footer-text {
-    background: #1a1a1a;
-    color: #999;
-  }
-
-  .quick-prompt-btn {
-    background: #333;
-    border-color: #444;
-    color: #9b75d0;
-  }
-
-  .quick-prompt-btn:hover:not(:disabled) {
     background: #6639a6;
     color: white;
   }
+
+  /* Larger touch targets */
+  .header-btn {
+    min-width: 40px;
+    min-height: 40px;
+  }
+
+  .send-button {
+    min-width: 40px;
+    min-height: 40px;
+  }
+
+  .quick-prompt-btn {
+    min-height: 40px;
+  }
 }
 
-/* Print mode */
-@media print {
-  .ai-assistant-button,
-  .ai-assistant-window {
-    display: none !important;
+/* iOS safe area support */
+@supports (padding: max(0px)) {
+  .ai-assistant-window:not(.fullscreen) {
+    bottom: max(8px, env(safe-area-inset-bottom));
+    right: max(8px, env(safe-area-inset-right));
+  }
+
+  .ai-assistant-button {
+    bottom: max(16px, env(safe-area-inset-bottom));
+    right: max(16px, env(safe-area-inset-right));
+  }
+
+  @media (max-width: 480px) {
+    .ai-assistant-window:not(.fullscreen) {
+      height: calc(100vh - 80px - env(safe-area-inset-bottom));
+    }
+  }
+}
+
+/* Prevent zoom on input focus (iOS) */
+@media (max-width: 768px) {
+  .ai-assistant-input textarea {
+    font-size: max(13px, 16px);
+  }
+}
+
+/* Accessibility improvements for mobile */
+@media (max-width: 768px) {
+  .ai-assistant-button:focus,
+  .header-btn:focus,
+  .send-button:focus,
+  .quick-prompt-btn:focus {
+    outline: 2px solid #6639a6;
+    outline-offset: 2px;
+  }
+
+  /* Better contrast for readability */
+  .message-time {
+    font-weight: 500;
   }
 }
