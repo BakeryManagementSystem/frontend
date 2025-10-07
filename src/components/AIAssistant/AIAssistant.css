@@ -892,6 +892,23 @@
     gap: 3px;
   }
 
+  .header-actions {
+    gap: 6px;
+    flex-shrink: 0;
+    margin-left: 8px;
+    margin-top: 2px;
+    width: 70px;
+    justify-content: flex-end;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: nowrap;
+  }
+
+  .header-actions .header-btn:nth-child(2) {
+    display: none;
+  }
+
   .header-btn {
     width: 32px;
     height: 32px;
