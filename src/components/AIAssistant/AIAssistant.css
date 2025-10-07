@@ -255,21 +255,17 @@
   flex-shrink: 0;
   flex-direction: row;
   align-items: center;
+  flex-wrap: nowrap;
 }
 
 .header-btn {
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
-  color: white;
-  width: 36px;
-  height: 36px;
+  padding: 0;
   border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  backdrop-filter: blur(10px);
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  min-height: 34px;
+  flex-shrink: 0;
 }
 
 .header-btn:hover {
@@ -666,6 +662,7 @@
     flex-shrink: 0;
     flex-direction: row;
     align-items: center;
+    flex-wrap: nowrap;
   }
 
   /* Hide minimize button on mobile */
@@ -674,15 +671,13 @@
   }
 
   .header-btn {
-    padding: 7px;
+    padding: 0;
     border-radius: 8px;
     width: 34px;
     height: 34px;
-  }
-
-  .header-btn svg {
-    width: 16px;
-    height: 16px;
+    min-width: 34px;
+    min-height: 34px;
+    flex-shrink: 0;
   }
 
   .ai-assistant-messages {
