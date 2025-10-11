@@ -1,0 +1,11 @@
+# No robots restrictions for business app
+User-agent: *
+Allow: /
+
+# Block ad crawlers
+User-agent: Mediapartners-Google
+Disallow: /
+
+User-agent: AdsBot-Google
+Disallow: /
+

@@ -1,0 +1,5 @@
+# This site does not display advertisements
+# Bakery Management System - Business Application
+# Contact: admin@bakery.com
+# No ads policy - This is a SaaS business management platform
+
