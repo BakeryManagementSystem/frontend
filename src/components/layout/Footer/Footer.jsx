@@ -49,8 +49,9 @@ const Footer = () => {
               <h3 className="footer-title">Quick Links</h3>
               <ul className="footer-links">
                 <li><Link to="/">Home</Link></li>
-                <li><Link to="/products">products</Link></li>
+                <li><Link to="/products">Products</Link></li>
                 <li><Link to="/shops">Shops</Link></li>
+                <li><Link to="/categories">Categories</Link></li>
                 <li><Link to="/about">About Us</Link></li>
                 <li><Link to="/contact">Contact</Link></li>
               </ul>
@@ -61,7 +62,7 @@ const Footer = () => {
               <h3 className="footer-title">Customer Service</h3>
               <ul className="footer-links">
                 <li><Link to="/buyer/orders">My Orders</Link></li>
-                <li><Link to="/buyer/checkout">Checkout</Link></li>
+                <li><Link to="/checkout">Checkout</Link></li>
                 <li><Link to="/buyer/wishlist">Wishlist</Link></li>
                 <li><Link to="/cart">Shopping Cart</Link></li>
                 <li><Link to="/contact">Contact Us</Link></li>
@@ -73,7 +74,7 @@ const Footer = () => {
               <h3 className="footer-title">For Sellers</h3>
               <ul className="footer-links">
                 <li><Link to="/register">Join as Seller</Link></li>
-                <li><Link to="/seller/dashboard">Seller Dashboard</Link></li>
+                <li><Link to="/seller">Seller Dashboard</Link></li>
                 <li><Link to="/seller/products">Manage Products</Link></li>
                 <li><Link to="/seller/orders">Manage Orders</Link></li>
                 <li><Link to="/seller/analytics">Analytics</Link></li>
