@@ -79,6 +79,7 @@
   overflow: hidden;
   position: relative;
   background: #f8fafc;
+  z-index: 1;
 }
 
 .shop-banner-image img {
@@ -99,12 +100,13 @@
 
 /* Shop Banner - Completely Redesigned */
 .shop-banner {
-  background: white; /* Changed from transparent */
+  background: white;
   padding: 2rem 0;
   margin-bottom: 2rem;
   border-bottom: 1px solid var(--border-light, #e2e8f0);
   position: relative;
-  z-index: 10; /* Ensure banner content stays on top */
+  z-index: 10;
+  margin-top: -60px; /* Pull banner up to overlap banner image */
 }
 
 .shop-header-content {
@@ -120,6 +122,7 @@
 .shop-avatar-section {
   position: relative;
   flex-shrink: 0;
+  z-index: 12;
 }
 
 .shop-avatar {
@@ -128,8 +131,8 @@
   border-radius: 20px;
   overflow: hidden;
   background: white;
-  border: 4px solid var(--border-light, #e2e8f0);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border: 4px solid white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .shop-avatar img {
@@ -158,6 +161,8 @@
 .shop-info-section {
   flex: 1;
   min-width: 300px;
+  position: relative;
+  z-index: 11;
 }
 
 .shop-title-section {
