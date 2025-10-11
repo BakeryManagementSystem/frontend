@@ -192,7 +192,11 @@ const ShopDetail = () => {
   }
 
   return (
-    <div className="shop-detail">
+    <div className="shop-detail" style={{
+      '--shop-primary-color': shopData.theme?.primaryColor || '#2563eb',
+      '--shop-secondary-color': shopData.theme?.secondaryColor || '#64748b',
+      '--shop-accent-color': shopData.theme?.accentColor || '#f59e0b'
+    }}>
       {/* Shop Banner Image */}
       {shopData.banner && (
         <div className="shop-banner-image">
