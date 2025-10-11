@@ -32,9 +32,18 @@ const Products = () => {
   // Sync category from URL params with filters
   useEffect(() => {
     if (category) {
+      // Convert slug back to category name
+      const categoryName = category
+        .split("-")
+        .map(
+          (word) => word.charAt(0).toUpperCase() + word.slice(1)
+        )
+        .join(" ")
+        .replace(/And/g, "&"); // Convert 'And' back to '&'
+
       setFilters((prev) => ({
         ...prev,
-        category: category,
+        category: categoryName,
       }));
       setCurrentPage(1); // Reset to first page when category changes
     }
