@@ -8,6 +8,11 @@
   color: var(--text-inverse);
   padding: var(--spacing-2xl) 0;
   overflow: hidden;
+  position: relative;
+}
+
+.hero .container {
+  overflow: visible;
 }
 
 .hero-content {
@@ -82,7 +87,7 @@
   justify-content: center;
   align-items: center;
   height: 500px;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .hero-gradient-bg {
@@ -133,6 +138,7 @@
   z-index: 2;
   width: 400px;
   height: 400px;
+  margin: 0 auto;
 }
 
 .floating-item {
@@ -145,6 +151,7 @@
   color: white;
   animation: float-item 6s ease-in-out infinite;
   transition: transform 0.3s ease;
+  will-change: transform;
 }
 
 .floating-item:hover {

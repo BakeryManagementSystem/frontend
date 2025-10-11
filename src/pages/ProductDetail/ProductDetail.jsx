@@ -31,9 +31,14 @@ const ProductDetail = () => {
   const [activeTab, setActiveTab] = useState("description");
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [wishlistLoading, setWishlistLoading] = useState(false);
+  const [reviews, setReviews] = useState([]);
+  const [reviewStats, setReviewStats] = useState(null);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
 
   useEffect(() => {
     fetchProduct();
+    fetchReviews();
+    fetchReviewStats();
   }, [id]);
 
   useEffect(() => {
@@ -189,6 +194,27 @@ const ProductDetail = () => {
     }
 
     return stars;
+  };
+
+  const fetchReviews = async () => {
+    setReviewsLoading(true);
+    try {
+      const response = await ApiService.getProductReviews(id, { per_page: 10 });
+      setReviews(response.data || []);
+    } catch (error) {
+      console.error("Failed to fetch reviews:", error);
+    } finally {
+      setReviewsLoading(false);
+    }
+  };
+
+  const fetchReviewStats = async () => {
+    try {
+      const response = await ApiService.getProductStats(id);
+      setReviewStats(response);
+    } catch (error) {
+      console.error("Failed to fetch review stats:", error);
+    }
   };
 
   if (!product) {
@@ -412,7 +438,7 @@ const ProductDetail = () => {
               }`}
               onClick={() => setActiveTab("reviews")}
             >
-              Reviews (0)
+              Reviews ({reviewStats?.total_reviews || 0})
             </button>
           </div>
 
@@ -478,11 +504,78 @@ const ProductDetail = () => {
 
             {activeTab === "reviews" && (
               <div className="reviews-content">
-                <div className="no-reviews">
-                  <MessageCircle size={48} />
-                  <h3>No reviews yet</h3>
-                  <p>Be the first to review this product!</p>
-                </div>
+                {reviewStats && reviewStats.total_reviews > 0 && (
+                  <div className="reviews-summary">
+                    <div className="average-rating">
+                      <h3>{reviewStats.average_rating}</h3>
+                      <div className="stars-large">
+                        {renderStars(reviewStats.average_rating)}
+                      </div>
+                      <p>{reviewStats.total_reviews} reviews</p>
+                    </div>
+                    <div className="rating-breakdown">
+                      {Object.entries(reviewStats.rating_distribution || {})
+                        .reverse()
+                        .map(([rating, data]) => (
+                          <div key={rating} className="rating-row">
+                            <span className="rating-label">{rating} stars</span>
+                            <div className="rating-bar">
+                              <div
+                                className="rating-bar-fill"
+                                style={{ width: `${data.percentage}%` }}
+                              ></div>
+                            </div>
+                            <span className="rating-count">{data.count}</span>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                )}
+                {reviewsLoading ? (
+                  <div className="loading-state">
+                    <p>Loading reviews...</p>
+                  </div>
+                ) : reviews.length > 0 ? (
+                  <div className="reviews-list">
+                    {reviews.map((review) => (
+                      <div key={review.id} className="review-card">
+                        <div className="review-header">
+                          <div className="review-author">
+                            <strong>{review.user?.name || "Anonymous"}</strong>
+                            {review.is_verified_purchase && (
+                              <span className="verified-badge">
+                                Verified Purchase
+                              </span>
+                            )}
+                          </div>
+                          <div className="review-rating">
+                            {renderStars(review.rating)}
+                          </div>
+                        </div>
+                        {review.review && (
+                          <div className="review-body">
+                            <p>{review.review}</p>
+                          </div>
+                        )}
+                        <div className="review-footer">
+                          <span className="review-date">
+                            {new Date(review.created_at).toLocaleDateString("en-US", {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            })}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="no-reviews">
+                    <MessageCircle size={48} />
+                    <h3>No reviews yet</h3>
+                    <p>Be the first to review this product!</p>
+                  </div>
+                )}
               </div>
             )}
           </div>

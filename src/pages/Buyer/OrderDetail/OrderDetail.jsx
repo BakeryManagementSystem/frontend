@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import ApiService from "../../../services/api";
+import ReviewModal from "../../../components/common/ReviewModal/ReviewModal";
 import {
   ArrowLeft,
   Package,
@@ -20,6 +21,7 @@ import {
   Store,
   User,
   Building2,
+  Star,
 } from "lucide-react";
 import "./OrderDetail.css";
 
@@ -31,10 +33,20 @@ const OrderDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [reviewLoading, setReviewLoading] = useState(false);
+  const [productReviews, setProductReviews] = useState({});
 
   useEffect(() => {
     fetchOrderDetail();
   }, [orderId]);
+
+  useEffect(() => {
+    if (order && order.status === "delivered") {
+      checkReviewStatus();
+    }
+  }, [order]);
 
   const fetchOrderDetail = async () => {
     setLoading(true);
@@ -48,6 +60,57 @@ const OrderDetail = () => {
       setError("Failed to load order details. Please try again.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const checkReviewStatus = async () => {
+    if (!order || !order.items) return;
+
+    const reviews = {};
+    for (const item of order.items) {
+      try {
+        const response = await ApiService.canReviewProduct(orderId, item.product_id);
+        reviews[item.product_id] = response;
+      } catch (error) {
+        console.error(`Failed to check review status for product ${item.product_id}:`, error);
+      }
+    }
+    setProductReviews(reviews);
+  };
+
+  const handleOpenReview = (item) => {
+    setSelectedProduct({
+      id: item.product_id,
+      name: item.product_name,
+      image: item.product_image || "/placeholder-product.jpg",
+      category: item.category || "Product",
+    });
+    setReviewModalOpen(true);
+  };
+
+  const handleSubmitReview = async (reviewData) => {
+    setReviewLoading(true);
+    try {
+      await ApiService.createReview({
+        product_id: selectedProduct.id,
+        order_id: orderId,
+        rating: reviewData.rating,
+        review: reviewData.review,
+      });
+
+      alert("Review submitted successfully!");
+      setReviewModalOpen(false);
+      setSelectedProduct(null);
+      checkReviewStatus(); // Refresh review status
+    } catch (error) {
+      console.error("Failed to submit review:", error);
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to submit review. Please try again.";
+      alert(errorMessage);
+    } finally {
+      setReviewLoading(false);
     }
   };
 
@@ -346,6 +409,28 @@ const OrderDetail = () => {
                           {formatPrice(item.unit_price * item.quantity)}
                         </span>
                       </div>
+                      {/* Review button */}
+                      {order.status === "delivered" && (
+                        <div className="review-section">
+                          {productReviews[item.product_id] ? (
+                            <button
+                              className="btn btn-secondary btn-sm"
+                              disabled
+                            >
+                              <Star size={14} />
+                              Reviewed
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleOpenReview(item)}
+                              className="btn btn-primary btn-sm"
+                            >
+                              <Star size={14} />
+                              Leave a Review
+                            </button>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))
@@ -460,6 +545,17 @@ const OrderDetail = () => {
           )}
         </div>
       </div>
+
+      {/* Review Modal */}
+      {reviewModalOpen && (
+        <ReviewModal
+          open={reviewModalOpen}
+          onClose={() => setReviewModalOpen(false)}
+          onSubmit={handleSubmitReview}
+          product={selectedProduct}
+          loading={reviewLoading}
+        />
+      )}
     </div>
   );
 };
