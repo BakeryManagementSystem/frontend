@@ -13,13 +13,19 @@ import {
   Instagram,
   MessageCircle,
   Heart,
-  Share,
+  Share2,
   Filter,
   Search,
   Package,
   Users,
-  Eye,
-  TrendingUp
+  TrendingUp,
+  Award,
+  Clock,
+  ShoppingBag,
+  Phone,
+  Mail,
+  CheckCircle,
+  Calendar
 } from 'lucide-react';
 import './ShopDetail.css';
 
@@ -34,6 +40,7 @@ const ShopDetail = () => {
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [sortBy, setSortBy] = useState('featured');
   const [isFollowing, setIsFollowing] = useState(false);
+  const [activeTab, setActiveTab] = useState('products');
 
   useEffect(() => {
     fetchShopData();
@@ -119,16 +126,16 @@ const ShopDetail = () => {
     const hasHalfStar = rating % 1 !== 0;
 
     for (let i = 0; i < fullStars; i++) {
-      stars.push(<Star key={i} size={14} fill="currentColor" />);
+      stars.push(<Star key={i} size={16} fill="currentColor" className="star-icon" />);
     }
 
     if (hasHalfStar) {
-      stars.push(<Star key="half" size={14} fill="currentColor" opacity={0.5} />);
+      stars.push(<Star key="half" size={16} fill="currentColor" opacity={0.5} className="star-icon" />);
     }
 
     const emptyStars = 5 - Math.ceil(rating);
     for (let i = 0; i < emptyStars; i++) {
-      stars.push(<Star key={`empty-${i}`} size={14} />);
+      stars.push(<Star key={`empty-${i}`} size={16} className="star-icon star-empty" />);
     }
 
     return stars;
@@ -136,6 +143,19 @@ const ShopDetail = () => {
 
   const handleFollow = () => {
     setIsFollowing(!isFollowing);
+  };
+
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: shopData.name,
+        text: shopData.description,
+        url: window.location.href
+      });
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      alert('Link copied to clipboard!');
+    }
   };
 
   const filteredProducts = products.filter(product => {
@@ -146,14 +166,25 @@ const ShopDetail = () => {
 
   const categories = [...new Set(products.map(p => p.category))];
 
+  if (loading) {
+    return (
+      <div className="shop-detail loading">
+        <div className="loading-spinner">
+          <div className="spinner"></div>
+          <p>Loading shop details...</p>
+        </div>
+      </div>
+    );
+  }
 
-  if (!shopData) {
+  if (error || !shopData) {
     return (
       <div className="shop-not-found">
         <div className="container">
+          <Package size={64} className="error-icon" />
           <h1>Shop Not Found</h1>
-          <p>The shop you're looking for doesn't exist or has been removed.</p>
-          <Link to="/products" className="btn btn-primary">Browse Products</Link>
+          <p>{error || "The shop you're looking for doesn't exist or has been removed."}</p>
+          <Link to="/shops" className="btn btn-primary">Browse All Shops</Link>
         </div>
       </div>
     );
@@ -161,60 +192,84 @@ const ShopDetail = () => {
 
   return (
     <div className="shop-detail">
-      {/* Shop Banner */}
+      {/* Enhanced Shop Banner */}
       <div className="shop-banner">
-        <img src={shopData.banner || 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1200&h=400&fit=crop&crop=center'} alt={shopData.name} className="banner-image" />
+        <div className="banner-image-wrapper">
+          <img
+            src={shopData.banner || 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1200&h=400&fit=crop&crop=center'}
+            alt={shopData.name}
+            className="banner-image"
+          />
+          <div className="banner-gradient"></div>
+        </div>
+
         <div className="banner-overlay">
           <div className="container">
             <div className="shop-header">
-              <div className="shop-info">
-                <div className="shop-main-info">
+              <div className="shop-main-info">
+                <div className="shop-avatar-wrapper">
                   <div className="shop-avatar">
-                    <div className="shop-logo">
-                      <img src={shopData.logo || 'https://images.unsplash.com/photo-1555507036-ab794f4eed25?w=120&h=120&fit=crop&crop=center'} alt={shopData.name} />
-                      {shopData.verified && (
-                        <div className="verified-badge" title="Verified Seller">
-                          ✓
-                        </div>
-                      )}
+                    <img
+                      src={shopData.logo || 'https://images.unsplash.com/photo-1555507036-ab794f4eed25?w=150&h=150&fit=crop&crop=center'}
+                      alt={shopData.name}
+                    />
+                  </div>
+                  {shopData.verified && (
+                    <div className="verified-badge" title="Verified Seller">
+                      <CheckCircle size={20} />
+                    </div>
+                  )}
+                </div>
+
+                <div className="shop-info-content">
+                  <div className="shop-title-row">
+                    <h1 className="shop-name">{shopData.name}</h1>
+                    {shopData.verified && <span className="verified-text">Verified</span>}
+                  </div>
+
+                  <div className="shop-meta-row">
+                    <div className="shop-rating-box">
+                      <div className="stars">
+                        {renderStars(shopData.rating)}
+                      </div>
+                      <span className="rating-text">
+                        <strong>{shopData.rating}</strong> ({shopData.reviewCount} reviews)
+                      </span>
+                    </div>
+
+                    {shopData.location && (
+                      <div className="shop-location-box">
+                        <MapPin size={16} />
+                        <span>{shopData.location}</span>
+                      </div>
+                    )}
+
+                    <div className="shop-member-since">
+                      <Calendar size={16} />
+                      <span>Member since {new Date(shopData.joinDate).getFullYear()}</span>
                     </div>
                   </div>
 
-                  <div className="shop-details">
-                    <h1>{shopData.name}</h1>
-                    <div className="shop-meta">
-                      <div className="shop-rating">
-                        <div className="stars">
-                          {renderStars(shopData.rating)}
-                        </div>
-                        <span>{shopData.rating} ({shopData.reviewCount} reviews)</span>
-                      </div>
-                      <div className="shop-location">
-                        <MapPin size={14} />
-                        {shopData.location}
-                      </div>
-                    </div>
-                    <p className="shop-description">{shopData.description}</p>
-                  </div>
+                  <p className="shop-description">{shopData.description}</p>
                 </div>
+              </div>
 
-                <div className="shop-actions">
-                  <button
-                    className={`btn ${isFollowing ? 'btn-secondary' : 'btn-primary'}`}
-                    onClick={handleFollow}
-                  >
-                    <Heart size={16} fill={isFollowing ? 'currentColor' : 'none'} />
-                    {isFollowing ? 'Following' : 'Follow'}
-                  </button>
-                  <button className="btn btn-outline">
-                    <MessageCircle size={16} />
-                    Contact
-                  </button>
-                  <button className="btn btn-outline">
-                    <Share size={16} />
-                    Share
-                  </button>
-                </div>
+              <div className="shop-actions">
+                <button
+                  className={`action-btn ${isFollowing ? 'following' : 'follow'}`}
+                  onClick={handleFollow}
+                >
+                  <Heart size={18} fill={isFollowing ? 'currentColor' : 'none'} />
+                  <span>{isFollowing ? 'Following' : 'Follow Shop'}</span>
+                </button>
+                <button className="action-btn contact">
+                  <MessageCircle size={18} />
+                  <span>Contact</span>
+                </button>
+                <button className="action-btn share" onClick={handleShare}>
+                  <Share2 size={18} />
+                  <span>Share</span>
+                </button>
               </div>
             </div>
           </div>
@@ -222,169 +277,234 @@ const ShopDetail = () => {
       </div>
 
       <div className="container">
-        {/* Shop Stats */}
-        <div className="shop-stats">
-          <div className="stat-item">
-            <Package size={20} />
-            <div className="stat-content">
+        {/* Enhanced Shop Stats */}
+        <div className="shop-stats-section">
+          <div className="stat-card">
+            <div className="stat-icon products">
+              <Package size={24} />
+            </div>
+            <div className="stat-details">
               <div className="stat-value">{shopData.productCount}</div>
               <div className="stat-label">Products</div>
             </div>
           </div>
-          <div className="stat-item">
-            <Users size={20} />
-            <div className="stat-content">
+
+          <div className="stat-card">
+            <div className="stat-icon followers">
+              <Users size={24} />
+            </div>
+            <div className="stat-details">
               <div className="stat-value">{shopData.followerCount.toLocaleString()}</div>
               <div className="stat-label">Followers</div>
             </div>
           </div>
-          <div className="stat-item">
-            <TrendingUp size={20} />
-            <div className="stat-content">
+
+          <div className="stat-card">
+            <div className="stat-icon sales">
+              <TrendingUp size={24} />
+            </div>
+            <div className="stat-details">
               <div className="stat-value">{shopData.salesCount}</div>
-              <div className="stat-label">Sales</div>
+              <div className="stat-label">Total Sales</div>
             </div>
           </div>
-          <div className="stat-item">
-            <Star size={20} />
-            <div className="stat-content">
+
+          <div className="stat-card highlight">
+            <div className="stat-icon rating">
+              <Award size={24} />
+            </div>
+            <div className="stat-details">
               <div className="stat-value">{shopData.rating}</div>
-              <div className="stat-label">Rating</div>
+              <div className="stat-label">Rating Score</div>
             </div>
           </div>
         </div>
 
-        <div className="shop-content">
-          {/* Products Section */}
-          <div className="products-section">
-            <div className="products-header">
-              <h2>Products ({filteredProducts.length})</h2>
+        {/* Tab Navigation */}
+        <div className="shop-tabs">
+          <button
+            className={`tab-btn ${activeTab === 'products' ? 'active' : ''}`}
+            onClick={() => setActiveTab('products')}
+          >
+            <ShoppingBag size={18} />
+            Products ({filteredProducts.length})
+          </button>
+          <button
+            className={`tab-btn ${activeTab === 'about' ? 'active' : ''}`}
+            onClick={() => setActiveTab('about')}
+          >
+            <Store size={18} />
+            About
+          </button>
+          <button
+            className={`tab-btn ${activeTab === 'policies' ? 'active' : ''}`}
+            onClick={() => setActiveTab('policies')}
+          >
+            <Award size={18} />
+            Policies
+          </button>
+        </div>
 
-              <div className="products-controls">
-                <div className="search-bar">
-                  <Search className="search-icon" size={16} />
-                  <input
-                    type="text"
-                    placeholder="Search products..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="search-input"
-                  />
+        <div className="shop-content-wrapper">
+          {/* Products Tab */}
+          {activeTab === 'products' && (
+            <div className="products-section fade-in">
+              <div className="products-header">
+                <div className="products-controls">
+                  <div className="search-bar">
+                    <Search className="search-icon" size={18} />
+                    <input
+                      type="text"
+                      placeholder="Search products..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="search-input"
+                    />
+                  </div>
+
+                  <select
+                    value={categoryFilter}
+                    onChange={(e) => setCategoryFilter(e.target.value)}
+                    className="filter-select"
+                  >
+                    <option value="all">All Categories</option>
+                    {categories.map(category => (
+                      <option key={category} value={category}>{category}</option>
+                    ))}
+                  </select>
+
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="filter-select"
+                  >
+                    <option value="featured">Featured</option>
+                    <option value="price-low">Price: Low to High</option>
+                    <option value="price-high">Price: High to Low</option>
+                    <option value="rating">Highest Rated</option>
+                    <option value="newest">Newest First</option>
+                  </select>
                 </div>
+              </div>
 
-                <select
-                  value={categoryFilter}
-                  onChange={(e) => setCategoryFilter(e.target.value)}
-                  className="category-filter"
-                >
-                  <option value="all">All Categories</option>
-                  {categories.map(category => (
-                    <option key={category} value={category}>{category}</option>
+              {filteredProducts.length > 0 ? (
+                <div className="products-grid">
+                  {filteredProducts.map(product => (
+                    <ProductCard key={product.id} product={product} />
                   ))}
-                </select>
+                </div>
+              ) : (
+                <div className="no-products">
+                  <Package size={64} />
+                  <h3>No products found</h3>
+                  <p>Try adjusting your search or filter to find what you're looking for.</p>
+                </div>
+              )}
+            </div>
+          )}
 
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="sort-select"
-                >
-                  <option value="featured">Featured</option>
-                  <option value="price-low">Price: Low to High</option>
-                  <option value="price-high">Price: High to Low</option>
-                  <option value="rating">Highest Rated</option>
-                  <option value="newest">Newest</option>
-                </select>
+          {/* About Tab */}
+          {activeTab === 'about' && (
+            <div className="about-section fade-in">
+              <div className="about-card">
+                <h2>About {shopData.name}</h2>
+                <p className="about-description">{shopData.description}</p>
+
+                <div className="about-details">
+                  <div className="detail-item">
+                    <div className="detail-icon">
+                      <Users size={20} />
+                    </div>
+                    <div className="detail-content">
+                      <label>Shop Owner</label>
+                      <span>{shopData.owner}</span>
+                    </div>
+                  </div>
+
+                  <div className="detail-item">
+                    <div className="detail-icon">
+                      <MapPin size={20} />
+                    </div>
+                    <div className="detail-content">
+                      <label>Location</label>
+                      <span>{shopData.location || 'Not specified'}</span>
+                    </div>
+                  </div>
+
+                  <div className="detail-item">
+                    <div className="detail-icon">
+                      <Clock size={20} />
+                    </div>
+                    <div className="detail-content">
+                      <label>Member Since</label>
+                      <span>{new Date(shopData.joinDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {(shopData.social.website || shopData.social.facebook || shopData.social.twitter || shopData.social.instagram) && (
+                  <div className="social-section">
+                    <h3>Connect With Us</h3>
+                    <div className="social-links-grid">
+                      {shopData.social.website && (
+                        <a href={shopData.social.website} target="_blank" rel="noopener noreferrer" className="social-link-btn">
+                          <Globe size={20} />
+                          <span>Visit Website</span>
+                        </a>
+                      )}
+                      {shopData.social.facebook && (
+                        <a href={`https://facebook.com/${shopData.social.facebook}`} target="_blank" rel="noopener noreferrer" className="social-link-btn">
+                          <Facebook size={20} />
+                          <span>Facebook</span>
+                        </a>
+                      )}
+                      {shopData.social.twitter && (
+                        <a href={`https://twitter.com/${shopData.social.twitter.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="social-link-btn">
+                          <Twitter size={20} />
+                          <span>Twitter</span>
+                        </a>
+                      )}
+                      {shopData.social.instagram && (
+                        <a href={`https://instagram.com/${shopData.social.instagram}`} target="_blank" rel="noopener noreferrer" className="social-link-btn">
+                          <Instagram size={20} />
+                          <span>Instagram</span>
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
+          )}
 
-            <div className="products-grid">
-              {filteredProducts.map(product => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-
-            {filteredProducts.length === 0 && (
-              <div className="no-products">
-                <Package size={48} />
-                <h3>No products found</h3>
-                <p>No products match your search criteria.</p>
+          {/* Policies Tab */}
+          {activeTab === 'policies' && (
+            <div className="policies-section fade-in">
+              <div className="policy-card">
+                <div className="policy-header">
+                  <Package size={24} />
+                  <h3>Shipping Policy</h3>
+                </div>
+                <p>{shopData.policies.shipping || 'No shipping policy provided yet.'}</p>
               </div>
-            )}
-          </div>
 
-          {/* Shop Sidebar */}
-          <div className="shop-sidebar">
-            {/* Shop Info */}
-            <div className="sidebar-section">
-              <h3>About This Shop</h3>
-              <div className="shop-info-card">
-                <div className="info-item">
-                  <span className="label">Owner:</span>
-                  <span className="value">{shopData.owner}</span>
+              <div className="policy-card">
+                <div className="policy-header">
+                  <Award size={24} />
+                  <h3>Return Policy</h3>
                 </div>
-                <div className="info-item">
-                  <span className="label">Member since:</span>
-                  <span className="value">{new Date(shopData.joinDate).toLocaleDateString()}</span>
+                <p>{shopData.policies.returns || 'No return policy provided yet.'}</p>
+              </div>
+
+              <div className="policy-card">
+                <div className="policy-header">
+                  <TrendingUp size={24} />
+                  <h3>Exchange Policy</h3>
                 </div>
-                <div className="info-item">
-                  <span className="label">Location:</span>
-                  <span className="value">{shopData.location}</span>
-                </div>
+                <p>{shopData.policies.exchange || 'No exchange policy provided yet.'}</p>
               </div>
             </div>
-
-            {/* Social Links */}
-            {(shopData.social.website || shopData.social.facebook || shopData.social.twitter || shopData.social.instagram) && (
-              <div className="sidebar-section">
-                <h3>Connect With Us</h3>
-                <div className="social-links">
-                  {shopData.social.website && (
-                    <a href={shopData.social.website} target="_blank" rel="noopener noreferrer" className="social-link">
-                      <Globe size={16} />
-                      Website
-                    </a>
-                  )}
-                  {shopData.social.facebook && (
-                    <a href={`https://facebook.com/${shopData.social.facebook}`} target="_blank" rel="noopener noreferrer" className="social-link">
-                      <Facebook size={16} />
-                      Facebook
-                    </a>
-                  )}
-                  {shopData.social.twitter && (
-                    <a href={`https://twitter.com/${shopData.social.twitter.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="social-link">
-                      <Twitter size={16} />
-                      Twitter
-                    </a>
-                  )}
-                  {shopData.social.instagram && (
-                    <a href={`https://instagram.com/${shopData.social.instagram}`} target="_blank" rel="noopener noreferrer" className="social-link">
-                      <Instagram size={16} />
-                      Instagram
-                    </a>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Policies */}
-            <div className="sidebar-section">
-              <h3>Shop Policies</h3>
-              <div className="policies">
-                <details className="policy-item">
-                  <summary>Shipping Policy</summary>
-                  <p>{shopData.policies.shipping}</p>
-                </details>
-                <details className="policy-item">
-                  <summary>Return Policy</summary>
-                  <p>{shopData.policies.returns}</p>
-                </details>
-                <details className="policy-item">
-                  <summary>Exchange Policy</summary>
-                  <p>{shopData.policies.exchange}</p>
-                </details>
-              </div>
-            </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
