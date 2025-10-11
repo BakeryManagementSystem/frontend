@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useCart } from '../../../context/CartContext';
+import ApiService from '../../../services/api';
 import ProductCard from '../../../components/common/ProductCard/ProductCard';
 import {
   Store,
@@ -28,6 +29,7 @@ const ShopDetail = () => {
   const [shopData, setShopData] = useState(null);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [sortBy, setSortBy] = useState('featured');
@@ -39,99 +41,76 @@ const ShopDetail = () => {
   }, [shopId]);
 
   const fetchShopData = async () => {
-    // Simulate API call with mock data
-    setTimeout(() => {
-      setShopData({
-        id: shopId,
-        name: 'Sweet Dreams Bakery',
-        description: 'Artisan bakery specializing in fresh-baked breads, pastries, and custom cakes. We use only the finest ingredients and traditional baking methods to create delicious treats for every occasion.',
-        logo: '/placeholder-bakery-logo.jpg',
-        banner: '/placeholder-bakery-banner.jpg',
-        owner: 'Maria Rodriguez',
-        rating: 4.8,
-        reviewCount: 186,
-        followerCount: 892,
-        productCount: 32,
-        salesCount: 1245,
-        joinDate: '2023-08-15',
-        location: 'Downtown Bakery District',
-        verified: true,
-        policies: {
-          shipping: 'Free delivery for orders over $30 within 5 miles. Fresh items delivered same day. Custom cakes require 48-hour advance notice.',
-          returns: 'Fresh bakery items must be returned within 24 hours if unsatisfactory. Custom orders are non-refundable unless there is a quality issue.',
-          exchange: 'We accept exchanges for packaged goods within 3 days. Fresh items can only be exchanged if there is a quality concern.'
-        },
-        social: {
-          website: 'https://sweetdreamsbakery.com',
-          facebook: 'sweetdreamsbakery',
-          twitter: '@sweetdreams_bakery',
-          instagram: 'sweetdreamsbakery'
-        },
-        theme: {
-          primaryColor: '#6639a6',
-          secondaryColor: '#7f4fc3',
-          accentColor: '#9b75d0'
+    setLoading(true);
+    setError('');
+    try {
+      const response = await ApiService.getShopByOwner(shopId);
+      const { shop, owner } = response;
+
+      // Parse JSON fields if they're strings
+      const parseSafe = (field, defaultValue = {}) => {
+        if (typeof field === 'string') {
+          try {
+            return JSON.parse(field);
+          } catch {
+            return defaultValue;
+          }
         }
+        return field || defaultValue;
+      };
+
+      setShopData({
+        id: shop.id,
+        owner_id: shop.owner_id,
+        name: shop.shop_name || owner.name + "'s Shop",
+        description: shop.description || 'A wonderful bakery shop',
+        logo: shop.logo_path || null,
+        banner: shop.banner_path || null,
+        owner: owner.name,
+        rating: shop.average_rating || 5.0,
+        reviewCount: shop.total_reviews || 0,
+        followerCount: shop.follower_count || 0,
+        productCount: shop.total_products || 0,
+        salesCount: shop.total_sales || 0,
+        joinDate: shop.created_at,
+        location: shop.address || '',
+        verified: shop.verified || false,
+        policies: parseSafe(shop.policies, {
+          shipping: '',
+          returns: '',
+          exchange: ''
+        }),
+        social: parseSafe(shop.social, {
+          website: '',
+          facebook: '',
+          twitter: '',
+          instagram: ''
+        }),
+        theme: parseSafe(shop.theme, {
+          primaryColor: '#2563eb',
+          secondaryColor: '#64748b',
+          accentColor: '#f59e0b'
+        })
       });
       setLoading(false);
-    }, 1000);
+    } catch (error) {
+      console.error('Failed to fetch shop data:', error);
+      setError('Failed to load shop data. Please try again.');
+      setLoading(false);
+    }
   };
 
   const fetchShopProducts = async () => {
-    // Simulate API call with mock data
-    setTimeout(() => {
-      const mockProducts = [
-        {
-          id: 1,
-          name: "Artisan Sourdough Bread",
-          price: 8.99,
-          originalPrice: 10.99,
-          image: "/placeholder-bread.jpg",
-          category: "Breads",
-          rating: 4.7,
-          reviewCount: 89,
-          seller: "Sweet Dreams Bakery",
-          discount: 18,
-          inStock: true
-        },
-        {
-          id: 2,
-          name: "Chocolate Croissants (6-pack)",
-          price: 12.99,
-          originalPrice: 15.99,
-          image: "/placeholder-croissant.jpg",
-          category: "Pastries",
-          rating: 4.9,
-          reviewCount: 156,
-          seller: "Sweet Dreams Bakery",
-          discount: 19,
-          inStock: true
-        },
-        {
-          id: 3,
-          name: "Custom Birthday Cake",
-          price: 45.00,
-          image: "/placeholder-cake.jpg",
-          category: "Cakes",
-          rating: 4.8,
-          reviewCount: 78,
-          seller: "Sweet Dreams Bakery",
-          inStock: true
-        },
-        {
-          id: 4,
-          name: "Fresh Blueberry Muffins (12-pack)",
-          price: 18.99,
-          image: "/placeholder-muffins.jpg",
-          category: "Muffins",
-          rating: 4.6,
-          reviewCount: 45,
-          seller: "Sweet Dreams Bakery",
-          inStock: false
-        }
-      ];
-      setProducts(mockProducts);
-    }, 1500);
+    try {
+      const response = await ApiService.getProducts({
+        owner_id: shopId,
+        per_page: 100
+      });
+      const productList = response.data || [];
+      setProducts(productList);
+    } catch (error) {
+      console.error('Failed to fetch shop products:', error);
+    }
   };
 
   const renderStars = (rating) => {
