@@ -292,10 +292,12 @@ const ProductDetail = () => {
 
               <div className="product-rating">
                 <div className="stars">
-                  {renderStars(4.5)}{" "}
-                  {/* Default rating since no reviews in API */}
+                  {renderStars(product.average_rating || 0)}
                 </div>
-                <span className="rating-text">(4.5) • 0 reviews</span>
+                <span className="rating-text">
+                  ({product.average_rating || 0}) • {product.reviews_count || 0}{" "}
+                  reviews
+                </span>
               </div>
 
               <div className="product-seller">

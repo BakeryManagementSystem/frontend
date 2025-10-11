@@ -133,8 +133,8 @@ const Products = () => {
             product.image_path ||
             "/placeholder-product.jpg",
           category: product.category || "General",
-          rating: calculateAverageRating(product.reviews || []),
-          reviewCount: (product.reviews || []).length,
+          rating: product.average_rating || 0,
+          reviewCount: product.reviews_count || 0,
           seller:
             product.owner?.shop_name || product.owner?.name || "Unknown Seller",
           discount: product.discount_price
@@ -179,11 +179,6 @@ const Products = () => {
     }
   };
 
-  const calculateAverageRating = (reviews) => {
-    if (!reviews || reviews.length === 0) return 4.5; // Default rating
-    const sum = reviews.reduce((acc, review) => acc + review.rating, 0);
-    return Math.round((sum / reviews.length) * 10) / 10;
-  };
 
   const applyClientSideFilters = (products) => {
     let filtered = [...products];
