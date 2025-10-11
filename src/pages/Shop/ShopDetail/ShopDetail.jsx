@@ -192,85 +192,80 @@ const ShopDetail = () => {
 
   return (
     <div className="shop-detail">
-      {/* Enhanced Shop Banner */}
+      {/* Redesigned Shop Banner */}
       <div className="shop-banner">
-        <div className="banner-image-wrapper">
-          <img
-            src={shopData.banner || 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1200&h=400&fit=crop&crop=center'}
-            alt={shopData.name}
-            className="banner-image"
-          />
-          <div className="banner-gradient"></div>
-        </div>
+        <div className="container">
+          <div className="shop-header-content">
+            {/* Shop Avatar */}
+            <div className="shop-avatar-section">
+              <div className="shop-avatar">
+                <img
+                  src={shopData.logo || 'https://images.unsplash.com/photo-1555507036-ab794f4eed25?w=150&h=150&fit=crop&crop=center'}
+                  alt={shopData.name}
+                />
+              </div>
+              {shopData.verified && (
+                <div className="verified-badge" title="Verified Seller">
+                  <CheckCircle size={16} />
+                </div>
+              )}
+            </div>
 
-        <div className="banner-overlay">
-          <div className="container">
-            <div className="shop-header">
-              <div className="shop-main-info">
-                <div className="shop-avatar-wrapper">
-                  <div className="shop-avatar">
-                    <img
-                      src={shopData.logo || 'https://images.unsplash.com/photo-1555507036-ab794f4eed25?w=150&h=150&fit=crop&crop=center'}
-                      alt={shopData.name}
-                    />
-                  </div>
-                  {shopData.verified && (
-                    <div className="verified-badge" title="Verified Seller">
-                      <CheckCircle size={20} />
-                    </div>
-                  )}
+            {/* Shop Info */}
+            <div className="shop-info-section">
+              <div className="shop-title-section">
+                <h1 className="shop-name">{shopData.name}</h1>
+                {shopData.verified && (
+                  <span className="verified-badge-text">
+                    <CheckCircle size={14} />
+                    Verified
+                  </span>
+                )}
+              </div>
+
+              <div className="shop-meta-section">
+                <div className="meta-item">
+                  <div className="stars">{renderStars(shopData.rating)}</div>
+                  <span className="meta-text">
+                    <strong>{shopData.rating}</strong> ({shopData.reviewCount} reviews)
+                  </span>
                 </div>
 
-                <div className="shop-info-content">
-                  <div className="shop-title-row">
-                    <h1 className="shop-name">{shopData.name}</h1>
-                    {shopData.verified && <span className="verified-text">Verified</span>}
+                {shopData.location && (
+                  <div className="meta-item">
+                    <MapPin size={14} />
+                    <span className="meta-text">{shopData.location}</span>
                   </div>
+                )}
 
-                  <div className="shop-meta-row">
-                    <div className="shop-rating-box">
-                      <div className="stars">
-                        {renderStars(shopData.rating)}
-                      </div>
-                      <span className="rating-text">
-                        <strong>{shopData.rating}</strong> ({shopData.reviewCount} reviews)
-                      </span>
-                    </div>
-
-                    {shopData.location && (
-                      <div className="shop-location-box">
-                        <MapPin size={16} />
-                        <span>{shopData.location}</span>
-                      </div>
-                    )}
-
-                    <div className="shop-member-since">
-                      <Calendar size={16} />
-                      <span>Member since {new Date(shopData.joinDate).getFullYear()}</span>
-                    </div>
-                  </div>
-
-                  <p className="shop-description">{shopData.description}</p>
+                <div className="meta-item">
+                  <Calendar size={14} />
+                  <span className="meta-text">
+                    Joined {new Date(shopData.joinDate).getFullYear()}
+                  </span>
                 </div>
               </div>
 
-              <div className="shop-actions">
-                <button
-                  className={`action-btn ${isFollowing ? 'following' : 'follow'}`}
-                  onClick={handleFollow}
-                >
-                  <Heart size={18} fill={isFollowing ? 'currentColor' : 'none'} />
-                  <span>{isFollowing ? 'Following' : 'Follow Shop'}</span>
-                </button>
-                <button className="action-btn contact">
-                  <MessageCircle size={18} />
-                  <span>Contact</span>
-                </button>
-                <button className="action-btn share" onClick={handleShare}>
-                  <Share2 size={18} />
-                  <span>Share</span>
-                </button>
-              </div>
+              <p className="shop-description">{shopData.description}</p>
+            </div>
+
+            {/* Shop Actions */}
+            <div className="shop-actions-section">
+              <button
+                className={`action-button ${isFollowing ? 'following' : 'follow'}`}
+                onClick={handleFollow}
+              >
+                <Heart size={16} fill={isFollowing ? 'currentColor' : 'none'} />
+                {isFollowing ? 'Following' : 'Follow'}
+              </button>
+              <button className="action-button secondary">
+                <MessageCircle size={16} />
+                Contact
+              </button>
+              <button className="action-button secondary" onClick={handleShare}>
+                <Share2 size={16} />
+                Share
+              </button>
             </div>
           </div>
         </div>
