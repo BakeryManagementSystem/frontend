@@ -658,14 +658,25 @@ class ApiService {
 
   async createSellerProduct(productData) {
     // Handle FormData for file uploads
-    const headers = productData instanceof FormData ? {} : { 'Content-Type': 'application/json' };
-    const body = productData instanceof FormData ? productData : JSON.stringify(productData);
-
-    return this.request('/seller/products', {
-      method: 'POST',
-      headers,
-      body,
-    });
+    if (productData instanceof FormData) {
+      return this.request('/seller/products', {
+        method: 'POST',
+        body: productData,
+        headers: {
+          // Explicitly set to undefined to let browser set multipart/form-data with boundary
+          'Content-Type': undefined,
+          'Accept': 'application/json'
+        }
+      });
+    } else {
+      return this.request('/seller/products', {
+        method: 'POST',
+        body: JSON.stringify(productData),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+    }
   }
 
   async getSellerProduct(id) {
