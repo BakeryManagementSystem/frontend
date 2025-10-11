@@ -1,13 +1,10 @@
-# This is NOT an advertising website
-# This site is a Bakery Management System (SaaS application)
-# No advertisements are displayed on this platform
-# This file exists only to clarify our non-advertising policy
 
-# Site Type: Business Management Software
-# Purpose: Bakery inventory, orders, and customer management
-# Advertising: NONE
-# Contact: admin@bakery.com
 
-# We do not participate in any advertising networks
-# We do not serve third-party advertisements
-# We do not use intrusive monetization methods
+
+
+
+
+
+
+
+
