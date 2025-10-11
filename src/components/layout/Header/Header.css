@@ -138,22 +138,28 @@
   border: none;
   color: var(--primary-color, #6639a6);
   cursor: pointer;
-  padding: 6px;
-  border-radius: 6px;
-  transition: all 0.2s ease;
+  padding: 0;
+  border-radius: 0;
+  transition: color 0.2s ease, transform 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
+  outline: none;
 }
 
 .search-btn:hover {
   color: var(--primary-hover, #4f2c80);
-  background: transparent;
-  transform: scale(1.1);
+  background: none;
+  transform: scale(1.15);
 }
 
 .search-btn:active {
-  transform: scale(0.95);
+  transform: scale(0.9);
+}
+
+.search-btn:focus {
+  outline: none;
+  color: var(--primary-hover, #4f2c80);
 }
 
 /* Desktop Header Actions */
