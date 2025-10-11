@@ -63,6 +63,7 @@ const SellerShop = () => {
   // Image URL input states
   const [imageInputType, setImageInputType] = useState({
     logo: 'file', // 'file' or 'url'
+    banner: 'file'
   });
   const [imageUrl, setImageUrl] = useState({
     logo: '',
