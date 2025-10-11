@@ -124,7 +124,7 @@ const Categories = () => {
       'Pastries & Croissants': '#DEB887',
       'Cookies & Biscuits': '#CD853F',
       'Custom Orders': '#9370DB',
-      'Bakery Bundles': '#6639a6',
+      'Bakery Bundles': '#4CAF50',
       // Old categories (fallback)
       'Bread & Rolls': '#D2691E',
       'Breads': '#D2691E',

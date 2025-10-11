@@ -29,6 +29,17 @@ const Products = () => {
   // Get search query from URL
   const searchQuery = searchParams.get("search") || "";
 
+  // Sync category from URL params with filters
+  useEffect(() => {
+    if (category) {
+      setFilters((prev) => ({
+        ...prev,
+        category: category,
+      }));
+      setCurrentPage(1); // Reset to first page when category changes
+    }
+  }, [category]);
+
   useEffect(() => {
     fetchProducts();
     fetchCategories();
