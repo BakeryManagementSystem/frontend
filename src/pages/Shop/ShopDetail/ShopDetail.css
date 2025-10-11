@@ -762,18 +762,19 @@
 
 @media (max-width: 768px) {
   .shop-detail {
-    padding-top: 60px; /* Adjust for mobile header */
+    padding-top: 0; /* Remove padding to show banner */
   }
 
   .shop-banner-image {
     height: 250px;
+    margin-top: 60px; /* Add margin for mobile header */
   }
 
   .shop-banner {
     height: auto;
-    min-height: auto; /* Changed from 500px */
-    margin-top: 0; /* Changed from -60px */
-    padding-top: 2rem; /* Changed from 60px */
+    min-height: auto;
+    margin-top: 0;
+    padding-top: 2rem;
   }
 
   .shop-header {
@@ -860,6 +861,7 @@
 @media (max-width: 480px) {
   .shop-banner-image {
     height: 200px;
+    margin-top: 56px; /* Adjust for smaller mobile header */
   }
 
   .shop-avatar {
