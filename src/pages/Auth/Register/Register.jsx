@@ -4,10 +4,7 @@ import { useAuth } from '../../../context/AuthContext';
 import {
   Eye,
   EyeOff,
-  Mail,
-  Lock,
   User,
-  Phone,
   AlertCircle,
   Store
 } from 'lucide-react';
@@ -18,6 +15,8 @@ const Register = () => {
     name: '',
     email: '',
     phone: '',
+    date_of_birth: '',
+    shop_name: '',
     password: '',
     confirmPassword: '',
     userType: 'buyer',
@@ -64,6 +63,15 @@ const Register = () => {
       newErrors.phone = 'Phone number is required';
     }
 
+    if (!formData.date_of_birth) {
+      newErrors.date_of_birth = 'Date of birth is required';
+    }
+
+    // Shop name is required only for sellers/owners
+    if (formData.userType === 'seller' && !formData.shop_name.trim()) {
+      newErrors.shop_name = 'Shop name is required for sellers';
+    }
+
     if (!formData.password) {
       newErrors.password = 'Password is required';
     } else if (formData.password.length < 8) {
@@ -96,7 +104,7 @@ const Register = () => {
     setErrors({});
 
     try {
-      const { confirmPassword, acceptTerms, phone, userType, ...registrationData } = formData;
+      const { confirmPassword, acceptTerms, userType, ...registrationData } = formData;
       // Map frontend field names to backend expected field names
       const backendData = {
         ...registrationData,
@@ -188,6 +196,27 @@ const Register = () => {
                 {errors.name && <div className="error-message">{errors.name}</div>}
               </div>
 
+              {/* Shop Name - Only show for sellers */}
+              {formData.userType === 'seller' && (
+                <div className="form-group">
+                  <label htmlFor="shop_name" className="form-label">
+                    Shop Name
+                  </label>
+                  <div className="input-wrapper">
+                    <input
+                      type="text"
+                      id="shop_name"
+                      name="shop_name"
+                      value={formData.shop_name}
+                      onChange={handleChange}
+                      className={`form-input ${errors.shop_name ? 'error' : ''}`}
+                      placeholder="Enter your shop name"
+                    />
+                  </div>
+                  {errors.shop_name && <div className="error-message">{errors.shop_name}</div>}
+                </div>
+              )}
+
               {/* Email */}
               <div className="form-group">
                 <label htmlFor="email" className="form-label">
@@ -224,6 +253,25 @@ const Register = () => {
                   />
                 </div>
                 {errors.phone && <div className="error-message">{errors.phone}</div>}
+              </div>
+
+              {/* Date of Birth */}
+              <div className="form-group">
+                <label htmlFor="date_of_birth" className="form-label">
+                  Date of Birth
+                </label>
+                <div className="input-wrapper">
+                  <input
+                    type="date"
+                    id="date_of_birth"
+                    name="date_of_birth"
+                    value={formData.date_of_birth}
+                    onChange={handleChange}
+                    className={`form-input ${errors.date_of_birth ? 'error' : ''}`}
+                    max={new Date().toISOString().split('T')[0]}
+                  />
+                </div>
+                {errors.date_of_birth && <div className="error-message">{errors.date_of_birth}</div>}
               </div>
 
               {/* Password */}

@@ -48,6 +48,9 @@ import SellerAnalytics from './pages/Seller/Analytics/SellerAnalytics';
 import AddProduct from './pages/Seller/Products/AddProduct';
 import EditProduct from './pages/Seller/Products/EditProduct';
 import IngredientsManagement from './pages/Seller/Ingredients/IngredientsManagement';
+import ExpensesManagement from './pages/Seller/Expenses/ExpensesManagement';
+import CouponsManagement from './pages/Seller/Coupons/CouponsManagement';
+import InventoryTransactions from './pages/Seller/InventoryTransactions/InventoryTransactions';
 
 // Protected Route Component
 import ProtectedRoute from "./components/common/ProtectedRoute/ProtectedRoute";
@@ -191,6 +194,21 @@ function App() {
                   <Route path="/seller/ingredients" element={
                     <ProtectedRoute userType="seller">
                       <IngredientsManagement />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/seller/expenses" element={
+                    <ProtectedRoute userType="seller">
+                      <ExpensesManagement />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/seller/coupons" element={
+                    <ProtectedRoute userType="seller">
+                      <CouponsManagement />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/seller/inventory-transactions" element={
+                    <ProtectedRoute userType="seller">
+                      <InventoryTransactions />
                     </ProtectedRoute>
                   } />
 
