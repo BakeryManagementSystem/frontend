@@ -782,11 +782,13 @@
   .shop-banner {
     height: auto;
     min-height: auto;
-    margin-top: 0;
-    padding: 1.5rem 0;
+    margin-top: 0; /* Remove negative margin on mobile */
+    padding: 0; /* Remove all padding */
+    padding-top: 1.5rem; /* Add only top padding */
+    padding-bottom: 1.5rem; /* Add only bottom padding */
     background: white;
-    position: relative;
-    padding-bottom: 2rem; /* Extra padding at bottom */
+    position: static; /* Change from relative */
+    z-index: auto; /* Reset z-index */
   }
 
   /* Fix shop header content layout for mobile */
@@ -794,12 +796,17 @@
     flex-direction: column;
     gap: 1.5rem;
     align-items: center;
+    position: static; /* Change from relative */
+    z-index: auto; /* Reset z-index */
   }
 
   .shop-avatar-section {
     display: flex;
     flex-direction: column;
     align-items: center;
+    position: static; /* Change from relative */
+    z-index: auto; /* Reset z-index */
+    margin-top: -50px; /* Pull avatar up to overlap banner */
   }
 
   .shop-avatar {
@@ -814,6 +821,8 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    position: static; /* Change from relative */
+    z-index: auto; /* Reset z-index */
   }
 
   .shop-title-section {
@@ -848,6 +857,7 @@
   .shop-actions-section {
     width: 100%;
     justify-content: center;
+    margin-bottom: 1.5rem; /* Add bottom margin */
   }
 
   .action-button {
@@ -862,12 +872,17 @@
   .shop-stats-section {
     grid-template-columns: 1fr;
     gap: 1rem;
-    margin-top: 3rem; /* Large margin to ensure separation */
-    clear: both; /* Ensure it clears any floats */
+    margin-top: 0; /* Remove top margin */
+    padding-top: 2rem; /* Add padding instead */
+    clear: both;
+    position: relative;
+    z-index: 1;
   }
 
   .stat-card {
     padding: 1.5rem;
+    position: relative;
+    z-index: 1;
   }
 
   .shop-content-wrapper {
