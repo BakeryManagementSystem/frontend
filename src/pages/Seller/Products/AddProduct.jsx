@@ -20,6 +20,10 @@ const AddProduct = () => {
   const [totalIngredientCost, setTotalIngredientCost] = useState(0);
   const [loadingIngredients, setLoadingIngredients] = useState(false);
 
+  // Categories state
+  const [categories, setCategories] = useState([]);
+  const [loadingCategories, setLoadingCategories] = useState(false);
+
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -40,18 +44,10 @@ const AddProduct = () => {
     image_urls: []
   });
 
-  const categoryOptions = [
-    { id: 1, name: 'Bread & Rolls' },
-    { id: 2, name: 'Pastries' },
-    { id: 3, name: 'Cakes' },
-    { id: 4, name: 'Cookies' },
-    { id: 5, name: 'Muffins & Cupcakes' },
-    { id: 6, name: 'Specialty & Dietary' }
-  ];
-
-  // Fetch ingredients on component mount
+  // Fetch ingredients and categories on component mount
   useEffect(() => {
     fetchIngredients();
+    fetchCategories();
   }, []);
 
   // Calculate total ingredient cost whenever selected ingredients change
@@ -280,6 +276,27 @@ const AddProduct = () => {
     }
   };
 
+  const fetchCategories = async () => {
+    setLoadingCategories(true);
+    try {
+      const response = await ApiService.getCategories();
+      setCategories(response.data || []);
+    } catch (error) {
+      console.error('Failed to fetch categories:', error);
+      // Fallback to default categories if API fails
+      setCategories([
+        { id: 1, name: 'Artisan Breads' },
+        { id: 2, name: 'Cakes & Celebration' },
+        { id: 3, name: 'Pastries & Croissants' },
+        { id: 4, name: 'Cookies & Biscuits' },
+        { id: 5, name: 'Custom Orders' },
+        { id: 6, name: 'Bakery Bundles' }
+      ]);
+    } finally {
+      setLoadingCategories(false);
+    }
+  };
+
   const addIngredient = (ingredientId) => {
     const ingredient = availableIngredients.find(ing => ing.id === parseInt(ingredientId));
     if (ingredient && !selectedIngredients.find(ing => ing.id === ingredientId)) {
@@ -404,9 +421,10 @@ const AddProduct = () => {
                     value={formData.category_id}
                     onChange={handleInputChange}
                     required
+                    disabled={loadingCategories}
                   >
-                    <option value="">Select a category</option>
-                    {categoryOptions.map(cat => (
+                    <option value="">{loadingCategories ? 'Loading categories...' : 'Select a category'}</option>
+                    {categories.map(cat => (
                       <option key={cat.id} value={cat.id}>{cat.name}</option>
                     ))}
                   </select>

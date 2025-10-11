@@ -466,48 +466,234 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .ingredients-management {
-    padding: 16px;
+    padding: 12px;
   }
 
   .page-header {
     flex-direction: column;
     gap: 16px;
     align-items: stretch;
+    padding: 16px;
+  }
+
+  .header-content h1 {
+    font-size: 22px;
+  }
+
+  .header-content p {
+    font-size: 14px;
   }
 
   .header-actions {
-    justify-content: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .header-actions .btn {
+    width: 100%;
+    justify-content: center;
   }
 
   .stats-grid {
     grid-template-columns: 1fr;
+    gap: 12px;
   }
 
-  .table-header,
-  .table-row {
-    grid-template-columns: 1fr;
-    gap: 8px;
+  .stat-card {
+    padding: 16px;
   }
 
+  .stat-value {
+    font-size: 20px;
+  }
+
+  .stat-label {
+    font-size: 13px;
+  }
+
+  .ingredients-controls {
+    padding: 12px;
+  }
+
+  .search-box {
+    max-width: 100%;
+  }
+
+  .search-box input {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+
+  /* Transform table into card layout for mobile */
   .table-header {
     display: none;
   }
 
   .table-row {
-    display: block;
+    grid-template-columns: 1fr;
+    gap: 8px;
     padding: 16px;
     border: 1px solid #e2e8f0;
     border-radius: 8px;
     margin-bottom: 12px;
+    background: white;
   }
 
   .table-row > div {
-    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
   }
 
-  .table-row > div:before {
-    content: attr(data-label) ': ';
+  .table-row > div::before {
+    content: attr(data-label);
     font-weight: 600;
-    color: #374151;
+    color: #64748b;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+  }
+
+  .ingredient-name::before {
+    content: 'Name: ';
+  }
+
+  .ingredient-unit::before {
+    content: 'Unit: ';
+  }
+
+  .ingredient-price::before {
+    content: 'Price: ';
+  }
+
+  .ingredient-updated::before {
+    content: 'Updated: ';
+  }
+
+  .ingredient-actions {
+    justify-content: flex-end;
+    padding-top: 8px;
+    border-top: 1px solid #f1f5f9;
+    margin-top: 8px;
+  }
+
+  .ingredient-actions::before {
+    content: none;
+  }
+
+  .action-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  /* Modal adjustments for mobile */
+  .modal {
+    max-width: 95%;
+    margin: 10px;
+  }
+
+  .modal-header {
+    padding: 16px;
+  }
+
+  .modal-header h3 {
+    font-size: 18px;
+  }
+
+  .modal-body {
+    padding: 0 16px 16px 16px;
+  }
+
+  .form-group label {
+    font-size: 13px;
+  }
+
+  .form-group input,
+  .form-group select {
+    font-size: 16px; /* Prevents zoom on iOS */
+    padding: 10px;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .modal-actions .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .ingredients-management {
+    padding: 8px;
+  }
+
+  .page-header {
+    padding: 12px;
+  }
+
+  .header-content h1 {
+    font-size: 20px;
+  }
+
+  .header-content p {
+    font-size: 13px;
+  }
+
+  .stat-card {
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .stat-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .stat-value {
+    font-size: 18px;
+  }
+
+  .stat-label {
+    font-size: 12px;
+  }
+
+  .ingredients-controls {
+    padding: 10px;
+  }
+
+  .table-row {
+    padding: 12px;
+  }
+
+  .table-row > div {
+    font-size: 14px;
+  }
+
+  .table-row > div::before {
+    font-size: 11px;
+  }
+
+  .action-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .modal-header {
+    padding: 12px;
+  }
+
+  .modal-header h3 {
+    font-size: 16px;
+  }
+
+  .modal-body {
+    padding: 0 12px 12px 12px;
+  }
+
+  .btn {
+    padding: 10px 16px;
+    font-size: 13px;
   }
 }
