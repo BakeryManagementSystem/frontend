@@ -37,7 +37,9 @@ const ShopList = () => {
       };
 
       const response = await ApiService.getAllShops(params);
-      setShops(response.data || response.shops || []);
+      // Handle the API response structure: { success: true, data: [...] }
+      const shopsData = response.success ? response.data : (response.data || response.shops || []);
+      setShops(shopsData);
     } catch (error) {
       console.error('Failed to fetch shops:', error);
       setError('Failed to load shops. Please try again.');
@@ -227,4 +229,3 @@ const ShopCard = ({ shop }) => {
 };
 
 export default ShopList;
-

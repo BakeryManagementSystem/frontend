@@ -251,7 +251,7 @@ const SellerShop = () => {
     // Use the owner_id from shopData, fallback to user.id if not available
     const ownerId = shopData.owner_id || user?.id;
     if (ownerId) {
-      window.open(`/shop/${ownerId}`, '_blank');
+      window.open(`/bakery/${ownerId}`, '_blank');
     } else {
       addNotification('Unable to preview shop. Please try again.', 'error');
     }
