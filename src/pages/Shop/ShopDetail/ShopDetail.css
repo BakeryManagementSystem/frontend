@@ -2,7 +2,6 @@
 .shop-detail {
   min-height: 100vh;
   background: var(--bg-secondary, #f8fafc);
-  padding-top: 80px; /* Space for fixed header */
 }
 
 /* Loading State */
@@ -79,7 +78,7 @@
   height: 400px;
   overflow: hidden;
   position: relative;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  background: #f8fafc;
 }
 
 .shop-banner-image img {
