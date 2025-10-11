@@ -15,6 +15,8 @@ import {
   RotateCcw,
   Store,
   MessageCircle,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import "./ProductDetail.css";
 
@@ -142,6 +144,39 @@ const ProductDetail = () => {
     }
   };
 
+  // Carousel navigation handlers
+  const handlePrevImage = () => {
+    const images = getProductImages();
+    setSelectedImage((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+  };
+
+  const handleNextImage = () => {
+    const images = getProductImages();
+    setSelectedImage((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+  };
+
+  const getProductImages = () => {
+    if (!product) return [];
+
+    const images = [];
+
+    // Add all images from the images array
+    if (
+      product.image_urls &&
+      Array.isArray(product.image_urls) &&
+      product.image_urls.length > 0
+    ) {
+      images.push(...product.image_urls);
+    }
+
+    // If no images array, add the main image
+    if (images.length === 0 && (product.image_url || product.image_path)) {
+      images.push(product.image_url || product.image_path);
+    }
+
+    return images;
+  };
+
   const handleShare = async () => {
     const productUrl = `${window.location.origin}/products/${product.id}`;
     const shareData = {
@@ -217,6 +252,21 @@ const ProductDetail = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="product-detail-page">
+        <div className="container">
+          <div className="loading-state">
+            <div className="loading-spinner">
+              <div className="spinner"></div>
+              <p>Loading product details...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!product) {
     return (
       <div className="product-detail-page">
@@ -271,17 +321,63 @@ const ProductDetail = () => {
         <div className="product-detail-grid">
           {/* Product Images */}
           <div className="product-images">
-            <div className="main-image">
-              <img
-                src={
-                  product.image_url ||
-                  product.image_path ||
-                  "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&h=600&fit=crop&crop=center"
-                }
-                alt={product.name}
-                className="main-product-image"
-              />
+            <div className="main-image-container">
+              <div className="main-image">
+                <img
+                  src={getProductImages()[selectedImage]}
+                  alt={`${product.name} - Image ${selectedImage + 1}`}
+                  className="main-product-image"
+                />
+                {discountPercentage > 0 && (
+                  <div className="product-discount-badge">
+                    -{discountPercentage}%
+                  </div>
+                )}
+              </div>
+
+              {/* Carousel Navigation Arrows */}
+              {getProductImages().length > 1 && (
+                <>
+                  <button
+                    className="carousel-arrow carousel-arrow-left"
+                    onClick={handlePrevImage}
+                    aria-label="Previous image"
+                  >
+                    <ChevronLeft size={24} />
+                  </button>
+                  <button
+                    className="carousel-arrow carousel-arrow-right"
+                    onClick={handleNextImage}
+                    aria-label="Next image"
+                  >
+                    <ChevronRight size={24} />
+                  </button>
+
+                  {/* Image Counter */}
+                  <div className="image-counter">
+                    {selectedImage + 1} / {getProductImages().length}
+                  </div>
+                </>
+              )}
             </div>
+
+            {/* Thumbnails Navigation */}
+            {getProductImages().length > 1 && (
+              <div className="image-thumbnails">
+                {getProductImages().map((image, index) => (
+                  <button
+                    key={index}
+                    className={`thumbnail ${
+                      selectedImage === index ? "active" : ""
+                    }`}
+                    onClick={() => setSelectedImage(index)}
+                    aria-label={`View image ${index + 1}`}
+                  >
+                    <img src={image} alt={`Thumbnail ${index + 1}`} />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Product Info */}
