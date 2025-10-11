@@ -134,32 +134,47 @@
 .search-btn {
   position: absolute;
   right: 8px;
-  background: none;
-  border: none;
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
   color: var(--primary-color, #6639a6);
   cursor: pointer;
-  padding: 0;
-  border-radius: 0;
+  padding: 0 !important;
+  margin: 0;
+  border-radius: 0 !important;
   transition: color 0.2s ease, transform 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  outline: none;
+  outline: none !important;
+  width: auto;
+  height: auto;
 }
 
 .search-btn:hover {
   color: var(--primary-hover, #4f2c80);
-  background: none;
+  background: none !important;
+  box-shadow: none !important;
   transform: scale(1.15);
 }
 
 .search-btn:active {
   transform: scale(0.9);
+  background: none !important;
+  box-shadow: none !important;
 }
 
 .search-btn:focus {
-  outline: none;
+  outline: none !important;
   color: var(--primary-hover, #4f2c80);
+  background: none !important;
+  box-shadow: none !important;
+}
+
+.search-btn:focus-visible {
+  outline: none !important;
+  background: none !important;
+  box-shadow: none !important;
 }
 
 /* Desktop Header Actions */
