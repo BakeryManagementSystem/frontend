@@ -943,6 +943,33 @@ class ApiService {
       body: JSON.stringify({ message, context }),
     });
   }
+
+  // Public Shop API
+  async getAllShops(params = {}) {
+    const searchParams = new URLSearchParams();
+    Object.keys(params).forEach(key => {
+      if (params[key] !== undefined && params[key] !== null && params[key] !== '') {
+        searchParams.append(key, params[key]);
+      }
+    });
+    const queryString = searchParams.toString();
+    return this.request(`/shops${queryString ? `?${queryString}` : ''}`);
+  }
+
+  async getShopByOwner(ownerId) {
+    return this.request(`/shops/${ownerId}`);
+  }
+
+  async getShopProducts(ownerId, params = {}) {
+    const searchParams = new URLSearchParams();
+    Object.keys(params).forEach(key => {
+      if (params[key] !== undefined && params[key] !== null && params[key] !== '') {
+        searchParams.append(key, params[key]);
+      }
+    });
+    const queryString = searchParams.toString();
+    return this.request(`/shops/${ownerId}/products${queryString ? `?${queryString}` : ''}`);
+  }
 }
 
 export default new ApiService();

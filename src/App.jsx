@@ -58,6 +58,7 @@ import ProtectedRoute from "./components/common/ProtectedRoute/ProtectedRoute";
 // Shop Pages (Bakery Shop Pages)
 import ShopDetail from "./pages/Shop/ShopDetail/ShopDetail";
 import BakeryShops from "./pages/Categories/BakeryShops";
+import ShopList from "./pages/Shop/ShopList/ShopList";
 
 function App() {
   return (
@@ -83,6 +84,7 @@ function App() {
                     element={<BakeryShops />}
                   />
                   <Route path="/bakery/:shopId" element={<ShopDetail />} />
+                  <Route path="/shops" element={<ShopList />} />
                   <Route path="/about" element={<About />} />
                   <Route path="/contact" element={<Contact />} />
                   <Route path="/cart" element={<Cart />} />
