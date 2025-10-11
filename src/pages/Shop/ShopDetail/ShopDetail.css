@@ -771,13 +771,12 @@
 
 @media (max-width: 768px) {
   .shop-detail {
-    padding-top: 0; /* Remove padding to show banner */
+    padding-top: 0;
   }
 
   .shop-banner-image {
     height: 250px;
-    margin-top: 60px; /* Add margin for mobile header */
-    z-index: 1;
+    margin-top: 60px;
   }
 
   .shop-banner {
@@ -785,8 +784,9 @@
     min-height: auto;
     margin-top: 0;
     padding: 1.5rem 0;
-    z-index: 100 !important; /* Much higher z-index for mobile */
+    background: white;
     position: relative;
+    padding-bottom: 2rem; /* Extra padding at bottom */
   }
 
   /* Fix shop header content layout for mobile */
@@ -794,16 +794,12 @@
     flex-direction: column;
     gap: 1.5rem;
     align-items: center;
-    z-index: 101 !important;
-    position: relative;
   }
 
   .shop-avatar-section {
     display: flex;
     flex-direction: column;
     align-items: center;
-    z-index: 102 !important;
-    position: relative;
   }
 
   .shop-avatar {
@@ -818,15 +814,11 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    z-index: 101 !important;
-    position: relative;
   }
 
   .shop-title-section {
     justify-content: center;
     width: 100%;
-    z-index: 101 !important;
-    position: relative;
   }
 
   .shop-name {
@@ -840,8 +832,6 @@
     gap: 0.75rem;
     align-items: center;
     width: 100%;
-    z-index: 101 !important;
-    position: relative;
   }
 
   .meta-item {
@@ -858,8 +848,6 @@
   .shop-actions-section {
     width: 100%;
     justify-content: center;
-    z-index: 101 !important;
-    position: relative;
   }
 
   .action-button {
@@ -870,31 +858,25 @@
     font-size: 0.85rem;
   }
 
-  /* Ensure stats section stays below */
+  /* Ensure stats section stays below with clear separation */
   .shop-stats-section {
     grid-template-columns: 1fr;
     gap: 1rem;
-    z-index: 1 !important;
-    position: relative;
-    margin-top: 2rem; /* Add extra margin to prevent overlap */
+    margin-top: 3rem; /* Large margin to ensure separation */
+    clear: both; /* Ensure it clears any floats */
   }
 
   .stat-card {
     padding: 1.5rem;
   }
 
-  /* Ensure content wrapper doesn't overlap */
   .shop-content-wrapper {
     padding: 0 1rem;
-    z-index: 1 !important;
-    position: relative;
   }
 
   .shop-tabs {
     gap: 0.25rem;
     padding: 0 1rem;
-    z-index: 1 !important;
-    position: relative;
   }
 
   .tab-btn {
@@ -929,7 +911,6 @@
 @media (max-width: 480px) {
   .shop-banner-image {
     height: 200px;
-    margin-top: 56px; /* Adjust for smaller mobile header */
   }
 
   .shop-banner {
