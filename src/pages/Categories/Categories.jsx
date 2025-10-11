@@ -92,11 +92,21 @@ const Categories = () => {
   // Helper function to get category icon
   const getCategoryIcon = (categoryName) => {
     const iconMap = {
+      // New marketplace categories
+      'Artisan Breads': <Wheat size={32} />,
+      'Cakes & Celebration': <Cake size={32} />,
+      'Pastries & Croissants': <Croissant size={32} />,
+      'Cookies & Biscuits': <Cookie size={32} />,
+      'Custom Orders': <Sparkles size={32} />,
+      'Bakery Bundles': <Package size={32} />,
+      // Old categories (fallback)
       'Bread & Rolls': <Wheat size={32} />,
+      'Breads': <Wheat size={32} />,
       'Pastries': <Croissant size={32} />,
       'Cakes': <Cake size={32} />,
       'Cookies': <Cookie size={32} />,
       'Muffins & Cupcakes': <Cherry size={32} />,
+      'Desserts': <Cherry size={32} />,
       'Donuts': <Donut size={32} />,
       'Bagels': <Circle size={32} />,
       'Specialty & Dietary': <Sparkles size={32} />
@@ -108,11 +118,21 @@ const Categories = () => {
   // Helper function to get category color
   const getCategoryColor = (categoryName) => {
     const colorMap = {
+      // New marketplace categories
+      'Artisan Breads': '#D2691E',
+      'Cakes & Celebration': '#FF69B4',
+      'Pastries & Croissants': '#DEB887',
+      'Cookies & Biscuits': '#CD853F',
+      'Custom Orders': '#9370DB',
+      'Bakery Bundles': '#6639a6',
+      // Old categories (fallback)
       'Bread & Rolls': '#D2691E',
+      'Breads': '#D2691E',
       'Pastries': '#DEB887',
       'Cakes': '#FF69B4',
       'Cookies': '#CD853F',
       'Muffins & Cupcakes': '#FFB6C1',
+      'Desserts': '#FFB6C1',
       'Donuts': '#FF6347',
       'Bagels': '#DAA520',
       'Specialty & Dietary': '#9370DB'
@@ -124,7 +144,16 @@ const Categories = () => {
   // Helper function to get default image
   const getDefaultImage = (categoryName) => {
     const imageMap = {
+      // New marketplace categories
+      'Artisan Breads': 'https://images.unsplash.com/photo-1549931319-a545dcf3bc73?w=400&h=300&fit=crop&crop=center',
+      'Cakes & Celebration': 'https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=400&h=300&fit=crop&crop=center',
+      'Pastries & Croissants': 'https://images.unsplash.com/photo-1506459225024-1428097a7e18?w=400&h=300&fit=crop&crop=center',
+      'Cookies & Biscuits': 'https://images.unsplash.com/photo-1499636136210-6f4ee915583e?w=400&h=300&fit=crop&crop=center',
+      'Custom Orders': 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&h=300&fit=crop&crop=center',
+      'Bakery Bundles': 'https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?w=400&h=300&fit=crop&crop=center',
+      // Old categories (fallback)
       'Bread & Rolls': 'https://images.unsplash.com/photo-1549931319-a545dcf3bc73?w=400&h=300&fit=crop&crop=center',
+      'Breads': 'https://images.unsplash.com/photo-1549931319-a545dcf3bc73?w=400&h=300&fit=crop&crop=center',
       'Pastries': 'https://images.unsplash.com/photo-1506459225024-1428097a7e18?w=400&h=300&fit=crop&crop=center',
       'Cakes': 'https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=400&h=300&fit=crop&crop=center',
       'Cookies': 'https://images.unsplash.com/photo-1499636136210-6f4ee915583e?w=400&h=300&fit=crop&crop=center',
@@ -140,6 +169,14 @@ const Categories = () => {
   // Helper function to get default subcategories
   const getDefaultSubcategories = (categoryName) => {
     const subcategoryMap = {
+      // New marketplace categories
+      'Artisan Breads': ['Sourdough', 'Multigrain', 'Baguettes', 'Ciabatta', 'Whole Wheat'],
+      'Cakes & Celebration': ['Birthday Cakes', 'Wedding Cakes', 'Custom Designs', 'Layer Cakes', 'Celebration'],
+      'Pastries & Croissants': ['Butter Croissants', 'Pain au Chocolat', 'Almond Danish', 'Puff Pastries', 'Morning Pastries'],
+      'Cookies & Biscuits': ['Chocolate Chip', 'Assorted Boxes', 'Oatmeal Raisin', 'Sugar Cookies', 'Gourmet Cookies'],
+      'Custom Orders': ['Custom Cupcakes', 'Personalized Cookies', 'Macaron Towers', 'Special Requests', 'Event Catering'],
+      'Bakery Bundles': ['Breakfast Bundles', 'Party Boxes', 'Gift Hampers', 'Corporate Catering', 'Holiday Specials'],
+      // Old categories (fallback)
       'Bread & Rolls': ['Sourdough', 'Whole Wheat', 'Baguettes', 'Dinner Rolls', 'Specialty Breads'],
       'Pastries': ['Croissants', 'Danishes', 'Puff Pastries', 'Eclairs', 'Breakfast Pastries'],
       'Cakes': ['Birthday Cakes', 'Wedding Cakes', 'Cheesecakes', 'Layer Cakes', 'Custom Designs'],
