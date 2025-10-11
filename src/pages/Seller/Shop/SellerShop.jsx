@@ -110,17 +110,16 @@ const SellerShop = () => {
       console.log('Shop response:', shopResponse);
       console.log('Stats response:', statsResponse);
 
-      if (shopResponse && shopResponse.shop) {
-        const shop = shopResponse.shop;
-        const owner = shopResponse.owner;
+      if (shopResponse && shopResponse.data) {
+        const shop = shopResponse.data;
 
         setShopData({
           id: shop.id || null,
-          owner_id: shop.owner_id || owner?.id || null,
-          name: shop.shop_name || shop.name || owner?.name + "'s Shop" || '',
+          owner_id: shop.owner_id || null,
+          name: shop.name || '',
           description: shop.description || '',
-          logo: shop.logo_path || shop.logo || '',
-          banner: shop.banner_path || shop.banner || '',
+          logo: shop.logo || '',
+          banner: shop.banner || '',
           theme: shop.theme || {
             primaryColor: '#2563eb',
             secondaryColor: '#64748b',
