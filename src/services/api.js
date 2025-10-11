@@ -805,6 +805,94 @@ class ApiService {
     });
   }
 
+  // Ingredient Batches API
+  async getIngredientBatches() {
+    return this.request('/owner/ingredient-batches');
+  }
+
+  async createIngredientBatch(batchData) {
+    return this.request('/owner/ingredient-batches', {
+      method: 'POST',
+      body: JSON.stringify(batchData),
+    });
+  }
+
+  async updateIngredientBatch(id, batchData) {
+    return this.request(`/owner/ingredient-batches/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(batchData),
+    });
+  }
+
+  async deleteIngredientBatch(id) {
+    return this.request(`/owner/ingredient-batches/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Analytics Export API
+  async exportAnalytics(timeRange, reportType = 'overview') {
+    const searchParams = new URLSearchParams({ timeRange, reportType });
+    const endpoint = `/seller/analytics/export?${searchParams.toString()}`;
+
+    try {
+      const response = await fetch(`${this.baseURL}${endpoint}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+          'Accept': 'application/pdf, application/vnd.ms-excel, text/csv',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to export analytics');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `analytics-${reportType}-${timeRange}-${Date.now()}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      return { success: true };
+    } catch (error) {
+      console.error('Export analytics error:', error);
+      throw error;
+    }
+  }
+
+  async previewAnalytics(timeRange, reportType = 'overview') {
+    const searchParams = new URLSearchParams({ timeRange, reportType });
+    const endpoint = `/seller/analytics/preview?${searchParams.toString()}`;
+
+    try {
+      const response = await fetch(`${this.baseURL}${endpoint}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+          'Accept': 'application/pdf',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to preview analytics');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      window.open(url, '_blank');
+
+      return { success: true };
+    } catch (error) {
+      console.error('Preview analytics error:', error);
+      throw error;
+    }
+  }
+
   // Review API
   async getProductReviews(productId, params = {}) {
     const searchParams = new URLSearchParams();
