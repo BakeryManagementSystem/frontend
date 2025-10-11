@@ -302,7 +302,10 @@ const ProductDetail = () => {
 
               <div className="product-seller">
                 <Store size={16} />
-                <span>by {product.owner?.name || "Unknown Seller"}</span>
+                <span>
+                  by{" "}
+                  {product.owner?.shop_name || product.owner?.name || "Unknown Seller"}
+                </span>
               </div>
             </div>
 
