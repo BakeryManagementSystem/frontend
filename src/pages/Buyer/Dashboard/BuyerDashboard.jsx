@@ -43,16 +43,19 @@ const BuyerDashboard = () => {
       // Fetch real dashboard data from the backend
       const response = await ApiService.getBuyerDashboard();
 
+      // Handle both response formats
+      const data = response.success && response.data ? response.data : response;
+
       setDashboardData({
-        stats: response.stats || {
+        stats: data.stats || {
           totalOrders: 0,
           pendingOrders: 0,
           totalSpent: 0,
           wishlistItems: 0
         },
-        recentOrders: response.recentOrders || [],
-        wishlistItems: response.wishlistItems || [],
-        recommendedProducts: response.recommendedProducts || []
+        recentOrders: data.recentOrders || [],
+        wishlistItems: data.wishlistItems || [],
+        recommendedProducts: data.recommendedProducts || []
       });
 
     } catch (error) {

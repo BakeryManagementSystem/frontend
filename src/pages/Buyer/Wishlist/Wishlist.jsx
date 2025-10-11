@@ -27,7 +27,18 @@ const Wishlist = () => {
 
     try {
       const response = await ApiService.getWishlist();
-      setWishlistItems(response || []);
+
+      // Handle both direct array and nested data property
+      let wishlistData = [];
+      if (response && response.success && Array.isArray(response.data)) {
+        wishlistData = response.data;
+      } else if (Array.isArray(response)) {
+        wishlistData = response;
+      } else if (response) {
+        wishlistData = response;
+      }
+
+      setWishlistItems(wishlistData || []);
     } catch (error) {
       console.error('Failed to fetch wishlist:', error);
       setError('Failed to load wishlist items. Please try again later.');

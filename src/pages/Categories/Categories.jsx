@@ -22,9 +22,17 @@ const Categories = () => {
       // Fetch real categories from API
       const response = await ApiService.getCategories();
 
-      if (response && Array.isArray(response)) {
+      // Handle both direct array response and object with data property
+      let categoriesData = [];
+      if (response && response.success && Array.isArray(response.data)) {
+        categoriesData = response.data;
+      } else if (Array.isArray(response)) {
+        categoriesData = response;
+      }
+
+      if (categoriesData.length > 0) {
         // Map API response to the format expected by the UI
-        const mappedCategories = response.map(category => ({
+        const mappedCategories = categoriesData.map(category => ({
           id: category.id,
           name: category.name,
           slug: category.slug || category.name.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-'),
@@ -67,7 +75,7 @@ const Categories = () => {
 
         setCategories(mappedCategories);
       } else {
-        console.warn('Invalid response format:', response);
+        console.warn('No categories found in response:', response);
         setCategories([]);
       }
     } catch (err) {

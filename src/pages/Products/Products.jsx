@@ -37,21 +37,38 @@ const Products = () => {
   const fetchCategories = async () => {
     try {
       const response = await ApiService.getCategories();
-      if (response && response.data) {
-        setCategories(response.data.map((cat) => cat.name || cat.category));
+
+      // Handle both direct array response and object with data property
+      let categoriesData = [];
+      if (response && response.success && Array.isArray(response.data)) {
+        categoriesData = response.data;
+      } else if (Array.isArray(response)) {
+        categoriesData = response;
+      }
+
+      if (categoriesData.length > 0) {
+        setCategories(categoriesData.map((cat) => cat.name || cat.category));
+      } else {
+        // Fallback to default categories
+        setCategories([
+          "Artisan Breads",
+          "Cakes & Celebration",
+          "Pastries & Croissants",
+          "Cookies & Biscuits",
+          "Custom Orders",
+          "Bakery Bundles",
+        ]);
       }
     } catch (error) {
       console.error("Failed to fetch categories:", error);
       // Fallback to default categories
       setCategories([
-        "Breads",
-        "Pastries",
-        "Cakes",
-        "Muffins",
-        "Donuts",
-        "Bagels",
-        "Cookies",
-        "Specialty",
+        "Artisan Breads",
+        "Cakes & Celebration",
+        "Pastries & Croissants",
+        "Cookies & Biscuits",
+        "Custom Orders",
+        "Bakery Bundles",
       ]);
     }
   };

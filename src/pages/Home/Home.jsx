@@ -55,20 +55,25 @@ const Home = () => {
 
         // Handle different response formats for categories
         if (categoriesResponse) {
-          if (Array.isArray(categoriesResponse)) {
-            setCategories(categoriesResponse);
-          } else if (categoriesResponse.data && Array.isArray(categoriesResponse.data)) {
-            setCategories(categoriesResponse.data);
+          let categoriesData = [];
+          if (categoriesResponse.success && Array.isArray(categoriesResponse.data)) {
+            categoriesData = categoriesResponse.data;
+          } else if (Array.isArray(categoriesResponse)) {
+            categoriesData = categoriesResponse;
+          }
+
+          if (categoriesData.length > 0) {
+            setCategories(categoriesData);
           } else {
-            console.warn('Unexpected categories response format:', categoriesResponse);
+            console.warn('No categories found, using fallback');
             // Set fallback categories if backend has no data
             setCategories([
-              { id: 1, name: 'Bread', products_count: 15 },
-              { id: 2, name: 'Pastries', products_count: 12 },
-              { id: 3, name: 'Cakes', products_count: 8 },
-              { id: 4, name: 'Cookies', products_count: 20 },
-              { id: 5, name: 'Cupcakes', products_count: 10 },
-              { id: 6, name: 'Specialty', products_count: 5 }
+              { id: 1, name: 'Artisan Breads', products_count: 3 },
+              { id: 2, name: 'Cakes & Celebration', products_count: 4 },
+              { id: 3, name: 'Pastries & Croissants', products_count: 3 },
+              { id: 4, name: 'Cookies & Biscuits', products_count: 3 },
+              { id: 5, name: 'Custom Orders', products_count: 3 },
+              { id: 6, name: 'Bakery Bundles', products_count: 4 }
             ]);
           }
         }
