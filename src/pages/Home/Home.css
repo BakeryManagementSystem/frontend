@@ -581,12 +581,12 @@
   }
 
   .floating-item {
-    padding: 12px;
+    padding: 15px;
   }
 
   .floating-item svg {
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
   }
 
   /* Reposition floating items for mobile */
@@ -711,59 +711,62 @@
   }
 
   .hero-visual {
-    height: 250px;
+    height: 280px;
     margin-top: var(--spacing-sm);
   }
 
   .floating-elements {
-    width: 220px;
-    height: 220px;
+    width: 240px;
+    height: 240px;
   }
 
   .floating-item {
-    padding: 10px;
+    padding: 12px;
   }
 
   .floating-item svg {
-    width: 20px;
-    height: 20px;
+    width: 26px;
+    height: 26px;
   }
 
   /* Further adjust floating items for small screens */
   .item-1 {
-    top: 15px;
-    left: 60px;
+    top: 18px;
+    left: 65px;
   }
 
   .item-2 {
-    top: 50px;
-    right: 20px;
+    top: 55px;
+    right: 22px;
   }
 
   .item-3 {
-    bottom: 60px;
-    left: 25px;
+    bottom: 65px;
+    left: 28px;
   }
 
   .item-4 {
-    bottom: 30px;
-    right: 45px;
+    bottom: 32px;
+    right: 48px;
   }
 
   .item-5 {
-    top: 35px;
-    left: 20px;
+    top: 38px;
+    left: 22px;
   }
 
   .item-6 {
-    bottom: 80px;
-    right: 75px;
+    bottom: 85px;
+    right: 80px;
   }
 
-  /* Hide some floating items on very small screens */
-  .item-5,
+  /* Keep all 6 items visible but adjust last two */
+  .item-5 {
+    display: flex;
+  }
+
   .item-6 {
-    display: none;
+    display: flex;
   }
 
   /* Smaller gradient circles */
@@ -835,42 +838,48 @@
   }
 
   .hero-visual {
-    height: 200px;
+    height: 240px;
   }
 
   .floating-elements {
-    width: 180px;
-    height: 180px;
+    width: 200px;
+    height: 200px;
   }
 
   .floating-item {
-    padding: 8px;
+    padding: 10px;
   }
 
   .floating-item svg {
-    width: 18px;
-    height: 18px;
+    width: 24px;
+    height: 24px;
+  }
+
+  /* Keep only 4 main items visible on extra small screens */
+  .item-5,
+  .item-6 {
+    display: none;
   }
 
   /* Further reduce positions for tiny screens */
   .item-1 {
-    top: 10px;
-    left: 45px;
+    top: 12px;
+    left: 50px;
   }
 
   .item-2 {
-    top: 40px;
-    right: 15px;
+    top: 45px;
+    right: 18px;
   }
 
   .item-3 {
-    bottom: 45px;
-    left: 20px;
+    bottom: 50px;
+    left: 22px;
   }
 
   .item-4 {
-    bottom: 25px;
-    right: 35px;
+    bottom: 28px;
+    right: 38px;
   }
 
   .hero-actions .btn {
