@@ -2,7 +2,7 @@
 .shop-detail {
   min-height: 100vh;
   background: linear-gradient(to bottom, var(--bg-secondary, #f8fafc) 0%, var(--bg-primary, #ffffff) 100%);
-  /* Remove padding-top since we'll handle it per section */
+  padding-top: 80px; /* Add padding to account for fixed header */
 }
 
 /* Loading State */
@@ -405,10 +405,11 @@
 .shop-tabs {
   display: flex;
   gap: 0.5rem;
-  margin: 2rem 0 1.5rem;
+  margin: 2rem auto 1.5rem; /* Added auto margin for centering */
   border-bottom: 2px solid var(--border-light, #e2e8f0);
   overflow-x: auto;
   padding-bottom: 0;
+  max-width: 1280px; /* Match container width */
 }
 
 .tab-btn {
@@ -442,6 +443,9 @@
 /* Content Wrapper */
 .shop-content-wrapper {
   margin-bottom: 3rem;
+  max-width: 1280px; /* Match container width */
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .fade-in {
