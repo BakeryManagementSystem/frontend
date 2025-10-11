@@ -161,13 +161,13 @@ const Header = () => {
                 <Package size={18} />
                 Products
               </Link>
+              <Link to="/shops" className="nav-link">
+                <Store size={18} />
+                Shops
+              </Link>
               <Link to="/categories" className="nav-link">
                 <Grid3X3 size={18} />
                 Categories
-              </Link>
-              <Link to="/about" className="nav-link">
-                <Info size={18} />
-                About
               </Link>
               <Link to="/contact" className="nav-link">
                 <Phone size={18} />
@@ -563,6 +563,10 @@ const Header = () => {
                 <Link to="/products" onClick={closeAllMenus}>
                   <Package size={18} />
                   Products
+                </Link>
+                <Link to="/shops" onClick={closeAllMenus}>
+                  <Store size={18} />
+                  Shops
                 </Link>
                 <Link to="/categories" onClick={closeAllMenus}>
                   <Grid3X3 size={18} />
