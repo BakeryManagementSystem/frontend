@@ -192,6 +192,27 @@ const ShopDetail = () => {
 
   return (
     <div className="shop-detail">
+      {/* Shop Banner Image */}
+      {shopData.banner && (
+        <div className="shop-banner-image">
+          <img
+            src={shopData.banner}
+            alt={`${shopData.name} banner`}
+            onError={(e) => {
+              e.target.style.display = 'none';
+              e.target.parentElement.innerHTML = '<div class="shop-banner-placeholder"><Store size="64" /></div>';
+            }}
+          />
+        </div>
+      )}
+      {!shopData.banner && (
+        <div className="shop-banner-image">
+          <div className="shop-banner-placeholder">
+            <Store size={64} />
+          </div>
+        </div>
+      )}
+
       {/* Redesigned Shop Banner */}
       <div className="shop-banner">
         <div className="container">

@@ -73,9 +73,34 @@
   font-size: 1.1rem;
 }
 
+/* Shop Banner Image - NEW */
+.shop-banner-image {
+  width: 100%;
+  height: 400px;
+  overflow: hidden;
+  position: relative;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+.shop-banner-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.shop-banner-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #cbd5e1;
+}
+
 /* Shop Banner - Completely Redesigned */
 .shop-banner {
-  background: transparent;
+  background: white; /* Changed from transparent */
   padding: 2rem 0;
   margin-bottom: 2rem;
   border-bottom: 1px solid var(--border-light, #e2e8f0);
@@ -298,13 +323,13 @@
 }
 
 .stat-card.highlight {
-  background: linear-gradient(135deg, var(--primary-color, #6639a6) 0%, var(--primary-dark, #4f2c80) 100%);
-  border: none;
+  background: white; /* Changed from gradient */
+  border: 2px solid var(--primary-color, #6639a6); /* Add border instead */
 }
 
 .stat-card.highlight .stat-value,
 .stat-card.highlight .stat-label {
-  color: white;
+  color: var(--primary-color, #6639a6); /* Changed from white */
 }
 
 .stat-icon {
@@ -333,7 +358,7 @@
 }
 
 .stat-icon.rating {
-  background: rgba(255, 255, 255, 0.2);
+  background: linear-gradient(135deg, var(--primary-color, #6639a6) 0%, var(--primary-dark, #4f2c80) 100%); /* Changed from rgba */
   color: white;
 }
 
@@ -723,6 +748,10 @@
 
 /* Responsive Design */
 @media (max-width: 1024px) {
+  .shop-banner-image {
+    height: 300px;
+  }
+
   .shop-name {
     font-size: 2rem;
   }
@@ -737,11 +766,15 @@
     padding-top: 60px; /* Adjust for mobile header */
   }
 
+  .shop-banner-image {
+    height: 250px;
+  }
+
   .shop-banner {
     height: auto;
-    min-height: 500px;
-    margin-top: -60px;
-    padding-top: 60px;
+    min-height: auto; /* Changed from 500px */
+    margin-top: 0; /* Changed from -60px */
+    padding-top: 2rem; /* Changed from 60px */
   }
 
   .shop-header {
@@ -826,6 +859,10 @@
 }
 
 @media (max-width: 480px) {
+  .shop-banner-image {
+    height: 200px;
+  }
+
   .shop-avatar {
     width: 100px;
     height: 100px;
