@@ -113,6 +113,25 @@ const SellerShop = () => {
       if (shopResponse && shopResponse.data) {
         const shop = shopResponse.data;
 
+        // Ensure theme has valid color values
+        const defaultTheme = {
+          primaryColor: '#2563eb',
+          secondaryColor: '#64748b',
+          accentColor: '#f59e0b'
+        };
+
+        const theme = {
+          primaryColor: shop.theme?.primaryColor || defaultTheme.primaryColor,
+          secondaryColor: shop.theme?.secondaryColor || defaultTheme.secondaryColor,
+          accentColor: shop.theme?.accentColor || defaultTheme.accentColor
+        };
+
+        // Validate hex color format
+        const isValidHex = (color) => /^#[0-9A-F]{6}$/i.test(color);
+        if (!isValidHex(theme.primaryColor)) theme.primaryColor = defaultTheme.primaryColor;
+        if (!isValidHex(theme.secondaryColor)) theme.secondaryColor = defaultTheme.secondaryColor;
+        if (!isValidHex(theme.accentColor)) theme.accentColor = defaultTheme.accentColor;
+
         setShopData({
           id: shop.id || null,
           owner_id: shop.owner_id || null,
@@ -120,11 +139,7 @@ const SellerShop = () => {
           description: shop.description || '',
           logo: shop.logo || '',
           banner: shop.banner || '',
-          theme: shop.theme || {
-            primaryColor: '#2563eb',
-            secondaryColor: '#64748b',
-            accentColor: '#f59e0b'
-          },
+          theme: theme,
           policies: shop.policies || {
             shipping: '',
             returns: '',
