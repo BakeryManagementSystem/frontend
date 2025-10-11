@@ -777,6 +777,7 @@
   .shop-banner-image {
     height: 250px;
     margin-top: 60px; /* Add margin for mobile header */
+    z-index: 1;
   }
 
   .shop-banner {
@@ -784,6 +785,8 @@
     min-height: auto;
     margin-top: 0;
     padding: 1.5rem 0;
+    z-index: 100; /* Much higher z-index for mobile */
+    position: relative;
   }
 
   /* Fix shop header content layout for mobile */
@@ -791,12 +794,16 @@
     flex-direction: column;
     gap: 1.5rem;
     align-items: center;
+    z-index: 101;
+    position: relative;
   }
 
   .shop-avatar-section {
     display: flex;
     flex-direction: column;
     align-items: center;
+    z-index: 102;
+    position: relative;
   }
 
   .shop-avatar {
@@ -811,11 +818,15 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    z-index: 101;
+    position: relative;
   }
 
   .shop-title-section {
     justify-content: center;
     width: 100%;
+    z-index: 101;
+    position: relative;
   }
 
   .shop-name {
@@ -829,6 +840,8 @@
     gap: 0.75rem;
     align-items: center;
     width: 100%;
+    z-index: 101;
+    position: relative;
   }
 
   .meta-item {
@@ -845,6 +858,8 @@
   .shop-actions-section {
     width: 100%;
     justify-content: center;
+    z-index: 101;
+    position: relative;
   }
 
   .action-button {
@@ -855,18 +870,31 @@
     font-size: 0.85rem;
   }
 
+  /* Ensure stats section stays below */
   .shop-stats-section {
     grid-template-columns: 1fr;
     gap: 1rem;
+    z-index: 1;
+    position: relative;
+    margin-top: 2rem; /* Add extra margin to prevent overlap */
   }
 
   .stat-card {
     padding: 1.5rem;
   }
 
+  /* Ensure content wrapper doesn't overlap */
+  .shop-content-wrapper {
+    padding: 0 1rem;
+    z-index: 1;
+    position: relative;
+  }
+
   .shop-tabs {
     gap: 0.25rem;
     padding: 0 1rem;
+    z-index: 1;
+    position: relative;
   }
 
   .tab-btn {
@@ -895,10 +923,6 @@
 
   .social-links-grid {
     grid-template-columns: 1fr;
-  }
-
-  .shop-content-wrapper {
-    padding: 0 1rem;
   }
 }
 
