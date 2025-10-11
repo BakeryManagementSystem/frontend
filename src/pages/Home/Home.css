@@ -531,18 +531,109 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
+  .hero {
+    padding: var(--spacing-xl) 0;
+  }
+
   .hero-content {
     grid-template-columns: 1fr;
     text-align: center;
-    gap: var(--spacing-xl);
+    gap: var(--spacing-lg);
+    min-height: auto;
+  }
+
+  .hero-text {
+    order: 1;
+    gap: var(--spacing-md);
   }
 
   .hero-title {
-    font-size: 2.5rem;
+    font-size: 2rem;
+    margin-bottom: var(--spacing-md);
+  }
+
+  .hero-description {
+    font-size: var(--font-size-base);
+    margin-bottom: var(--spacing-lg);
   }
 
   .hero-actions {
     justify-content: center;
+    flex-direction: column;
+    width: 100%;
+    gap: var(--spacing-sm);
+  }
+
+  .hero-actions .btn {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .hero-visual {
+    order: 2;
+    height: 300px;
+    overflow: hidden;
+  }
+
+  .floating-elements {
+    width: 280px;
+    height: 280px;
+  }
+
+  .floating-item {
+    padding: 12px;
+  }
+
+  .floating-item svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  /* Reposition floating items for mobile */
+  .item-1 {
+    top: 20px;
+    left: 80px;
+  }
+
+  .item-2 {
+    top: 60px;
+    right: 30px;
+  }
+
+  .item-3 {
+    bottom: 80px;
+    left: 40px;
+  }
+
+  .item-4 {
+    bottom: 40px;
+    right: 60px;
+  }
+
+  .item-5 {
+    top: 40px;
+    left: 30px;
+  }
+
+  .item-6 {
+    bottom: 100px;
+    right: 100px;
+  }
+
+  /* Reduce gradient circles size */
+  .circle-1 {
+    width: 200px;
+    height: 200px;
+  }
+
+  .circle-2 {
+    width: 150px;
+    height: 150px;
+  }
+
+  .circle-3 {
+    width: 100px;
+    height: 100px;
   }
 
   .section-link {
@@ -560,6 +651,11 @@
     padding: var(--spacing-lg);
   }
 
+  .feature-icon {
+    width: 64px;
+    height: 64px;
+  }
+
   .categories-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: var(--spacing-lg);
@@ -575,6 +671,11 @@
     gap: var(--spacing-lg);
   }
 
+  .stat-icon {
+    width: 64px;
+    height: 64px;
+  }
+
   .stat-value {
     font-size: var(--font-size-3xl);
   }
@@ -582,31 +683,198 @@
 
 @media (max-width: 480px) {
   .hero {
-    padding: var(--spacing-xl) 0;
+    padding: var(--spacing-lg) 0;
+  }
+
+  .hero-content {
+    gap: var(--spacing-md);
+    padding: 0 var(--spacing-sm);
   }
 
   .hero-title {
-    font-size: 2rem;
+    font-size: 1.75rem;
+    line-height: 1.2;
+  }
+
+  .hero-description {
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--spacing-md);
   }
 
   .hero-actions {
-    flex-direction: column;
-    align-items: center;
+    gap: var(--spacing-xs);
+  }
+
+  .hero-actions .btn {
+    font-size: var(--font-size-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+
+  .hero-visual {
+    height: 250px;
+    margin-top: var(--spacing-sm);
+  }
+
+  .floating-elements {
+    width: 220px;
+    height: 220px;
+  }
+
+  .floating-item {
+    padding: 10px;
+  }
+
+  .floating-item svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Further adjust floating items for small screens */
+  .item-1 {
+    top: 15px;
+    left: 60px;
+  }
+
+  .item-2 {
+    top: 50px;
+    right: 20px;
+  }
+
+  .item-3 {
+    bottom: 60px;
+    left: 25px;
+  }
+
+  .item-4 {
+    bottom: 30px;
+    right: 45px;
+  }
+
+  .item-5 {
+    top: 35px;
+    left: 20px;
+  }
+
+  .item-6 {
+    bottom: 80px;
+    right: 75px;
+  }
+
+  /* Hide some floating items on very small screens */
+  .item-5,
+  .item-6 {
+    display: none;
+  }
+
+  /* Smaller gradient circles */
+  .circle-1 {
+    width: 150px;
+    height: 150px;
+  }
+
+  .circle-2 {
+    width: 100px;
+    height: 100px;
+  }
+
+  .circle-3 {
+    width: 80px;
+    height: 80px;
+  }
+
+  .feature-icon {
+    width: 56px;
+    height: 56px;
+  }
+
+  .feature-card h3 {
+    font-size: var(--font-size-lg);
   }
 
   .categories-grid {
     grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+
+  .category-card {
+    padding: var(--spacing-lg);
   }
 
   .products-grid {
     grid-template-columns: 1fr;
+    gap: var(--spacing-md);
   }
 
   .stats-grid {
     grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+
+  .stat-icon {
+    width: 56px;
+    height: 56px;
+  }
+
+  .stat-value {
+    font-size: var(--font-size-2xl);
   }
 
   .cta-content h2 {
     font-size: var(--font-size-2xl);
+  }
+
+  .cta-content p {
+    font-size: var(--font-size-base);
+  }
+}
+
+/* Extra small devices */
+@media (max-width: 375px) {
+  .hero-title {
+    font-size: 1.5rem;
+  }
+
+  .hero-visual {
+    height: 200px;
+  }
+
+  .floating-elements {
+    width: 180px;
+    height: 180px;
+  }
+
+  .floating-item {
+    padding: 8px;
+  }
+
+  .floating-item svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* Further reduce positions for tiny screens */
+  .item-1 {
+    top: 10px;
+    left: 45px;
+  }
+
+  .item-2 {
+    top: 40px;
+    right: 15px;
+  }
+
+  .item-3 {
+    bottom: 45px;
+    left: 20px;
+  }
+
+  .item-4 {
+    bottom: 25px;
+    right: 35px;
+  }
+
+  .hero-actions .btn {
+    font-size: var(--font-size-xs);
+    padding: var(--spacing-xs) var(--spacing-sm);
   }
 }
