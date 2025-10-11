@@ -60,23 +60,23 @@ const Footer = () => {
             <div className="footer-section">
               <h3 className="footer-title">Customer Service</h3>
               <ul className="footer-links">
-                <li><Link to="/help">Help Center</Link></li>
-                <li><Link to="/ordering">Order Information</Link></li>
-                <li><Link to="/delivery">Delivery & Pickup</Link></li>
-                <li><Link to="/track-order">Track Your Order</Link></li>
-                <li><Link to="/faq">FAQ</Link></li>
+                <li><Link to="/buyer/orders">My Orders</Link></li>
+                <li><Link to="/buyer/checkout">Checkout</Link></li>
+                <li><Link to="/buyer/wishlist">Wishlist</Link></li>
+                <li><Link to="/cart">Shopping Cart</Link></li>
+                <li><Link to="/contact">Contact Us</Link></li>
               </ul>
             </div>
 
-            {/* For Bakers */}
+            {/* For Sellers */}
             <div className="footer-section">
-              <h3 className="footer-title">For Bakers</h3>
+              <h3 className="footer-title">For Sellers</h3>
               <ul className="footer-links">
-                <li><Link to="/baker/register">Join as Baker</Link></li>
-                <li><Link to="/baker">Baker Dashboard</Link></li>
-                <li><Link to="/baker-support">Baker Support</Link></li>
-                <li><Link to="/baker-guidelines">Guidelines</Link></li>
-                <li><Link to="/pricing">Pricing & Features</Link></li>
+                <li><Link to="/register">Join as Seller</Link></li>
+                <li><Link to="/seller/dashboard">Seller Dashboard</Link></li>
+                <li><Link to="/seller/products">Manage Products</Link></li>
+                <li><Link to="/seller/orders">Manage Orders</Link></li>
+                <li><Link to="/seller/analytics">Analytics</Link></li>
               </ul>
             </div>
           </div>
