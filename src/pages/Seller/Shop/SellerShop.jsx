@@ -15,7 +15,8 @@ import {
   Star,
   Package,
   Users,
-  TrendingUp
+  TrendingUp,
+  Link as LinkIcon
 } from 'lucide-react';
 import './SellerShop.css';
 
@@ -58,6 +59,19 @@ const SellerShop = () => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
   const [errors, setErrors] = useState({});
+
+  // Image URL input states
+  const [imageInputType, setImageInputType] = useState({
+    logo: 'file', // 'file' or 'url'
+  });
+  const [imageUrl, setImageUrl] = useState({
+    logo: '',
+    banner: ''
+  });
+  const [urlLoading, setUrlLoading] = useState({
+    logo: false,
+    banner: false
+  });
 
   const [shopStats, setShopStats] = useState({
     totalProducts: 0,
@@ -345,6 +359,45 @@ const SellerShop = () => {
     }
   };
 
+  // New handler for URL input change
+  const handleImageUrlChange = (imageType, url) => {
+    setImageUrl(prev => ({ ...prev, [imageType]: url }));
+
+    // Clear errors
+    if (errors[imageType]) {
+      setErrors(prev => ({ ...prev, [imageType]: '' }));
+    }
+  };
+
+  // New handler for URL input submit
+  const handleImageUrlSubmit = async (imageType) => {
+    const url = imageUrl[imageType]?.trim();
+    if (!url) return;
+
+    // Basic URL validation
+    const urlPattern = /^(ftp|http|https):\/\/[^ "]+$/;
+    if (!urlPattern.test(url)) {
+      addNotification('Please enter a valid URL', 'error');
+      return;
+    }
+
+    setUrlLoading(prev => ({ ...prev, [imageType]: true }));
+
+    try {
+      // Update shop data with the new image URL
+      setShopData(prev => ({
+        ...prev,
+        [imageType]: url
+      }));
+      addNotification(`${imageType === 'logo' ? 'Logo' : 'Banner'} URL updated successfully!`, 'success');
+    } catch (error) {
+      console.error('Failed to update image URL:', error);
+      addNotification('Failed to update image URL. Please try again.', 'error');
+    } finally {
+      setUrlLoading(prev => ({ ...prev, [imageType]: false }));
+    }
+  };
+
   return (
     <div className="seller-shop">
       <div className="container">
@@ -563,19 +616,42 @@ const SellerShop = () => {
                 <h2>Shop Appearance</h2>
 
                 <div className="image-uploads">
+                  {/* Logo Upload/URL Section */}
                   <div className="upload-group">
                     <h3>Shop Logo</h3>
+
+                    {/* Image Input Type Toggle */}
+                    {isEditing && (
+                      <div className="image-input-toggle">
+                        <button
+                          className={`toggle-btn ${imageInputType.logo === 'file' ? 'active' : ''}`}
+                          onClick={() => setImageInputType(prev => ({ ...prev, logo: 'file' }))}
+                        >
+                          <Camera size={16} />
+                          Upload File
+                        </button>
+                        <button
+                          className={`toggle-btn ${imageInputType.logo === 'url' ? 'active' : ''}`}
+                          onClick={() => setImageInputType(prev => ({ ...prev, logo: 'url' }))}
+                        >
+                          <LinkIcon size={16} />
+                          Image URL
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Image Preview */}
                     <div className="image-upload">
                       <div className="image-container">
                         {shopData.logo ? (
-                            <img src={shopData.logo} alt="Shop Logo" className="upload-preview logo" />
+                          <img src={shopData.logo} alt="Shop Logo" className="upload-preview logo" />
                         ) : (
-                            <div className="placeholder-image logo">
-                              <Image size={48} />
-                              <p>No logo uploaded</p>
-                            </div>
+                          <div className="placeholder-image logo">
+                            <Image size={48} />
+                            <p>No logo uploaded</p>
+                          </div>
                         )}
-                        {isEditing && (
+                        {isEditing && imageInputType.logo === 'file' && (
                           <div className="upload-overlay">
                             <button className="upload-btn" onClick={() => handleImageClick('logo')} disabled={imageUploading.logo}>
                               <Camera size={16} />
@@ -590,11 +666,78 @@ const SellerShop = () => {
                         )}
                       </div>
                     </div>
+
+                    {/* URL Input Field */}
+                    {isEditing && imageInputType.logo === 'url' && (
+                      <div className="url-input-section">
+                        <div className="url-input-group">
+                          <input
+                            type="url"
+                            className="form-input url-input"
+                            placeholder="https://example.com/logo.jpg"
+                            value={imageUrl.logo}
+                            onChange={(e) => handleImageUrlChange('logo', e.target.value)}
+                            onKeyPress={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                handleImageUrlSubmit('logo');
+                              }
+                            }}
+                          />
+                          <button
+                            className="btn btn-primary url-submit-btn"
+                            onClick={() => handleImageUrlSubmit('logo')}
+                            disabled={urlLoading.logo || !imageUrl.logo.trim()}
+                          >
+                            {urlLoading.logo ? (
+                              <>
+                                <div className="loading-small"></div>
+                                Loading...
+                              </>
+                            ) : (
+                              <>
+                                <LinkIcon size={16} />
+                                Add URL
+                              </>
+                            )}
+                          </button>
+                        </div>
+                        {shopData.logo && (
+                          <button className="btn btn-secondary remove-url-btn" onClick={() => handleImageRemove('logo')}>
+                            Remove Current Logo
+                          </button>
+                        )}
+                      </div>
+                    )}
+
                     <p className="upload-hint">Recommended: 200x200px, PNG or JPG (Max 5MB)</p>
                   </div>
 
+                  {/* Banner Upload/URL Section */}
                   <div className="upload-group">
                     <h3>Shop Banner</h3>
+
+                    {/* Image Input Type Toggle */}
+                    {isEditing && (
+                      <div className="image-input-toggle">
+                        <button
+                          className={`toggle-btn ${imageInputType.banner === 'file' ? 'active' : ''}`}
+                          onClick={() => setImageInputType(prev => ({ ...prev, banner: 'file' }))}
+                        >
+                          <Camera size={16} />
+                          Upload File
+                        </button>
+                        <button
+                          className={`toggle-btn ${imageInputType.banner === 'url' ? 'active' : ''}`}
+                          onClick={() => setImageInputType(prev => ({ ...prev, banner: 'url' }))}
+                        >
+                          <LinkIcon size={16} />
+                          Image URL
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Image Preview */}
                     <div className="image-upload">
                       <div className="image-container">
                         {shopData.banner ? (
@@ -605,7 +748,7 @@ const SellerShop = () => {
                             <p>No banner uploaded</p>
                           </div>
                         )}
-                        {isEditing && (
+                        {isEditing && imageInputType.banner === 'file' && (
                           <div className="upload-overlay">
                             <button className="upload-btn" onClick={() => handleImageClick('banner')} disabled={imageUploading.banner}>
                               <Image size={16} />
@@ -620,6 +763,50 @@ const SellerShop = () => {
                         )}
                       </div>
                     </div>
+
+                    {/* URL Input Field */}
+                    {isEditing && imageInputType.banner === 'url' && (
+                      <div className="url-input-section">
+                        <div className="url-input-group">
+                          <input
+                            type="url"
+                            className="form-input url-input"
+                            placeholder="https://example.com/banner.jpg"
+                            value={imageUrl.banner}
+                            onChange={(e) => handleImageUrlChange('banner', e.target.value)}
+                            onKeyPress={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                handleImageUrlSubmit('banner');
+                              }
+                            }}
+                          />
+                          <button
+                            className="btn btn-primary url-submit-btn"
+                            onClick={() => handleImageUrlSubmit('banner')}
+                            disabled={urlLoading.banner || !imageUrl.banner.trim()}
+                          >
+                            {urlLoading.banner ? (
+                              <>
+                                <div className="loading-small"></div>
+                                Loading...
+                              </>
+                            ) : (
+                              <>
+                                <LinkIcon size={16} />
+                                Add URL
+                              </>
+                            )}
+                          </button>
+                        </div>
+                        {shopData.banner && (
+                          <button className="btn btn-secondary remove-url-btn" onClick={() => handleImageRemove('banner')}>
+                            Remove Current Banner
+                          </button>
+                        )}
+                      </div>
+                    )}
+
                     <p className="upload-hint">Recommended: 1200x400px, PNG or JPG (Max 5MB)</p>
                   </div>
                 </div>
