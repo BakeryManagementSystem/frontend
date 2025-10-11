@@ -9,6 +9,11 @@ class ApiService {
     this.forceRealAPI = false; // Use mock data for debugging ingredient issues
   }
 
+  // Helper method to get auth token
+  getToken() {
+    return localStorage.getItem('auth_token');
+  }
+
   // Initialize mock data for offline mode
   initializeMockData() {
     return {
@@ -561,6 +566,66 @@ class ApiService {
     return this.request('/buyer/orders/stats');
   }
 
+  // Invoice APIs (for both buyers and sellers)
+  async generateBuyerInvoice(orderId) {
+    const token = this.getToken();
+    const response = await fetch(`${this.baseURL}/orders/${orderId}/invoice`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/pdf',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to generate invoice');
+    }
+
+    // Create blob from response
+    const blob = await response.blob();
+
+    // Create download link
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `invoice-order-${orderId}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+
+    return { success: true };
+  }
+
+  async previewBuyerInvoice(orderId) {
+    const token = this.getToken();
+    const response = await fetch(`${this.baseURL}/orders/${orderId}/invoice/preview`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/pdf',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to preview invoice');
+    }
+
+    // Create blob from response
+    const blob = await response.blob();
+
+    // Open in new tab
+    const url = window.URL.createObjectURL(blob);
+    window.open(url, '_blank');
+
+    // Clean up after a delay
+    setTimeout(() => {
+      window.URL.revokeObjectURL(url);
+    }, 100);
+
+    return { success: true };
+  }
+
   // User Profile APIs
   async getUserProfile() {
     return this.request('/user/profile');
@@ -589,6 +654,11 @@ class ApiService {
       method: 'PUT',
       body: JSON.stringify(addressData),
     });
+  }
+
+  // Login Activity API
+  async getLoginActivity() {
+    return this.request('/user/login-activity');
   }
 
   // Seller/Owner Orders API
@@ -969,6 +1039,112 @@ class ApiService {
     });
     const queryString = searchParams.toString();
     return this.request(`/shops/${ownerId}/products${queryString ? `?${queryString}` : ''}`);
+  }
+
+  // Invoice API
+  async generateInvoice(orderId) {
+    const response = await fetch(`${this.baseURL}/seller/orders/${orderId}/invoice`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${this.getToken()}`,
+        'Accept': 'application/pdf',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to generate invoice');
+    }
+
+    // Create a blob from the PDF stream
+    const blob = await response.blob();
+
+    // Create a link element and trigger download
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `invoice-${orderId}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+
+    return { success: true };
+  }
+
+  async previewInvoice(orderId) {
+    const response = await fetch(`${this.baseURL}/seller/orders/${orderId}/invoice`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${this.getToken()}`,
+        'Accept': 'application/pdf',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to preview invoice');
+    }
+
+    // Create a blob from the PDF stream
+    const blob = await response.blob();
+
+    // Open in new tab
+    const url = window.URL.createObjectURL(blob);
+    window.open(url, '_blank');
+
+    return { success: true };
+  }
+
+  // Buyer Invoice API
+  async generateBuyerInvoice(orderId) {
+    const response = await fetch(`${this.baseURL}/buyer/orders/${orderId}/invoice`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${this.getToken()}`,
+        'Accept': 'application/pdf',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to generate invoice');
+    }
+
+    // Create a blob from the PDF stream
+    const blob = await response.blob();
+
+    // Create a link element and trigger download
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `invoice-${orderId}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+
+    return { success: true };
+  }
+
+  async previewBuyerInvoice(orderId) {
+    const response = await fetch(`${this.baseURL}/buyer/orders/${orderId}/invoice`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${this.getToken()}`,
+        'Accept': 'application/pdf',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to preview invoice');
+    }
+
+    // Create a blob from the PDF stream
+    const blob = await response.blob();
+
+    // Open in new tab
+    const url = window.URL.createObjectURL(blob);
+    window.open(url, '_blank');
+
+    return { success: true };
   }
 }
 

@@ -60,32 +60,18 @@ const Profile = () => {
 
       // Enhanced profile data mapping to include all possible registration fields
       setProfileData({
-        name: response.user?.name || response.name || '',
-        email: response.user?.email || response.email || '',
-        phone: response.user?.phone || response.phone || '',
-        date_of_birth: response.user?.date_of_birth || response.date_of_birth || '',
-        avatar: response.user?.avatar || response.avatar || '',
-        // Additional registration fields that might be missing
-        first_name: response.user?.first_name || response.first_name || '',
-        last_name: response.user?.last_name || response.last_name || '',
-        gender: response.user?.gender || response.gender || '',
-        business_name: response.user?.business_name || response.business_name || '',
-        business_type: response.user?.business_type || response.business_type || '',
-        tax_id: response.user?.tax_id || response.tax_id || '',
-        website: response.user?.website || response.website || '',
-        bio: response.user?.bio || response.bio || '',
-        user_type: response.user?.user_type || response.user_type || user?.user_type || '',
-        address: response.user?.address || response.address || {
-          street: response.user?.street || response.street || '',
-          city: response.user?.city || response.city || '',
-          state: response.user?.state || response.state || '',
-          zipCode: response.user?.zip_code || response.zip_code || response.zipCode || '',
-          country: response.user?.country || response.country || ''
-        },
-        // Account information
-        email_verified_at: response.user?.email_verified_at || response.email_verified_at,
-        created_at: response.user?.created_at || response.created_at,
-        updated_at: response.user?.updated_at || response.updated_at
+        name: response.name || '',
+        email: response.email || '',
+        phone: response.phone || '',
+        date_of_birth: response.date_of_birth || '',
+        avatar: response.avatar || '',
+        address: response.address || {
+          street: '',
+          city: '',
+          state: '',
+          zipCode: '',
+          country: ''
+        }
       });
     } catch (error) {
       console.error('Failed to fetch profile:', error);

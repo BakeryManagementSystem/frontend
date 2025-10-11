@@ -74,6 +74,7 @@ const ShopDetail = () => {
         logo: shop.logo_path || null,
         banner: shop.banner_path || null,
         owner: owner.name,
+        ownerEmail: owner.email,
         rating: shop.average_rating || 5.0,
         reviewCount: shop.total_reviews || 0,
         followerCount: shop.follower_count || 0,
@@ -279,10 +280,19 @@ const ShopDetail = () => {
                 <Heart size={16} fill={isFollowing ? 'currentColor' : 'none'} />
                 {isFollowing ? 'Following' : 'Follow'}
               </button>
-              <button className="action-button secondary">
-                <MessageCircle size={16} />
+              <a
+                href={`mailto:${shopData.ownerEmail || ''}`}
+                className="action-button secondary"
+                onClick={(e) => {
+                  if (!shopData.ownerEmail) {
+                    e.preventDefault();
+                    alert('Contact email not available for this shop.');
+                  }
+                }}
+              >
+                <Mail size={16} />
                 Contact
-              </button>
+              </a>
               <button className="action-button secondary" onClick={handleShare}>
                 <Share2 size={16} />
                 Share

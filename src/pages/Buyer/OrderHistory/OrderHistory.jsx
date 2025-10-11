@@ -74,6 +74,26 @@ const OrderHistory = () => {
     }
   };
 
+  const handleDownloadInvoice = async (orderId) => {
+    try {
+      await ApiService.generateBuyerInvoice(orderId);
+      // Success - file will be downloaded automatically
+    } catch (error) {
+      console.error("Failed to download invoice:", error);
+      alert("Failed to download invoice. Please try again.");
+    }
+  };
+
+  const handlePreviewInvoice = async (orderId) => {
+    try {
+      await ApiService.previewBuyerInvoice(orderId);
+      // Success - invoice will open in new tab
+    } catch (error) {
+      console.error("Failed to preview invoice:", error);
+      alert("Failed to preview invoice. Please try again.");
+    }
+  };
+
   const getStatusIcon = (status) => {
     switch (status) {
       case "delivered":
@@ -288,6 +308,20 @@ const OrderHistory = () => {
                     >
                       <Eye size={14} />
                       View Details
+                    </button>
+                    <button
+                      onClick={() => handleDownloadInvoice(order.id)}
+                      className="btn btn-outline btn-sm"
+                    >
+                      <Download size={14} />
+                      Download Invoice
+                    </button>
+                    <button
+                      onClick={() => handlePreviewInvoice(order.id)}
+                      className="btn btn-outline btn-sm"
+                    >
+                      <Eye size={14} />
+                      Preview Invoice
                     </button>
                   </div>
                 </div>

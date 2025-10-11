@@ -566,6 +566,7 @@
 /* About Section - Enhanced */
 .about-section {
   max-width: 900px;
+  margin: 0 auto; /* Center the content */
 }
 
 .about-card {
@@ -684,6 +685,7 @@
   display: grid;
   gap: 1.5rem;
   max-width: 900px;
+  margin: 0 auto; /* Center the content */
 }
 
 .policy-card {

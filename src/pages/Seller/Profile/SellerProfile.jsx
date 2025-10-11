@@ -257,19 +257,16 @@ const SellerProfile = () => {
 
             <div className="avatar-section">
               <div className="avatar-container">
-                <img
-                  src={profileData.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'}
-                  alt="Profile Avatar"
-                  className="avatar-image"
-                />
-                <button className="avatar-edit-btn">
-                  <Camera size={16} />
-                </button>
+                <div className="avatar-icon">
+                  <User size={48} />
+                </div>
               </div>
               <div className="avatar-info">
                 <h3>{profileData.name}</h3>
                 <p>{profileData.email}</p>
-                <span className="seller-since">Seller since January 2024</span>
+                <span className="seller-since">
+                  Seller since {profileData.created_at ? new Date(profileData.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long' }) : 'N/A'}
+                </span>
               </div>
             </div>
 
