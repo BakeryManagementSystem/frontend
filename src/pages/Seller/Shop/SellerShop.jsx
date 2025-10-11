@@ -252,8 +252,12 @@ const SellerShop = () => {
         featured_products: shopData.settings.featuredProducts
       };
 
+      console.log('Sending shop data:', shopDataToSend);
+
       // Send data to API
       const response = await ApiService.updateSellerShop(shopDataToSend);
+
+      console.log('Update response:', response);
 
       if (response.success) {
         setIsEditing(false);
