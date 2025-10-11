@@ -23,6 +23,8 @@ const SellerShop = () => {
   const { user } = useAuth();
   const { addNotification } = useNotifications();
   const [shopData, setShopData] = useState({
+    id: null,
+    owner_id: null,
     name: '',
     description: '',
     logo: '',
@@ -93,14 +95,17 @@ const SellerShop = () => {
       console.log('Shop response:', shopResponse);
       console.log('Stats response:', statsResponse);
 
-      if (shopResponse && (shopResponse.success || shopResponse.data)) {
-        const shop = shopResponse.data || shopResponse;
+      if (shopResponse && shopResponse.shop) {
+        const shop = shopResponse.shop;
+        const owner = shopResponse.owner;
 
         setShopData({
-          name: shop.name || '',
+          id: shop.id || null,
+          owner_id: shop.owner_id || owner?.id || null,
+          name: shop.shop_name || shop.name || owner?.name + "'s Shop" || '',
           description: shop.description || '',
-          logo: shop.logo || '',
-          banner: shop.banner || '',
+          logo: shop.logo_path || shop.logo || '',
+          banner: shop.banner_path || shop.banner || '',
           theme: shop.theme || {
             primaryColor: '#2563eb',
             secondaryColor: '#64748b',
@@ -125,13 +130,7 @@ const SellerShop = () => {
           }
         });
 
-        // Show success message if data was loaded from backend
-        if (!shopResponse.message?.includes('Offline mode')) {
-          console.log('Shop data loaded successfully from backend');
-        } else {
-          console.warn('Using fallback/mock data');
-          addNotification('Using offline data. Some features may be limited.', 'warning');
-        }
+        console.log('Shop data loaded successfully from backend');
       }
 
       if (statsResponse && (statsResponse.success || statsResponse.data)) {
@@ -249,8 +248,13 @@ const SellerShop = () => {
   };
 
   const handlePreview = () => {
-    // Open shop preview in new tab
-    window.open(`/shop/${user?.id}`, '_blank');
+    // Use the owner_id from shopData, fallback to user.id if not available
+    const ownerId = shopData.owner_id || user?.id;
+    if (ownerId) {
+      window.open(`/shop/${ownerId}`, '_blank');
+    } else {
+      addNotification('Unable to preview shop. Please try again.', 'error');
+    }
   };
 
   const handleImageUpload = async (imageType, file) => {
