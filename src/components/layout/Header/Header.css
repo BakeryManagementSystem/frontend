@@ -136,7 +136,7 @@
   right: 8px;
   background: none;
   border: none;
-  color: var(--text-secondary, #64748b);
+  color: var(--primary-color, #6639a6);
   cursor: pointer;
   padding: 6px;
   border-radius: 6px;
@@ -147,8 +147,13 @@
 }
 
 .search-btn:hover {
-  color: var(--primary-color, #6639a6);
-  background: var(--primary-bg, rgba(102, 57, 166, 0.1));
+  color: var(--primary-hover, #4f2c80);
+  background: transparent;
+  transform: scale(1.1);
+}
+
+.search-btn:active {
+  transform: scale(0.95);
 }
 
 /* Desktop Header Actions */
