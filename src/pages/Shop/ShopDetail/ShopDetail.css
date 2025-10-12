@@ -36,7 +36,7 @@
 }
 
 .loading-spinner p {
-  color: #64748b;
+  color: var(--shop-secondary-color, #64748b); /* Use shop secondary color instead of hardcoded */
   font-size: 1rem;
 }
 
@@ -55,19 +55,19 @@
 }
 
 .error-icon {
-  color: #94a3b8;
+  color: var(--shop-accent-color, #94a3b8); /* Use shop accent color */
   margin-bottom: 1.5rem;
 }
 
 .shop-not-found h1 {
   font-size: 2rem;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--shop-primary-color, #1e293b); /* Use shop primary color */
   margin-bottom: 1rem;
 }
 
 .shop-not-found p {
-  color: #64748b;
+  color: var(--shop-secondary-color, #64748b); /* Use shop secondary color */
   margin-bottom: 2rem;
   font-size: 1.1rem;
 }
@@ -78,7 +78,7 @@
   height: 400px;
   overflow: hidden;
   position: relative;
-  background: #f8fafc;
+  background: var(--bg-secondary, #f8fafc);
   z-index: 1;
 }
 
@@ -95,7 +95,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #cbd5e1;
+  color: var(--shop-accent-color, #cbd5e1); /* Use shop accent color */
 }
 
 /* Shop Banner - Completely Redesigned */
@@ -351,22 +351,22 @@
 }
 
 .stat-icon.products {
-  background: linear-gradient(135deg, var(--shop-accent-color, #f59e0b) 0%, #d97706 100%); /* Use shop accent color */
+  background: linear-gradient(135deg, var(--shop-accent-color, #f59e0b) 0%, var(--shop-accent-color, #d97706) 100%); /* Use only shop accent color */
   color: white;
 }
 
 .stat-icon.followers {
-  background: linear-gradient(135deg, var(--shop-secondary-color, #7f4fc3) 0%, var(--shop-primary-color, #6639a6) 100%); /* Use shop colors */
+  background: linear-gradient(135deg, var(--shop-secondary-color, #64748b) 0%, var(--shop-primary-color, #2563eb) 100%); /* Use shop colors only */
   color: white;
 }
 
 .stat-icon.sales {
-  background: linear-gradient(135deg, var(--success-color, #10b981) 0%, #059669 100%);
+  background: linear-gradient(135deg, var(--shop-primary-color, #2563eb) 0%, var(--shop-primary-color, #1d4ed8) 100%); /* Use shop primary color */
   color: white;
 }
 
 .stat-icon.rating {
-  background: linear-gradient(135deg, var(--shop-primary-color, #6639a6) 0%, var(--shop-primary-color, #6639a6) 100%); /* Use shop primary color */
+  background: linear-gradient(135deg, var(--shop-primary-color, #2563eb) 0%, var(--shop-secondary-color, #64748b) 100%); /* Use shop colors */
   color: white;
 }
 
@@ -422,13 +422,13 @@
 }
 
 .tab-btn:hover {
-  color: var(--shop-secondary-color, #6639a6); /* Use shop secondary color */
+  color: var(--shop-secondary-color); /* Use shop secondary color - remove fallback */
   background: var(--shop-secondary-color)0D; /* Use shop secondary color with 5% opacity */
 }
 
 .tab-btn.active {
-  color: var(--shop-accent-color, #6639a6); /* Use shop accent color */
-  border-bottom-color: var(--shop-accent-color, #6639a6);
+  color: var(--shop-accent-color); /* Use shop accent color - remove fallback */
+  border-bottom-color: var(--shop-accent-color);
 }
 
 /* Content Wrapper */
@@ -504,7 +504,7 @@
 
 .search-input:focus {
   outline: none;
-  border-color: var(--shop-accent-color, #6639a6); /* Use shop accent color */
+  border-color: var(--shop-accent-color); /* Use shop accent color - remove fallback */
   background: var(--bg-card, white);
   box-shadow: 0 0 0 4px var(--shop-accent-color)1A; /* Use shop accent color with 10% opacity */
 }
@@ -529,7 +529,7 @@
 
 .filter-select:focus {
   outline: none;
-  border-color: var(--shop-secondary-color, #6639a6); /* Use shop secondary color */
+  border-color: var(--shop-secondary-color); /* Use shop secondary color - remove fallback */
   background: var(--bg-card, white);
   box-shadow: 0 0 0 4px var(--shop-secondary-color)1A; /* Use shop secondary color with 10% opacity */
 }
@@ -611,7 +611,7 @@
   width: 50px;
   height: 50px;
   border-radius: 10px;
-  background: linear-gradient(135deg, var(--shop-secondary-color, #6639a6) 0%, var(--shop-accent-color, #4f2c80) 100%); /* Use shop colors */
+  background: linear-gradient(135deg, var(--shop-secondary-color) 0%, var(--shop-accent-color) 100%); /* Use shop colors - remove fallbacks */
   color: white;
   display: flex;
   align-items: center;
@@ -674,8 +674,8 @@
 
 .social-link-btn:hover {
   background: var(--bg-card, white);
-  border-color: var(--shop-secondary-color, #6639a6); /* Use shop secondary color */
-  color: var(--shop-secondary-color, #6639a6);
+  border-color: var(--shop-secondary-color); /* Use shop secondary color - remove fallback */
+  color: var(--shop-secondary-color);
   transform: translateY(-2px);
   box-shadow: 0 8px 16px var(--shop-secondary-color)26; /* Use shop secondary color with 15% opacity */
 }
@@ -712,7 +712,7 @@
 }
 
 .policy-header svg {
-  color: var(--shop-accent-color, #6639a6); /* Use shop accent color */
+  color: var(--shop-accent-color); /* Use shop accent color - remove fallback */
 }
 
 .policy-header h3 {
