@@ -10,8 +10,7 @@ import {
   Search,
   Filter,
   Heart,
-  Eye,
-  X
+  Eye
 } from 'lucide-react';
 import './ShopList.css';
 
@@ -54,11 +53,6 @@ const ShopList = () => {
     fetchShops();
   };
 
-  const clearSearch = () => {
-    setSearchQuery('');
-    fetchShops();
-  };
-
   const filteredShops = shops.filter(shop => {
     if (searchQuery && !shop.shop_name?.toLowerCase().includes(searchQuery.toLowerCase()) &&
         !shop.description?.toLowerCase().includes(searchQuery.toLowerCase())) {
@@ -87,32 +81,18 @@ const ShopList = () => {
           </div>
         </div>
 
-        {/* Enhanced Search and Filters */}
+        {/* Search and Filters */}
         <div className="shop-controls">
-          <form onSubmit={handleSearch} className="enhanced-search-bar">
-            <div className="search-input-group">
-              <Search className="search-icon" size={20} />
-              <input
-                type="text"
-                placeholder="Search bakery shops by name or description..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="search-input"
-              />
-              {searchQuery && (
-                <button
-                  type="button"
-                  onClick={clearSearch}
-                  className="clear-btn"
-                  aria-label="Clear search"
-                >
-                  <X size={18} />
-                </button>
-              )}
-            </div>
-            <button type="submit" className="search-submit-btn">
-              Search
-            </button>
+          <form onSubmit={handleSearch} className="search-bar">
+            <Search className="search-icon" size={20} />
+            <input
+              type="text"
+              placeholder="Search bakery shops..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="search-input"
+            />
+            <button type="submit" className="search-btn">Search</button>
           </form>
 
           <div className="filter-group">
