@@ -20,7 +20,7 @@
   width: 50px;
   height: 50px;
   border: 4px solid var(--border-light, #e2e8f0);
-  border-top: 4px solid var(--shop-secondary-color, #64748b); /* Use shop secondary color */
+  border-top: 4px solid var(--shop-secondary-color); /* Remove fallback color */
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 1rem;
@@ -36,7 +36,7 @@
 }
 
 .loading-spinner p {
-  color: var(--shop-secondary-color, #64748b); /* Use shop secondary color instead of hardcoded */
+  color: var(--shop-secondary-color); /* Remove fallback color */
   font-size: 1rem;
 }
 
@@ -55,19 +55,19 @@
 }
 
 .error-icon {
-  color: var(--shop-accent-color, #94a3b8); /* Use shop accent color */
+  color: var(--shop-accent-color); /* Remove fallback color */
   margin-bottom: 1.5rem;
 }
 
 .shop-not-found h1 {
   font-size: 2rem;
   font-weight: 700;
-  color: var(--shop-primary-color, #1e293b); /* Use shop primary color */
+  color: var(--shop-primary-color); /* Remove fallback color */
   margin-bottom: 1rem;
 }
 
 .shop-not-found p {
-  color: var(--shop-secondary-color, #64748b); /* Use shop secondary color */
+  color: var(--shop-secondary-color); /* Remove fallback color */
   margin-bottom: 2rem;
   font-size: 1.1rem;
 }
@@ -95,7 +95,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--shop-accent-color, #cbd5e1); /* Use shop accent color */
+  color: var(--shop-accent-color); /* Remove fallback color */
 }
 
 /* Shop Banner - Completely Redesigned */
@@ -263,23 +263,23 @@
 }
 
 .action-button.follow {
-  background: var(--shop-primary-color, #6639a6); /* Use shop primary color */
-  border-color: var(--shop-primary-color, #6639a6);
+  background: var(--shop-primary-color); /* Remove fallback color */
+  border-color: var(--shop-primary-color);
   color: white;
   box-shadow: 0 4px 12px var(--shop-primary-color)33; /* Use shop primary color with opacity */
 }
 
 .action-button.follow:hover {
-  background: var(--shop-primary-color, #6639a6);
-  border-color: var(--shop-primary-color, #6639a6);
+  background: var(--shop-primary-color);
+  border-color: var(--shop-primary-color);
   transform: translateY(-2px);
   box-shadow: 0 6px 16px var(--shop-primary-color)4D; /* Use shop primary color with opacity */
 }
 
 .action-button.following {
   background: white;
-  border-color: var(--shop-secondary-color, #64748b); /* Use shop secondary color */
-  color: var(--shop-secondary-color, #64748b);
+  border-color: var(--shop-secondary-color); /* Remove fallback color */
+  color: var(--shop-secondary-color);
 }
 
 .action-button.following:hover {
@@ -293,8 +293,8 @@
 }
 
 .action-button.secondary:hover {
-  border-color: var(--shop-accent-color, #f59e0b); /* Use shop accent color */
-  color: var(--shop-accent-color, #f59e0b);
+  border-color: var(--shop-accent-color); /* Remove fallback color */
+  color: var(--shop-accent-color);
   background: var(--shop-accent-color)0D; /* Use shop accent color with 5% opacity */
 }
 
@@ -332,12 +332,12 @@
 
 .stat-card.highlight {
   background: white;
-  border: 2px solid var(--shop-accent-color, #f59e0b); /* Use shop accent color */
+  border: 2px solid var(--shop-accent-color); /* Remove fallback color */
 }
 
 .stat-card.highlight .stat-value,
 .stat-card.highlight .stat-label {
-  color: var(--shop-accent-color, #f59e0b); /* Use shop accent color */
+  color: var(--shop-accent-color); /* Remove fallback color */
 }
 
 .stat-icon {
@@ -351,22 +351,22 @@
 }
 
 .stat-icon.products {
-  background: linear-gradient(135deg, var(--shop-accent-color, #f59e0b) 0%, var(--shop-accent-color, #d97706) 100%); /* Use only shop accent color */
+  background: linear-gradient(135deg, var(--shop-accent-color) 0%, var(--shop-accent-color) 100%); /* Remove fallback colors */
   color: white;
 }
 
 .stat-icon.followers {
-  background: linear-gradient(135deg, var(--shop-secondary-color, #64748b) 0%, var(--shop-primary-color, #2563eb) 100%); /* Use shop colors only */
+  background: linear-gradient(135deg, var(--shop-secondary-color) 0%, var(--shop-primary-color) 100%); /* Remove fallback colors */
   color: white;
 }
 
 .stat-icon.sales {
-  background: linear-gradient(135deg, var(--shop-primary-color, #2563eb) 0%, var(--shop-primary-color, #1d4ed8) 100%); /* Use shop primary color */
+  background: linear-gradient(135deg, var(--shop-primary-color) 0%, var(--shop-primary-color) 100%); /* Remove fallback colors */
   color: white;
 }
 
 .stat-icon.rating {
-  background: linear-gradient(135deg, var(--shop-primary-color, #2563eb) 0%, var(--shop-secondary-color, #64748b) 100%); /* Use shop colors */
+  background: linear-gradient(135deg, var(--shop-primary-color) 0%, var(--shop-secondary-color) 100%); /* Remove fallback colors */
   color: white;
 }
 
@@ -746,7 +746,7 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--shop-primary-color, #6639a6) 0%, var(--shop-primary-color, #4f2c80) 100%); /* Use shop primary color */
+  background: linear-gradient(135deg, var(--shop-primary-color) 0%, var(--shop-primary-color) 100%); /* Remove fallback colors */
   color: white;
   box-shadow: 0 4px 12px var(--shop-primary-color)4D; /* Use shop primary color with 30% opacity */
 }
