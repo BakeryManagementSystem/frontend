@@ -24,6 +24,7 @@ const SellerProfile = () => {
     phone: '',
     date_of_birth: '',
     avatar: '',
+    created_at: '', // Add created_at field to initial state
     address: {
       street: '',
       city: '',
@@ -64,6 +65,7 @@ const SellerProfile = () => {
         phone: response.phone || '',
         date_of_birth: response.date_of_birth || '',
         avatar: response.avatar || '',
+        created_at: response.created_at || '', // Add created_at field
         address: response.address || {
           street: '',
           city: '',
