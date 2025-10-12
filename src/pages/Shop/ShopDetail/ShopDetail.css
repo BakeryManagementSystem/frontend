@@ -787,19 +787,10 @@
     min-height: auto;
     margin-top: 0;
     padding: 0;
-    padding-top: 4rem; /* Add more padding to account for overlaid avatar */
+    padding-top: 1.5rem;
     padding-bottom: 2rem;
     background: white;
     margin-bottom: 2rem; /* Add spacing before next section */
-  }
-
-  /* Position only the avatar over the banner */
-  .shop-avatar-section {
-    position: absolute; /* Position absolutely over the banner */
-    top: 50%; /* Center vertically in banner */
-    left: 50%; /* Center horizontally in banner */
-    transform: translate(-50%, -50%); /* Perfect centering */
-    z-index: 15; /* Ensure it's above the banner */
   }
 
   /* Fix shop header content layout for mobile */
@@ -807,7 +798,17 @@
     flex-direction: column;
     gap: 1.5rem;
     align-items: center;
-    position: relative; /* Keep in normal flow */
+  }
+
+  .shop-avatar-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: absolute; /* Position absolutely over the banner */
+    top: 50%; /* Center vertically in banner */
+    left: 50%; /* Center horizontally in banner */
+    transform: translate(-50%, -50%); /* Perfect centering */
+    z-index: 15; /* Ensure it's above the banner */
   }
 
   .shop-avatar {
@@ -824,14 +825,14 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   }
 
-  /* Ensure shop info section is visible and in normal flow */
+  /* Ensure shop info section is visible */
   .shop-info-section {
     width: 100%;
     text-align: center;
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-top: 3rem; /* Add margin to account for overlaid avatar */
+    margin-bottom: 4rem;
   }
 
   .shop-title-section {
