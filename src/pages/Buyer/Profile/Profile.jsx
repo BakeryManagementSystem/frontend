@@ -63,7 +63,7 @@ const Profile = () => {
         name: response.name || '',
         email: response.email || '',
         phone: response.phone || '',
-        date_of_birth: response.date_of_birth || '',
+        date_of_birth: formatDateForInput(response.date_of_birth) || '',
         avatar: response.avatar || '',
         address: response.address || {
           street: '',
@@ -78,6 +78,40 @@ const Profile = () => {
       setErrors({ general: 'Failed to load profile data. Please try again.' });
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Helper function to format date for HTML date input
+  const formatDateForInput = (dateString) => {
+    if (!dateString) return '';
+
+    try {
+      // Handle various date formats that might come from the backend
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return '';
+
+      // Format as YYYY-MM-DD for HTML date input
+      return date.toISOString().split('T')[0];
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return '';
+    }
+  };
+
+  // Helper function to format date for backend submission
+  const formatDateForBackend = (dateString) => {
+    if (!dateString) return null;
+
+    try {
+      // Ensure date is in proper format for backend
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return null;
+
+      // Return as YYYY-MM-DD format
+      return date.toISOString().split('T')[0];
+    } catch (error) {
+      console.error('Error formatting date for backend:', error);
+      return null;
     }
   };
 
@@ -175,7 +209,10 @@ const Profile = () => {
       console.log('Saving profile data:', profileData);
       console.log('Date of birth value:', profileData.date_of_birth);
 
-      const response = await ApiService.updateUserProfile(profileData);
+      const response = await ApiService.updateUserProfile({
+        ...profileData,
+        date_of_birth: formatDateForBackend(profileData.date_of_birth) // Ensure correct format for backend
+      });
 
       console.log('Profile update response:', response);
 
