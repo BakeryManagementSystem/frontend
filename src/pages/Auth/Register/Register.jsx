@@ -110,6 +110,11 @@ const Register = () => {
         ...registrationData,
         user_type: userType // Convert camelCase to snake_case
       };
+
+      // Debug logging to see what data is being sent
+      console.log('Form data before sending:', formData);
+      console.log('Backend data being sent:', backendData);
+
       const result = await register(backendData);
 
       if (result.success) {

@@ -171,7 +171,14 @@ const Profile = () => {
     setSuccess('');
 
     try {
+      // Debug logging
+      console.log('Saving profile data:', profileData);
+      console.log('Date of birth value:', profileData.date_of_birth);
+
       const response = await ApiService.updateUserProfile(profileData);
+
+      console.log('Profile update response:', response);
+
       setSuccess('Profile updated successfully!');
       setIsEditing(false);
 
@@ -179,6 +186,9 @@ const Profile = () => {
       if (updateUser) {
         updateUser(response.user || profileData);
       }
+
+      // Refresh profile data to show updated values
+      await fetchProfile();
 
       setTimeout(() => setSuccess(''), 3000);
     } catch (error) {

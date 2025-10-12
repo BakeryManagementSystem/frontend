@@ -35,7 +35,8 @@ const Categories = () => {
         const mappedCategories = categoriesData.map(category => ({
           id: category.id,
           name: category.name,
-          slug: category.slug || category.name.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-'),
+          // Improved slug generation - convert & to -and- for better URL compatibility
+          slug: category.slug || category.name.toLowerCase().replace(/ & /g, '-and-').replace(/\s+/g, '-'),
           description: category.description || `Quality ${category.name.toLowerCase()} made fresh daily`,
           productCount: category.products_count || 0,
           image: getDefaultImage(category.name),

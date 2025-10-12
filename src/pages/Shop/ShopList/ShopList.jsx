@@ -10,7 +10,10 @@ import {
   Search,
   Filter,
   Heart,
-  Eye
+  Eye,
+  X,
+  SlidersHorizontal,
+  ChevronDown
 } from 'lucide-react';
 import './ShopList.css';
 
@@ -21,6 +24,7 @@ const ShopList = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState('all');
   const [sortBy, setSortBy] = useState('rating');
+  const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
     fetchShops();
@@ -53,6 +57,11 @@ const ShopList = () => {
     fetchShops();
   };
 
+  const clearSearch = () => {
+    setSearchQuery('');
+    fetchShops();
+  };
+
   const filteredShops = shops.filter(shop => {
     if (searchQuery && !shop.shop_name?.toLowerCase().includes(searchQuery.toLowerCase()) &&
         !shop.description?.toLowerCase().includes(searchQuery.toLowerCase())) {
@@ -73,52 +82,171 @@ const ShopList = () => {
   return (
     <div className="shop-list-page">
       <div className="container">
-        {/* Page Header */}
-        <div className="page-header">
-          <div className="header-content">
-            <h1>Explore Bakery Shops</h1>
-            <p>Discover amazing local bakeries and their delicious products</p>
+        {/* Enhanced Page Header with Search */}
+        <div className="page-header-hero">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Store size={20} />
+              <span>Discover Local Bakeries</span>
+            </div>
+            <h1>Find Your Perfect Bakery</h1>
+            <p>Explore {shops.length} amazing local bakeries and discover their delicious handcrafted products</p>
+
+            {/* Enhanced Search Bar */}
+            <div className="hero-search-container">
+              <form onSubmit={handleSearch} className="hero-search-bar">
+                <div className="search-input-wrapper">
+                  <Search className="search-icon" size={22} />
+                  <input
+                    type="text"
+                    placeholder="Search by bakery name, specialty, or location..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="hero-search-input"
+                  />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={clearSearch}
+                      className="clear-search-btn"
+                      aria-label="Clear search"
+                    >
+                      <X size={18} />
+                    </button>
+                  )}
+                </div>
+                <button type="submit" className="hero-search-btn">
+                  <Search size={20} />
+                  <span>Search</span>
+                </button>
+              </form>
+
+              {/* Quick Filter Tags */}
+              <div className="quick-filters">
+                <button
+                  className={`filter-tag ${filter === 'all' ? 'active' : ''}`}
+                  onClick={() => setFilter('all')}
+                >
+                  All Bakeries
+                </button>
+                <button
+                  className={`filter-tag ${filter === 'verified' ? 'active' : ''}`}
+                  onClick={() => setFilter('verified')}
+                >
+                  <span className="verified-dot"></span>
+                  Verified
+                </button>
+                <button
+                  className={`filter-tag ${filter === 'top-rated' ? 'active' : ''}`}
+                  onClick={() => setFilter('top-rated')}
+                >
+                  <Star size={14} />
+                  Top Rated
+                </button>
+                <button
+                  className={`filter-tag ${filter === 'new' ? 'active' : ''}`}
+                  onClick={() => setFilter('new')}
+                >
+                  <TrendingUp size={14} />
+                  New Shops
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Decorative Elements */}
+          <div className="hero-decoration">
+            <div className="decoration-circle circle-1"></div>
+            <div className="decoration-circle circle-2"></div>
+            <div className="decoration-circle circle-3"></div>
           </div>
         </div>
 
-        {/* Search and Filters */}
-        <div className="shop-controls">
-          <form onSubmit={handleSearch} className="search-bar">
-            <Search className="search-icon" size={20} />
-            <input
-              type="text"
-              placeholder="Search bakery shops..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="search-input"
-            />
-            <button type="submit" className="search-btn">Search</button>
-          </form>
+        {/* Enhanced Controls Bar */}
+        <div className="shop-controls-bar">
+          <div className="controls-left">
+            <p className="results-count">
+              <strong>{filteredShops.length}</strong> {filteredShops.length === 1 ? 'bakery' : 'bakeries'} found
+            </p>
+          </div>
 
-          <div className="filter-group">
-            <select
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-              className="filter-select"
+          <div className="controls-right">
+            <button
+              className="filter-toggle-btn"
+              onClick={() => setShowFilters(!showFilters)}
             >
-              <option value="all">All Shops</option>
-              <option value="verified">Verified Only</option>
-              <option value="top-rated">Top Rated</option>
-              <option value="new">New Shops</option>
-            </select>
+              <SlidersHorizontal size={18} />
+              <span>Filters</span>
+              <ChevronDown size={16} className={showFilters ? 'rotated' : ''} />
+            </button>
 
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="sort-select"
-            >
-              <option value="rating">Highest Rated</option>
-              <option value="products">Most Products</option>
-              <option value="reviews">Most Reviews</option>
-              <option value="newest">Newest First</option>
-            </select>
+            <div className="sort-dropdown">
+              <label htmlFor="sort-select">Sort by:</label>
+              <select
+                id="sort-select"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="sort-select"
+              >
+                <option value="rating">Highest Rated</option>
+                <option value="products">Most Products</option>
+                <option value="reviews">Most Reviews</option>
+                <option value="newest">Newest First</option>
+              </select>
+            </div>
           </div>
         </div>
+
+        {/* Expandable Filters Panel */}
+        {showFilters && (
+          <div className="filters-panel">
+            <div className="filters-content">
+              <div className="filter-section">
+                <h4>Shop Type</h4>
+                <div className="filter-options">
+                  <label className="filter-checkbox">
+                    <input type="checkbox" />
+                    <span>Artisan Bakery</span>
+                  </label>
+                  <label className="filter-checkbox">
+                    <input type="checkbox" />
+                    <span>Cake Specialist</span>
+                  </label>
+                  <label className="filter-checkbox">
+                    <input type="checkbox" />
+                    <span>Pastry Shop</span>
+                  </label>
+                </div>
+              </div>
+
+              <div className="filter-section">
+                <h4>Rating</h4>
+                <div className="filter-options">
+                  <label className="filter-checkbox">
+                    <input type="checkbox" />
+                    <span className="rating-label">
+                      <Star size={14} fill="currentColor" />
+                      <Star size={14} fill="currentColor" />
+                      <Star size={14} fill="currentColor" />
+                      <Star size={14} fill="currentColor" />
+                      <Star size={14} /> & Up
+                    </span>
+                  </label>
+                </div>
+              </div>
+
+              <div className="filter-section">
+                <h4>Location</h4>
+                <div className="filter-options">
+                  <label className="filter-checkbox">
+                    <input type="checkbox" />
+                    <span>Near Me</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Error Message */}
         {error && (
@@ -137,8 +265,11 @@ const ShopList = () => {
         ) : (
           <div className="no-shops">
             <Store size={64} />
-            <h3>No Shops Found</h3>
-            <p>We couldn't find any bakery shops matching your criteria. Try adjusting your filters.</p>
+            <h3>No Bakeries Found</h3>
+            <p>We couldn't find any bakery shops matching your criteria. Try adjusting your search or filters.</p>
+            <button onClick={clearSearch} className="btn btn-primary">
+              Clear Search
+            </button>
           </div>
         )}
       </div>

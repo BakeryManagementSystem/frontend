@@ -32,14 +32,21 @@ const Products = () => {
   // Sync category from URL params with filters
   useEffect(() => {
     if (category) {
-      // Convert slug back to category name
-      const categoryName = category
+      // Convert slug back to category name with improved logic
+      // First replace -and- with & (must be done before splitting by -)
+      let categoryName = category.replace(/-and-/g, " & ");
+
+      // Then convert remaining hyphens to spaces and capitalize
+      categoryName = categoryName
         .split("-")
-        .map(
-          (word) => word.charAt(0).toUpperCase() + word.slice(1)
-        )
-        .join(" ")
-        .replace(/And/g, "&"); // Convert 'And' back to '&'
+        .map((word) => {
+          // Capitalize first letter of each word
+          return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+        })
+        .join(" ");
+
+      console.log("Category slug:", category);
+      console.log("Converted category name:", categoryName);
 
       setFilters((prev) => ({
         ...prev,
