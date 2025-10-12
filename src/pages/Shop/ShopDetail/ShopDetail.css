@@ -881,8 +881,8 @@
   .shop-stats-section {
     grid-template-columns: 1fr;
     gap: 1rem;
-    margin-top: 10rem;
-    padding-top: 0;
+    margin-top: 0;
+    padding-top: 10rem;
   }
 
   .stat-card {
