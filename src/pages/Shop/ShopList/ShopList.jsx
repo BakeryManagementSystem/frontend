@@ -149,6 +149,20 @@ const ShopList = () => {
 const ShopCard = ({ shop }) => {
   const [isHovered, setIsHovered] = useState(false);
 
+  // Helper function to get image URL with fallbacks
+  const getImageUrl = (shop, type) => {
+    // Try both field names for compatibility
+    if (type === 'logo') {
+      return shop.logo || shop.logo_path;
+    } else if (type === 'banner') {
+      return shop.banner || shop.banner_path;
+    }
+    return null;
+  };
+
+  const logoUrl = getImageUrl(shop, 'logo');
+  const bannerUrl = getImageUrl(shop, 'banner');
+
   return (
     <Link
       to={`/bakery/${shop.owner_id || shop.id}`}
@@ -158,13 +172,19 @@ const ShopCard = ({ shop }) => {
     >
       {/* Shop Banner */}
       <div className="shop-banner">
-        {shop.banner_path ? (
-          <img src={shop.banner_path} alt={shop.shop_name} />
-        ) : (
-          <div className="banner-placeholder">
-            <Store size={48} />
-          </div>
-        )}
+        {bannerUrl ? (
+          <img
+            src={bannerUrl}
+            alt={shop.shop_name}
+            onError={(e) => {
+              e.target.style.display = 'none';
+              e.target.nextElementSibling.style.display = 'flex';
+            }}
+          />
+        ) : null}
+        <div className="banner-placeholder" style={{ display: bannerUrl ? 'none' : 'flex' }}>
+          <Store size={48} />
+        </div>
         {shop.verified && (
           <div className="verified-badge">
             <span>✓ Verified</span>
@@ -174,13 +194,19 @@ const ShopCard = ({ shop }) => {
 
       {/* Shop Logo */}
       <div className="shop-logo">
-        {shop.logo_path ? (
-          <img src={shop.logo_path} alt={shop.shop_name} />
-        ) : (
-          <div className="logo-placeholder">
-            <Store size={32} />
-          </div>
-        )}
+        {logoUrl ? (
+          <img
+            src={logoUrl}
+            alt={shop.shop_name}
+            onError={(e) => {
+              e.target.style.display = 'none';
+              e.target.nextElementSibling.style.display = 'flex';
+            }}
+          />
+        ) : null}
+        <div className="logo-placeholder" style={{ display: logoUrl ? 'none' : 'flex' }}>
+          <Store size={32} />
+        </div>
       </div>
 
       {/* Shop Info */}
@@ -205,25 +231,32 @@ const ShopCard = ({ shop }) => {
             <span>{shop.total_products || 0}</span>
             <span className="stat-label">products</span>
           </div>
-
-          <div className="stat-item">
-            <TrendingUp className="icon" size={16} />
-            <span>{shop.total_sales || 0}</span>
-            <span className="stat-label">sales</span>
-          </div>
         </div>
 
-        {/* Shop Actions */}
-        <div className={`shop-actions ${isHovered ? 'visible' : ''}`}>
-          <button className="btn-icon" title="Add to Favorites">
-            <Heart size={18} />
-          </button>
-          <button className="btn-icon" title="Quick View">
-            <Eye size={18} />
-          </button>
-          <span className="view-shop">View Shop</span>
+        {/* Shop Performance Indicator */}
+        <div className="shop-performance">
+          {shop.total_sales > 50 && (
+            <div className="performance-badge trending">
+              <TrendingUp size={12} />
+              <span>Popular</span>
+            </div>
+          )}
+          {shop.average_rating >= 4.8 && (
+            <div className="performance-badge top-rated">
+              <Star size={12} />
+              <span>Top Rated</span>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Hover Effect */}
+      {isHovered && (
+        <div className="shop-card-overlay">
+          <Eye size={20} />
+          <span>View Shop</span>
+        </div>
+      )}
     </Link>
   );
 };
