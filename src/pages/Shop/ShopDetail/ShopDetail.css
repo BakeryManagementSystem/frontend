@@ -176,7 +176,7 @@
 .shop-name {
   font-size: 2rem;
   font-weight: 700;
-  color: var(--text-primary, #1e293b);
+  color: var(--shop-primary-color); /* Use shop primary color instead of global text-primary */
   margin: 0;
   line-height: 1.2;
 }
@@ -185,13 +185,13 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  background: var(--success-color, #10b981);
+  background: var(--shop-accent-color); /* Use shop accent color instead of success color */
   color: white;
   padding: 0.35rem 0.85rem;
   border-radius: 20px;
   font-size: 0.85rem;
   font-weight: 600;
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+  box-shadow: 0 2px 8px var(--shop-accent-color)33; /* Use shop accent color shadow */
 }
 
 .shop-meta-section {
@@ -205,7 +205,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: var(--text-secondary, #64748b);
+  color: var(--shop-secondary-color); /* Use shop secondary color instead of global text-secondary */
   font-size: 0.9rem;
 }
 
@@ -215,24 +215,24 @@
 }
 
 .star-icon {
-  color: var(--warning-color, #fbbf24);
+  color: var(--shop-accent-color); /* Use shop accent color instead of warning color */
 }
 
 .star-empty {
-  color: var(--border-medium, #cbd5e1);
+  color: var(--shop-secondary-color); /* Use shop secondary color instead of border-medium */
 }
 
 .meta-text {
-  color: var(--text-secondary, #64748b);
+  color: var(--shop-secondary-color); /* Use shop secondary color */
 }
 
 .meta-text strong {
   font-weight: 700;
-  color: var(--text-primary, #1e293b);
+  color: var(--shop-primary-color); /* Use shop primary color instead of global text-primary */
 }
 
 .shop-description {
-  color: var(--text-secondary, #64748b);
+  color: var(--shop-secondary-color); /* Use shop secondary color instead of global text-secondary */
   font-size: 0.95rem;
   line-height: 1.6;
   max-width: 600px;
