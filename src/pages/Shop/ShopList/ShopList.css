@@ -73,18 +73,24 @@
   display: flex;
   align-items: center;
   background: white;
-  border: 2px solid #7c3aed;
+  border: 2px solid #e2e8f0;
   border-radius: 12px;
   padding: 0.75rem 1rem;
   transition: all 0.3s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   min-width: 300px;
+  height: 48px;
 }
 
 .search-input-group:focus-within {
   border-color: #7c3aed;
   box-shadow: 0 4px 12px rgba(124, 58, 237, 0.15);
   transform: translateY(-1px);
+}
+
+.search-input-group:hover {
+  border-color: #7c3aed;
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.15);
 }
 
 .search-icon {
