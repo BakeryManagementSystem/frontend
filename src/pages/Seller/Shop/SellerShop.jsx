@@ -31,9 +31,9 @@ const SellerShop = () => {
     logo: '',
     banner: '',
     theme: {
-      primaryColor: '#2563eb',
-      secondaryColor: '#64748b',
-      accentColor: '#f59e0b'
+      primaryColor: '#6639a6',
+      secondaryColor: '#7f4fc3',
+      accentColor: '#9b75d0'
     },
     policies: {
       shipping: '',
@@ -115,9 +115,9 @@ const SellerShop = () => {
 
         // Ensure theme has valid color values
         const defaultTheme = {
-          primaryColor: '#2563eb',
-          secondaryColor: '#64748b',
-          accentColor: '#f59e0b'
+          primaryColor: '#6639a6',
+          secondaryColor: '#7f4fc3',
+          accentColor: '#9b75d0'
         };
 
         const theme = {

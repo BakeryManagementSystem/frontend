@@ -95,9 +95,9 @@ const ShopDetail = () => {
           instagram: ''
         }),
         theme: parseSafe(shop.theme, {
-          primaryColor: '#2563eb',
-          secondaryColor: '#64748b',
-          accentColor: '#f59e0b'
+          primaryColor: '#6639a6',
+          secondaryColor: '#7f4fc3',
+          accentColor: '#9b75d0'
         })
       });
       setLoading(false);
@@ -193,9 +193,9 @@ const ShopDetail = () => {
 
   return (
     <div className="shop-detail" style={{
-      '--shop-primary-color': shopData.theme?.primaryColor || '#2563eb',
-      '--shop-secondary-color': shopData.theme?.secondaryColor || '#64748b',
-      '--shop-accent-color': shopData.theme?.accentColor || '#f59e0b'
+      '--shop-primary-color': shopData.theme?.primaryColor || '#6639a6',
+      '--shop-secondary-color': shopData.theme?.secondaryColor || '#7f4fc3',
+      '--shop-accent-color': shopData.theme?.accentColor || '#9b75d0'
     }}>
       {/* Shop Banner Image */}
       {shopData.banner && (
