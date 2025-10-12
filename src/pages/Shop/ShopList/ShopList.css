@@ -236,13 +236,18 @@
   width: 100%;
   height: 180px;
   overflow: hidden;
-  background: #f1f5f9; /* Changed from gradient to solid light gray */
+  background: #f1f5f9;
+  display: block; /* Ensure proper block display */
 }
 
 .shop-banner img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block; /* Remove inline spacing */
+  margin: 0; /* Remove any default margins */
+  padding: 0; /* Remove any default padding */
+  vertical-align: top; /* Remove baseline spacing */
 }
 
 .banner-placeholder {
@@ -251,8 +256,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #94a3b8; /* Changed from white to gray */
-  background: #f1f5f9; /* Added solid background */
+  color: #94a3b8;
+  background: #f1f5f9;
+  margin: 0; /* Ensure no margins */
+  padding: 0; /* Ensure no padding */
 }
 
 .verified-badge {
