@@ -266,14 +266,14 @@
   background: var(--shop-primary-color, #6639a6); /* Use shop primary color */
   border-color: var(--shop-primary-color, #6639a6);
   color: white;
-  box-shadow: 0 4px 12px rgba(102, 57, 166, 0.2);
+  box-shadow: 0 4px 12px var(--shop-primary-color)33; /* Use shop primary color with opacity */
 }
 
 .action-button.follow:hover {
   background: var(--shop-primary-color, #6639a6);
   border-color: var(--shop-primary-color, #6639a6);
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(102, 57, 166, 0.3);
+  box-shadow: 0 6px 16px var(--shop-primary-color)4D; /* Use shop primary color with opacity */
 }
 
 .action-button.following {
@@ -283,7 +283,7 @@
 }
 
 .action-button.following:hover {
-  background: var(--shop-secondary-color, rgba(100, 116, 139, 0.05)); /* Use shop secondary color */
+  background: var(--shop-secondary-color)0D; /* Use shop secondary color with 5% opacity */
 }
 
 .action-button.secondary {
@@ -295,7 +295,7 @@
 .action-button.secondary:hover {
   border-color: var(--shop-accent-color, #f59e0b); /* Use shop accent color */
   color: var(--shop-accent-color, #f59e0b);
-  background: var(--shop-accent-color, rgba(245, 158, 11, 0.05)); /* Use shop accent color */
+  background: var(--shop-accent-color)0D; /* Use shop accent color with 5% opacity */
 }
 
 /* Container */
@@ -423,7 +423,7 @@
 
 .tab-btn:hover {
   color: var(--shop-secondary-color, #6639a6); /* Use shop secondary color */
-  background: rgba(100, 116, 139, 0.05); /* Use shop secondary color */
+  background: var(--shop-secondary-color)0D; /* Use shop secondary color with 5% opacity */
 }
 
 .tab-btn.active {
@@ -506,7 +506,7 @@
   outline: none;
   border-color: var(--shop-accent-color, #6639a6); /* Use shop accent color */
   background: var(--bg-card, white);
-  box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.1); /* Use shop accent color */
+  box-shadow: 0 0 0 4px var(--shop-accent-color)1A; /* Use shop accent color with 10% opacity */
 }
 
 .filter-select {
@@ -531,7 +531,7 @@
   outline: none;
   border-color: var(--shop-secondary-color, #6639a6); /* Use shop secondary color */
   background: var(--bg-card, white);
-  box-shadow: 0 0 0 4px rgba(100, 116, 139, 0.1); /* Use shop secondary color */
+  box-shadow: 0 0 0 4px var(--shop-secondary-color)1A; /* Use shop secondary color with 10% opacity */
 }
 
 .products-grid {
@@ -677,7 +677,7 @@
   border-color: var(--shop-secondary-color, #6639a6); /* Use shop secondary color */
   color: var(--shop-secondary-color, #6639a6);
   transform: translateY(-2px);
-  box-shadow: 0 8px 16px rgba(100, 116, 139, 0.15); /* Use shop secondary color */
+  box-shadow: 0 8px 16px var(--shop-secondary-color)26; /* Use shop secondary color with 15% opacity */
 }
 
 /* Policies Section - Enhanced */
@@ -746,14 +746,14 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--primary-color, #6639a6) 0%, var(--primary-dark, #4f2c80) 100%);
+  background: linear-gradient(135deg, var(--shop-primary-color, #6639a6) 0%, var(--shop-primary-color, #4f2c80) 100%); /* Use shop primary color */
   color: white;
-  box-shadow: 0 4px 12px rgba(102, 57, 166, 0.3);
+  box-shadow: 0 4px 12px var(--shop-primary-color)4D; /* Use shop primary color with 30% opacity */
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(102, 57, 166, 0.4);
+  box-shadow: 0 8px 20px var(--shop-primary-color)66; /* Use shop primary color with 40% opacity */
 }
 
 /* Responsive Design */
