@@ -550,6 +550,7 @@
   .hero-title {
     font-size: 2rem;
     margin-bottom: var(--spacing-md);
+    margin-top: var(--spacing-xl); /* Add space above title for mobile */
   }
 
   .hero-description {
