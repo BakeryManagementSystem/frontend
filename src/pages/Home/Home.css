@@ -703,7 +703,7 @@
   }
 
   .hero-actions {
-    gap: var(--spacing-xs);
+    gap: var(--spacing-lg); /* Maintain larger gap between buttons for mobile */
   }
 
   .hero-actions .btn {
