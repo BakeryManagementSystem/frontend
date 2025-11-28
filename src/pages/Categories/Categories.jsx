@@ -139,7 +139,7 @@ const Categories = () => {
       'Specialty & Dietary': '#9370DB'
     };
 
-    return colorMap[categoryName] || '#6639a6';
+    return colorMap[categoryName] || '#e7ab39';
   };
 
   // Helper function to get default image

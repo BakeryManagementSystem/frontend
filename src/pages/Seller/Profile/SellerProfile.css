@@ -142,12 +142,12 @@
   width: 100px;
   height: 100px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #6639a6 0%, #4f2c80 100%);
+  background: linear-gradient(135deg, #e7ab39 0%, #d99a28 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  box-shadow: 0 4px 12px rgba(102, 57, 166, 0.3);
+  box-shadow: 0 4px 12px rgba(231, 171, 57, 0.4);
 }
 
 .avatar-info {

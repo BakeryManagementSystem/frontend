@@ -483,14 +483,14 @@
 .stat-icon {
   width: 80px;
   height: 80px;
-  background: var(--primary-color) !important; /* Purple background for icons */
+  background: var(--gold-color) !important; /* Gold background for icons - better for bakery stats */
   border-radius: 50% !important;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white !important; /* White icons on purple background */
+  color: white !important; /* White icons on gold background */
   margin-bottom: var(--spacing-sm);
-  box-shadow: 0 4px 15px rgba(102, 57, 166, 0.2); /* Purple shadow */
+  box-shadow: 0 4px 15px rgba(231, 171, 57, 0.3); /* Gold shadow */
 }
 
 .stat-value {
@@ -788,10 +788,6 @@
   .feature-icon {
     width: 56px;
     height: 56px;
-  }
-
-  .feature-card h3 {
-    font-size: var(--font-size-lg);
   }
 
   .categories-grid {

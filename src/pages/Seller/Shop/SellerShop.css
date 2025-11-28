@@ -287,8 +287,8 @@
 .form-input:focus,
 .form-textarea:focus {
   outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: var(--gold-color);
+  box-shadow: 0 0 0 3px rgba(231, 171, 57, 0.1);
 }
 
 .form-input:disabled,

@@ -171,9 +171,9 @@
   color: #721c24;
 }
 
-.type-badge.purple {
-  background: #e2d9f3;
-  color: #6f42c1;
+.type-badge.gold {
+  background: #fef3e2;
+  color: #c28a1f;
 }
 
 /* Modal */
@@ -407,4 +407,3 @@
     min-width: 900px;
   }
 }
-

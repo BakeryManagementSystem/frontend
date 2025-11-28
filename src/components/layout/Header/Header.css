@@ -144,7 +144,7 @@
   background: none !important;
   border: none !important;
   box-shadow: none !important;
-  color: var(--primary-color, #6639a6) !important;
+  color: var(--gold-color, #e7ab39) !important;
   cursor: pointer;
   padding: 0 !important;
   margin: 0;
@@ -159,7 +159,7 @@
 }
 
 .search-btn:hover {
-  color: var(--primary-hover, #4f2c80) !important;
+  color: var(--gold-hover, #d99a28) !important;
   background: none !important;
   box-shadow: none !important;
   transform: scale(1.15);
@@ -173,7 +173,7 @@
 
 .search-btn:focus {
   outline: none !important;
-  color: var(--primary-hover, #4f2c80) !important;
+  color: var(--gold-hover, #d99a28) !important;
   background: none !important;
   box-shadow: none !important;
 }
@@ -228,7 +228,7 @@
   position: absolute;
   top: 2px;
   right: 2px;
-  background: var(--error-color, #ef4444);
+  background: var(--gold-color, #e7ab39);
   color: white;
   font-size: 10px;
   font-weight: 600;
@@ -316,7 +316,7 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: var(--primary-color, #6639a6);
+  background: linear-gradient(135deg, var(--gold-color, #e7ab39) 0%, var(--gold-hover, #d99a28) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -410,16 +410,18 @@
 }
 
 .btn-primary {
-  background: var(--accent-color, #9b75d0);
+  background: linear-gradient(135deg, var(--gold-color, #e7ab39) 0%, var(--gold-hover, #d99a28) 100%);
   color: white;
-  border: 1px solid var(--accent-color, #9b75d0);
+  border: 1px solid var(--gold-color, #e7ab39);
+  box-shadow: var(--shadow-gold);
 }
 
 .btn-primary:hover {
-  background: var(--secondary-color, #7f4fc3);
-  border-color: var(--secondary-color, #7f4fc3);
+  background: linear-gradient(135deg, var(--gold-hover, #d99a28) 0%, var(--gold-dark, #c28a1f) 100%);
+  border-color: var(--gold-hover, #d99a28);
   color: white;
   transform: translateY(-1px);
+  box-shadow: 0 6px 12px -2px rgb(231 171 57 / 0.3);
 }
 
 /* Mobile Menu Button */
@@ -482,7 +484,7 @@
   background: var(--bg-secondary, #f8fafc);
   border-radius: 8px;
   overflow: hidden;
-  border: 1px solid var(--primary-color, #6639a6);
+  border: 1px solid var(--gold-color, #e7ab39);
 }
 
 .mobile-search input {
@@ -500,7 +502,7 @@
 }
 
 .mobile-search button {
-  background: var(--primary-color, #6639a6);
+  background: linear-gradient(135deg, var(--gold-color, #e7ab39) 0%, var(--gold-hover, #d99a28) 100%);
   border: none;
   color: white;
   padding: 12px 14px;
@@ -514,7 +516,7 @@
 
 .mobile-search button:hover,
 .mobile-search button:active {
-  background: var(--secondary-color, #7f4fc3);
+  background: linear-gradient(135deg, var(--gold-hover, #d99a28) 0%, var(--gold-dark, #c28a1f) 100%);
 }
 
 .mobile-nav-links {
@@ -718,7 +720,7 @@
 .dropdown-link:focus,
 .mobile-icon-btn:focus,
 .mobile-menu-btn:focus {
-  outline: 2px solid var(--accent-color, #9b75d0);
+  outline: 2px solid var(--gold-color, #e7ab39);
   outline-offset: 2px;
 }
 

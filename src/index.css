@@ -6,14 +6,24 @@
 }
 
 :root {
-  /* Bakery Theme Colors - Purple Palette */
-  --primary-color: #6639a6;      /* Deep Purple */
+  /* Bakery Theme Colors - Dual Color Palette (Purple & Gold) */
+  --primary-color: #6639a6;      /* Deep Purple - Main brand color */
   --primary-hover: #4f2c80;      /* Dark Purple */
   --primary-dark: #4f2c80;       /* Dark Purple (alias) */
   --primary-bg: rgba(102, 57, 166, 0.1);  /* Primary background */
+
+  /* NEW: Gold/Orange accent from logo */
+  --gold-color: #e7ab39;         /* Golden/Orange - Secondary brand color */
+  --gold-hover: #d99a28;         /* Darker gold on hover */
+  --gold-light: #f5c563;         /* Light gold */
+  --gold-bg: rgba(231, 171, 57, 0.1);  /* Gold background */
+  --gold-dark: #c28a1f;          /* Dark gold */
+
   --secondary-color: #7f4fc3;    /* Medium Purple */
   --secondary-dark: #6639a6;     /* Secondary dark */
-  --accent-color: #9b75d0;       /* Light Purple */
+  --accent-color: #e7ab39;       /* Changed from purple to GOLD - Logo accent */
+  --accent-hover: #d99a28;       /* Accent hover state */
+
   --success-color: #10b981;
   --success: #10b981;            /* Success (alias) */
   --success-bg: rgba(16, 185, 129, 0.1);  /* Success background */
@@ -48,11 +58,12 @@
   --border-medium: #cbd5e1;
   --border-dark: #94a3b8;
 
-  /* Shadow Colors */
+  /* Shadow Colors - Updated to use both brand colors */
   --shadow-sm: 0 1px 2px 0 rgb(102 57 166 / 0.05);
   --shadow-md: 0 4px 6px -1px rgb(102 57 166 / 0.1), 0 2px 4px -2px rgb(102 57 166 / 0.1);
   --shadow-lg: 0 10px 15px -3px rgb(102 57 166 / 0.1), 0 4px 6px -4px rgb(102 57 166 / 0.1);
   --shadow-xl: 0 20px 25px -5px rgb(102 57 166 / 0.1), 0 8px 10px -6px rgb(102 57 166 / 0.1);
+  --shadow-gold: 0 4px 6px -1px rgb(231 171 57 / 0.2), 0 2px 4px -2px rgb(231 171 57 / 0.1);
 
   /* Spacing */
   --spacing-xs: 0.25rem;

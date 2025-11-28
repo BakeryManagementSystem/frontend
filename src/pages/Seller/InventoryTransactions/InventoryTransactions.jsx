@@ -30,7 +30,7 @@ const InventoryTransactions = () => {
     { value: 'usage', label: 'Usage', icon: '🔨', color: 'orange' },
     { value: 'adjustment', label: 'Adjustment', icon: '⚖️', color: 'blue' },
     { value: 'waste', label: 'Waste', icon: '🗑️', color: 'red' },
-    { value: 'return', label: 'Return', icon: '↩️', color: 'purple' },
+    { value: 'return', label: 'Return', icon: '↩️', color: 'gold' },
   ];
 
   useEffect(() => {
@@ -393,4 +393,3 @@ const InventoryTransactions = () => {
 };
 
 export default InventoryTransactions;
-

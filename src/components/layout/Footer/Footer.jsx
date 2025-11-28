@@ -24,7 +24,7 @@ const Footer = () => {
             {/* Company Info */}
             <div className="footer-section">
               <div className="footer-logo">
-                <img src="/bakerbari_logo_light.png" alt="Bakerbari" className="footer-logo-image" />
+                <img src="/bakerbari_logo_light.svg" alt="Bakerbari" className="footer-logo-image" />
               </div>
               <p className="footer-description">
                 Your comprehensive Bakerbari platform. Streamline your bakery operations,

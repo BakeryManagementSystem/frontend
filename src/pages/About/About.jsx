@@ -152,9 +152,9 @@ const About = () => {
               {/* Floating animated SVG icon */}
               <div className="floating-animation">
                 <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="60" cy="60" r="50" fill="#6639a6" opacity="0.15"/>
-                  <circle cx="60" cy="60" r="35" fill="#6639a6" opacity="0.3"/>
-                  <circle cx="60" cy="60" r="20" fill="#6639a6"/>
+                  <circle cx="60" cy="60" r="50" fill="#e7ab39" opacity="0.15"/>
+                  <circle cx="60" cy="60" r="35" fill="#e7ab39" opacity="0.3"/>
+                  <circle cx="60" cy="60" r="20" fill="#e7ab39"/>
                   <path d="M60 40 Q70 60 60 80 Q50 60 60 40 Z" fill="#fff" opacity="0.7"/>
                 </svg>
               </div>
