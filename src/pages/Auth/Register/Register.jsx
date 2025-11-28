@@ -138,7 +138,7 @@ const Register = () => {
           <div className="auth-form-section">
             <div className="auth-header">
               <h1>Create Account</h1>
-              <p>Join BMS and start your journey</p>
+              <p>Join Bakerbari and start your journey</p>
             </div>
 
             {errors.general && (
@@ -377,7 +377,7 @@ const Register = () => {
             <div className="auth-image-content">
               <h2>Start Your Journey</h2>
               <p>
-                Join thousands of buyers and sellers on BMS. Whether you're looking
+                Join thousands of buyers and sellers on Bakerbari. Whether you're looking
                 to discover amazing products or grow your business, we've got you covered.
               </p>
               <ul className="auth-features">

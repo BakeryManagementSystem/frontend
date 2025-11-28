@@ -147,8 +147,7 @@ const Header = () => {
           <div className="header-content">
             {/* Logo */}
             <Link to="/" className="logo" onClick={closeAllMenus}>
-              <ChefHat size={32} />
-              <span>BMS</span>
+              <img src="/bakerbari_logo.svg" alt="Bakerbari" className="logo-image" />
             </Link>
 
             {/* Desktop Navigation */}

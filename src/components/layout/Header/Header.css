@@ -45,6 +45,13 @@
   color: var(--primary-hover, #4f2c80);
 }
 
+.logo-image {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 4px rgba(102, 57, 166, 0.1));
+}
+
 .logo svg {
   color: var(--primary-color, #6639a6);
   filter: drop-shadow(0 2px 4px rgba(102, 57, 166, 0.1));

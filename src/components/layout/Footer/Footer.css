@@ -29,10 +29,9 @@
 }
 
 .footer-logo-image {
-  width: 40px;
+  width: auto;
   height: 40px;
   object-fit: contain;
-  filter: brightness(0) invert(1);
 }
 
 .footer-logo-text {

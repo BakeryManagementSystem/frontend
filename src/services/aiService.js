@@ -195,7 +195,7 @@ class AIService {
 
   // Generate system prompt based on user authentication status
   generateSystemPrompt(isAuthenticated, contextData) {
-    let systemPrompt = `You are a helpful AI assistant for a bakery management system. 
+    let systemPrompt = `You are a helpful AI assistant for Bakerbari, a bakery management platform. 
     You should only answer questions related to bakery operations, products, orders, and general bakery information.
     If someone asks about topics unrelated to bakery business, politely redirect them to bakery-related topics.
     

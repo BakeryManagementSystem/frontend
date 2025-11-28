@@ -12,7 +12,7 @@ const AIAssistant = () => {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: `Hi ${user?.name || 'there'}! 👋 I'm your BMS AI Assistant powered by Google Gemini. I can help you with:\n\n${
+      text: `Hi ${user?.name || 'there'}! 👋 I'm your Bakerbari AI Assistant powered by Google Gemini. I can help you with:\n\n${
         user?.role === 'seller' || user?.user_type === 'seller' || user?.user_type === 'owner'
           ? '• Sales and revenue tracking\n• Order management\n• Product inventory\n• Ingredient management\n• Analytics and insights\n• Customer data'
           : user?.role === 'buyer' || user?.user_type === 'buyer'

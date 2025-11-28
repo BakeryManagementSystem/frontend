@@ -71,7 +71,7 @@ const About = () => {
   ];
 
   const milestones = [
-    { year: "2020", event: "BMS Founded", description: "Started as a small marketplace with big dreams" },
+    { year: "2020", event: "Bakerbari Founded", description: "Started as a small marketplace with big dreams" },
     { year: "2021", event: "10K Users", description: "Reached our first major milestone of 10,000 users" },
     { year: "2022", event: "Global Expansion", description: "Expanded to serve customers in 50+ countries" },
     { year: "2023", event: "Mobile App Launch", description: "Launched our mobile apps for iOS and Android" },
@@ -100,7 +100,7 @@ const About = () => {
             </h2>
             <p className="modern-hero-subtitle">
               Join a thriving community where innovation meets trust. Discover amazing products,
-              connect with reliable sellers, and grow your business with BMS.
+              connect with reliable sellers, and grow your business with Bakerbari.
             </p>
             <div className="modern-hero-actions">
               <Link to="/register" className="btn btn-primary btn-lg">
@@ -215,7 +215,7 @@ const About = () => {
             <h2 style={{ color: '#fff' }}>Ready to Join Our Community?</h2>
             <p style={{ color: '#fff' }}>
               Whether you're looking to discover amazing products or grow your business,
-              BMS provides the platform and support you need to succeed.
+              Bakerbari provides the platform and support you need to succeed.
             </p>
             <div className="cta-buttons">
               <Link to="/register" className="btn btn-primary btn-lg">

@@ -1,10 +1,10 @@
-# 🍞 Bakery Management System - Frontend
+# 🍞 Bakerbari - Frontend
 
-A modern React.js frontend application for the Bakery Management System, providing an intuitive interface for managing bakery operations, inventory, orders, and analytics.
+A modern React.js frontend application for Bakerbari, providing an intuitive interface for managing bakery operations, inventory, orders, and analytics.
 
 ## 📌 Project Overview
 
-This is the client-side application of the Bakery Management System, built with React.js and JavaScript. It provides a responsive, user-friendly interface for bakery staff and administrators to manage daily operations efficiently.
+This is the client-side application of Bakerbari, built with React.js and JavaScript. It provides a responsive, user-friendly interface for bakery staff and administrators to manage daily operations efficiently.
 
 ## 👥 Team Members
 
@@ -109,7 +109,7 @@ This is the client-side application of the Bakery Management System, built with 
 3. **Environment Setup**
    ```env
    VITE_API_URL=http://localhost:8000/api
-   VITE_APP_NAME="Bakery Management System"
+   VITE_APP_NAME="Bakerbari"
    VITE_OPENAI_API_KEY=your-openai-key
    VITE_APP_VERSION=1.0.0
    ```

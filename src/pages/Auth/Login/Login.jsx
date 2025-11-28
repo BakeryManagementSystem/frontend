@@ -70,7 +70,7 @@ const Login = () => {
           <div className="auth-form-section">
             <div className="auth-header">
               <h1>Welcome Back</h1>
-              <p>Sign in to your BMS account</p>
+              <p>Sign in to your Bakerbari account</p>
             </div>
 
             {error && (

@@ -24,11 +24,10 @@ const Footer = () => {
             {/* Company Info */}
             <div className="footer-section">
               <div className="footer-logo">
-                <ChefHat size={32} />
-                <span className="footer-logo-text">BMS</span>
+                <img src="/bakerbari_logo_light.png" alt="Bakerbari" className="footer-logo-image" />
               </div>
               <p className="footer-description">
-                Your comprehensive Bakery Management System. Streamline your bakery operations,
+                Your comprehensive Bakerbari platform. Streamline your bakery operations,
                 manage inventory, track orders, and grow your bakery business with our powerful tools.
               </p>
               <div className="footer-social">
@@ -112,7 +111,7 @@ const Footer = () => {
         <div className="footer-bottom">
           <div className="footer-bottom-content">
             <div className="footer-copyright">
-              <p>&copy; 2024 Bakery Management System. All rights reserved.</p>
+              <p>&copy; 2024 Bakerbari. All rights reserved.</p>
             </div>
             <div className="footer-legal">
               <Link to="/privacy">Privacy Policy</Link>

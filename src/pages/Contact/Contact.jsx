@@ -134,7 +134,7 @@ const Contact = () => {
       answer: 'We offer a 30-day return policy for most items. Products must be in original condition and packaging. Some restrictions apply for certain categories.'
     },
     {
-      question: 'How do I become a seller on BMS?',
+      question: 'How do I become a seller on Bakerbari?',
       answer: 'You can apply to become a seller by clicking "Register" and selecting "Seller" as your account type. We\'ll review your application and get back to you within 2-3 business days.'
     },
     {
