@@ -700,6 +700,7 @@
   .hero-description {
     font-size: var(--font-size-sm);
     margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-md);
   }
 
   .hero-actions {
@@ -708,7 +709,7 @@
 
   .hero-actions .btn {
     font-size: var(--font-size-sm);
-    padding: var(--spacing-sm) var(--spacing-md);
+    padding-bottom: var(--spacing-md);
   }
 
   .hero-visual {
