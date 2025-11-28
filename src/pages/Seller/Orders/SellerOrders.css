@@ -68,8 +68,8 @@
 
 .search-input:focus {
   outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgb(102 57 166 / 0.1);
+  border-color: var(--gold-color); /* Changed from primary-color to gold-color */
+  box-shadow: 0 0 0 3px rgba(231, 171, 57, 0.1);
 }
 
 .filter-tabs {
@@ -98,9 +98,9 @@
 }
 
 .filter-tab.active {
-  background-color: var(--primary-color);
+  background-color: var(--gold-color); /* Changed from primary-color to gold-color */
   color: var(--text-inverse);
-  border-color: var(--primary-color);
+  border-color: var(--gold-color);
 }
 
 .count {
@@ -155,7 +155,7 @@
 
 .order-total {
   font-weight: 600;
-  color: var(--primary-color);
+  color: var(--gold-color); /* Changed from primary-color to gold-color */
 }
 
 .order-status {
@@ -301,7 +301,7 @@
 
 .product-price {
   font-weight: 600;
-  color: var(--primary-color);
+  color: var(--gold-color); /* Changed from primary-color to gold-color */
   font-size: var(--font-size-base);
   white-space: nowrap;
   flex-shrink: 0;

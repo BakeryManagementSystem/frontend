@@ -89,7 +89,7 @@
 }
 
 .stat-card.info .stat-icon {
-  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  background: linear-gradient(135deg, #e7ab39, #d99a28); /* Changed from purple to gold */
 }
 
 .stat-content {

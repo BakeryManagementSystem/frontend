@@ -16,7 +16,7 @@
   width: 48px;
   height: 48px;
   border: 4px solid #e2e8f0;
-  border-top-color: #7c3aed;
+  border-top-color: #e7ab39; /* Changed from purple to gold */
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -83,18 +83,18 @@
 }
 
 .search-input-group:focus-within {
-  border-color: #7c3aed;
-  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.15);
+  border-color: #e7ab39; /* Changed from purple to gold */
+  box-shadow: 0 4px 12px rgba(231, 171, 57, 0.15);
   transform: translateY(-1px);
 }
 
 .search-input-group:hover {
-  border-color: #7c3aed;
-  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.15);
+  border-color: #e7ab39; /* Changed from purple to gold */
+  box-shadow: 0 4px 12px rgba(231, 171, 57, 0.15);
 }
 
 .search-icon {
-  color: #7c3aed;
+  color: #e7ab39; /* Changed from purple to gold */
   margin-right: 0.75rem;
   flex-shrink: 0;
 }
@@ -133,7 +133,7 @@
 
 .search-submit-btn {
   padding: 0.75rem 1.5rem;
-  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+  background: linear-gradient(135deg, #e7ab39 0%, #d99a28 100%); /* Changed from purple to gold */
   color: white;
   border: none;
   border-radius: 8px;
@@ -141,13 +141,13 @@
   font-size: 0.95rem;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3);
+  box-shadow: 0 2px 8px rgba(231, 171, 57, 0.3);
   white-space: nowrap;
 }
 
 .search-submit-btn:hover {
-  background: linear-gradient(135deg, #6d28d9 0%, #5b21b6 100%);
-  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
+  background: linear-gradient(135deg, #d99a28 0%, #c28a1f 100%); /* Changed from purple to gold */
+  box-shadow: 0 4px 12px rgba(231, 171, 57, 0.4);
   transform: translateY(-2px);
 }
 
@@ -179,15 +179,15 @@
 
 .filter-select:hover,
 .sort-select:hover {
-  border-color: #7c3aed;
-  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.15);
+  border-color: #e7ab39; /* Changed from purple to gold */
+  box-shadow: 0 4px 12px rgba(231, 171, 57, 0.15);
 }
 
 .filter-select:focus,
 .sort-select:focus {
   outline: none;
-  border-color: #7c3aed;
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+  border-color: #e7ab39; /* Changed from purple to gold */
+  box-shadow: 0 0 0 3px rgba(231, 171, 57, 0.1);
 }
 
 /* Alert */
@@ -392,8 +392,8 @@
 }
 
 .btn-icon:hover {
-  background: #7c3aed;
-  border-color: #7c3aed;
+  background: #e7ab39; /* Changed from purple to gold */
+  border-color: #e7ab39;
   color: white;
 }
 
@@ -401,7 +401,7 @@
   flex: 1;
   text-align: center;
   padding: 0.5rem;
-  background: #7c3aed;
+  background: #e7ab39; /* Changed from purple to gold */
   color: white;
   border-radius: 8px;
   font-weight: 600;

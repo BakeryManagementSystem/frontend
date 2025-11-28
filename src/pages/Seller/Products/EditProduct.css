@@ -19,7 +19,7 @@
 
 .loading-spinner {
   animation: spin 1s linear infinite;
-  color: var(--primary-color);
+  color: var(--gold-color); /* Changed from primary-color to gold-color */
   margin-bottom: 1rem;
 }
 
@@ -107,11 +107,11 @@
 }
 
 .form-section h3 {
-  margin: 0 0 1rem 0;
-  color: var(--text-primary);
-  font-size: 1.25rem;
+  margin: 0 0 1.5rem 0;
+  color: #333;
+  font-size: 1.1rem;
+  border-bottom: 2px solid var(--gold-color); /* Changed from primary-color to gold-color */
   padding-bottom: 0.5rem;
-  border-bottom: 2px solid var(--primary-color);
 }
 
 .form-group {
@@ -144,11 +144,11 @@
 }
 
 .form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
+.form-group textarea:focus,
+.form-group select:focus {
   outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(139, 69, 19, 0.1);
+  border-color: var(--gold-color); /* Changed from primary-color to gold-color */
+  box-shadow: 0 0 0 3px rgba(231, 171, 57, 0.1);
 }
 
 .form-group textarea {
@@ -309,13 +309,12 @@
 }
 
 .btn-primary {
-  background: var(--primary-color);
+  background: var(--gold-color); /* Changed from primary-color to gold-color */
   color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--primary-dark);
-  transform: translateY(-1px);
+  background: var(--gold-hover); /* Changed from primary-dark to gold-hover */
 }
 
 .btn-secondary {

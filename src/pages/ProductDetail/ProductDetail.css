@@ -923,8 +923,8 @@
   --radius-md: 0.5rem;
   --radius-lg: 0.75rem;
 
-  --primary-color: #7c3aed;
-  --primary-dark: #5b21b6;
+  --primary-color: #e7ab39; /* Changed from purple to gold */
+  --primary-dark: #d99a28; /* Changed from purple to gold dark */
   --success-color: #10b981;
   --error-color: #ef4444;
   --error-dark: #dc2626;
